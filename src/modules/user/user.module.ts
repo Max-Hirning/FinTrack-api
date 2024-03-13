@@ -5,11 +5,13 @@ import {MongooseModule} from '@nestjs/mongoose';
 import {UserSchema} from './schemas/user.schema';
 import {UserController} from './user.controller';
 import {Collections} from '@/configs/collections';
+import {ImageModule} from '../image/image.module';
 import {CommonModule} from '../common/common.module';
 
 @Module({
   imports: [
     JwtModule,
+    ImageModule,
     CommonModule,
     MongooseModule.forFeature([{name: Collections.users, schema: UserSchema}]),
   ],

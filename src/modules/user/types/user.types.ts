@@ -6,7 +6,7 @@ export interface IUpdateUserProfile {
   lastName?: string;
   currency?: string;
   firstName?: string;
-  avatar?: string|null;
+  imageId?: string|null;
 }
 export interface IUpdateUserSecurity {
   password: string;

@@ -1,8 +1,14 @@
 import {AppModule} from './app.module';
 import {NestFactory} from '@nestjs/core';
+import {v2 as cloudinary} from 'cloudinary';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+  cloudinary.config({
+    api_key: process.env.CLOUDINARY_APIKEY,
+    cloud_name: process.env.CLOUDINARY_CLOUDNAME,
+    api_secret: process.env.CLOUDINARY_APISECRET,
+  });
   await app.listen(process.env.PORT);
   // eslint-disable-next-line no-console
   console.log('API is running');

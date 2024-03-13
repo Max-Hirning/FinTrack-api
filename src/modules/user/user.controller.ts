@@ -2,12 +2,13 @@ import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {UserService} from './user.service';
 import {IResponse} from '@/types/app.types';
+import {ImageService} from '../image/image.service';
 import {MailerService} from '@nestjs-modules/mailer';
-import {IUpdateUserProfile} from './types/user.types';
 import {CommonService} from '../common/common.service';
 import {FileInterceptor} from '@nestjs/platform-express';
 import {AuthSuccessMessages} from '@/configs/messages/auth';
 import {UserSuccessMessages} from '@/configs/messages/user';
+import {IUpdateUserProfile, IUser} from './types/user.types';
 import {UpdateUserProfileDto} from './dto/update-user-profile.dto';
 import {UpdateUserSecurityDto} from './dto/update-user-security.dto';
 import {Controller, Get, Body, Put, Param, Delete, UseInterceptors, UploadedFile, HttpStatus, HttpException} from '@nestjs/common';
@@ -17,12 +18,13 @@ export class UserController {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
+    private readonly imageService: ImageService,
     private readonly commonService: CommonService,
     private readonly mailerService: MailerService,
   ) {}
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<IResponse<string>> {
+  async findOne(@Param('id') id: string): Promise<IResponse<IUser>> {
     const response = await this.userService.findOne(id);
     return ({
       data: response,
@@ -32,7 +34,9 @@ export class UserController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<IResponse<undefined>> { // delete avatar, transactions, cards
+  async remove(@Param('id') id: string): Promise<IResponse<undefined>> { // delete transactions, cards
+    const user = await this.commonService.findOneUserAPI('_id', id);
+    await this.imageService.remove(user.imageId); // delete image(avatar)
     const response = await this.userService.remove(id);
     return ({
       message: response,
@@ -58,10 +62,13 @@ export class UserController {
   async updateProfile(@Param('id') id: string, @UploadedFile() file: Express.Multer.File, @Body() updateUserProfileDto: UpdateUserProfileDto): Promise<IResponse<undefined>> {
     const updateUserProfile: IUpdateUserProfile = {};
     const user = await this.commonService.findOneUserAPI('_id', id, true);
-    // if(file) {
-    //   const imageUrl = await this.commonService.createUpdateImage('avatars', id, file);
-    //   updateUserProfile.avatar = imageUrl;
-    // }
+    if(file) {
+      if(user.imageId) {
+        await this.imageService.update(user.imageId, file.buffer, {folder: 'FinTrack/avatars'});
+      } else {
+        updateUserProfile.imageId = await this.imageService.create(file.buffer, {folder: 'FinTrack/avatars'});
+      }
+    }
     if(updateUserProfileDto.currency) {
       await this.commonService.findOneCurrency(updateUserProfileDto.currency);
       updateUserProfile.currency = updateUserProfileDto.currency;
