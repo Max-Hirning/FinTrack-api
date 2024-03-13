@@ -10,11 +10,6 @@ import {IUpdateUserProfile, IUpdateUserSecurity, IUser} from './types/user.types
 export class UserService {
   constructor(@InjectModel(Collections.users) private readonly userModel: Model<User>) {}
 
-  async remove(id: string): Promise<string> {
-    await this.userModel.deleteOne({_id: id});
-    return UserSuccessMessages.removeOne;
-  }
-  
   async findOne(id: string): Promise<IUser> {
     const [user] = await this.userModel.aggregate([
       {
@@ -49,6 +44,11 @@ export class UserService {
     ]);
     if(!user) throw new HttpException(UserErrorMessages.findOne, HttpStatus.NOT_FOUND);
     return user;
+  }
+
+  async removeOne(id: string): Promise<string> {
+    await this.userModel.deleteOne({_id: id});
+    return UserSuccessMessages.removeOne;
   }
 
   async updateProfile(id: string, updateUserProfile: IUpdateUserProfile): Promise<string> {

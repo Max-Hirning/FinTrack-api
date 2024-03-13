@@ -11,7 +11,13 @@ import {v2 as cloudinary, UploadApiErrorResponse, UploadApiOptions, UploadApiRes
 export class ImageService {
   constructor(@InjectModel(Collections.images) private readonly imageModel: Model<Image>) {}
 
-  async remove(id: string): Promise<string> {
+  async findOne(id: string): Promise<IImage> {
+    const image = await this.imageModel.findOne({_id: id});
+    if(!image) throw new HttpException(ImageErrorMessages.findOne, HttpStatus.NOT_FOUND);
+    return image;
+  }
+
+  async removeOne(id: string): Promise<string> {
     const image = await this.findOne(id);
     const {result} = await cloudinary.uploader.destroy(image.id);
     if(result === 'ok') {
@@ -21,13 +27,7 @@ export class ImageService {
     throw new HttpException(ImageErrorMessages.removeOne, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  async findOne(id: string): Promise<IImage> {
-    const image = await this.imageModel.findOne({_id: id});
-    if(!image) throw new HttpException(ImageErrorMessages.findOne, HttpStatus.NOT_FOUND);
-    return image;
-  }
-
-  async create(file: Buffer, options: Required<Pick<UploadApiOptions, 'folder'>>): Promise<string> {
+  async createOne(file: Buffer, options: Required<Pick<UploadApiOptions, 'folder'>>): Promise<string> {
     const {public_id, secure_url}: UploadApiResponse|UploadApiErrorResponse = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
@@ -50,7 +50,7 @@ export class ImageService {
     throw new HttpException(ImageErrorMessages.createOne, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  async update(id: string, file: Buffer, options: Required<Pick<UploadApiOptions, 'folder'>>): Promise<string> {
+  async updateOne(id: string, file: Buffer, options: Required<Pick<UploadApiOptions, 'folder'>>): Promise<string> {
     const image = await this.findOne(id);
     const {public_id, secure_url}: UploadApiResponse|UploadApiErrorResponse = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(

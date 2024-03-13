@@ -71,7 +71,7 @@ export class CardService {
     return card;
   }
 
-  async remove(id: string): Promise<string> {
+  async removeOne(id: string): Promise<string> {
     await this.cardModel.deleteOne({_id: id});
     return CardSuccessMessages.removeOne;
   }
@@ -140,12 +140,12 @@ export class CardService {
     return cards;
   }
 
-  async create(createCard: ICreateCard): Promise<string> {
+  async createOne(createCard: ICreateCard): Promise<string> {
     await this.cardModel.create(createCard);
     return CardSuccessMessages.createOne;
   }
 
-  async update(id: string, updateCard: IUpdateCard): Promise<string> {
+  async updateOne(id: string, updateCard: IUpdateCard): Promise<string> {
     await this.cardModel.updateOne({_id: id}, updateCard);
     return CardSuccessMessages.updateOne;
   }

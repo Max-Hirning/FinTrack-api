@@ -36,10 +36,10 @@ export class UserController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<IResponse<undefined>> { // delete transactions, cards
+  async removeOne(@Param('id') id: string): Promise<IResponse<undefined>> { // delete transactions, cards
     const user = await this.commonService.findOneUserAPI('_id', id);
-    await this.imageService.remove(user.imageId); // delete image(avatar)
-    const response = await this.userService.remove(id);
+    await this.imageService.removeOne(user.imageId); // delete image(avatar)
+    const response = await this.userService.removeOne(id);
     return ({
       message: response,
       statusCode: HttpStatus.OK,
@@ -50,7 +50,7 @@ export class UserController {
   async removeAvatar(@Param('id') id: string): Promise<IResponse<undefined>> {
     const user = await this.commonService.findOneUserAPI('_id', id);
     if(user.imageId) {
-      await this.imageService.remove(user.imageId);
+      await this.imageService.removeOne(user.imageId);
       await this.userService.updateProfile(id, {imageId: null});
     }
     return ({
@@ -79,9 +79,9 @@ export class UserController {
     const user = await this.commonService.findOneUserAPI('_id', id, true);
     if(file) {
       if(user.imageId) {
-        await this.imageService.update(user.imageId, file.buffer, {folder: 'FinTrack/avatars'});
+        await this.imageService.updateOne(user.imageId, file.buffer, {folder: 'FinTrack/avatars'});
       } else {
-        updateUserProfile.imageId = await this.imageService.create(file.buffer, {folder: 'FinTrack/avatars'});
+        updateUserProfile.imageId = await this.imageService.createOne(file.buffer, {folder: 'FinTrack/avatars'});
       }
     }
     if(updateUserProfileDto.currency) {

@@ -28,8 +28,8 @@ export class CardController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<IResponse<undefined>> { // delete all transactions
-    const response = await this.cardService.remove(id);
+  async removeOne(@Param('id') id: string): Promise<IResponse<undefined>> { // delete all transactions
+    const response = await this.cardService.removeOne(id);
     return ({
       message: response,
       statusCode: HttpStatus.OK,
@@ -51,10 +51,10 @@ export class CardController {
   }
 
   @Post()
-  async create(@Body() createCardDto: CreateCardDto): Promise<IResponse<undefined>> {
+  async createOne(@Body() createCardDto: CreateCardDto): Promise<IResponse<undefined>> {
     await this.commonService.findOneUserAPI('_id', createCardDto.ownerId, false);
     await this.commonService.findOneCurrency(createCardDto.currency);
-    const response = await this.cardService.create(createCardDto);
+    const response = await this.cardService.createOne(createCardDto);
     return ({
       message: response,
       statusCode: HttpStatus.OK,
@@ -62,7 +62,7 @@ export class CardController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto): Promise<IResponse<undefined>> {
+  async updateOne(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto): Promise<IResponse<undefined>> {
     const updateCard: IUpdateCard = {};
     if(updateCardDto.currency) {
       await this.commonService.findOneCurrency(updateCardDto.currency);
@@ -70,7 +70,7 @@ export class CardController {
     }
     if(updateCardDto.color) updateCard.color = updateCardDto.color;
     if(updateCardDto.title) updateCard.title = updateCardDto.title;
-    const response = await this.cardService.update(id, updateCardDto);
+    const response = await this.cardService.updateOne(id, updateCardDto);
     return ({
       message: response,
       statusCode: HttpStatus.OK,
