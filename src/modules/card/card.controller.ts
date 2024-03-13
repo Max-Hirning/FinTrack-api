@@ -37,7 +37,7 @@ export class CardController {
   }
 
   @Get()
-  async findAll(@Query('ownerId') ownerId?: string): Promise<IResponse<ICard[]>> {
+  async findMany(@Query('ownerId') ownerId?: string): Promise<IResponse<ICard[]>> {
     if(!ownerId) throw new HttpException('"ownerId" is required', HttpStatus.BAD_REQUEST);
     const filters: IFilters = {
       ownerId: new mongoose.Types.ObjectId(ownerId)

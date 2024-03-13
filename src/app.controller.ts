@@ -23,7 +23,7 @@ export class AppController {
     return ({
       statusCode: HttpStatus.OK,
       data: Object.values(currencies),
-      message: CurrencySuccessMessages.findAll,
+      message: CurrencySuccessMessages.findMany,
     });
   }
 
