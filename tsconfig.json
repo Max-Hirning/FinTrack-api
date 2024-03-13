@@ -6,6 +6,7 @@
       "@cardModule/*": ["src/modules/card/*"],
       "@userModule/*": ["src/modules/user/*"],
       "@messages/*": ["src/configs/messages/*"],
+      "@imageModule/*": ["src/modules/image/*"],
       "@commonModule/*": ["src/modules/common/*"],
       "@categoryModule/*": ["src/modules/category/*"],
       "@firebaseModule/*": ["src/modules/firebase/*"],

@@ -1,12 +1,42 @@
+import * as bcrypt from 'bcrypt';
+import {JwtService} from '@nestjs/jwt';
 import {AppService} from './app.service';
-import {Controller, Get} from '@nestjs/common';
+import {ICurrency, IResponse} from './types/app.types';
+import {AuthErrorMessages} from './configs/messages/auth';
+import {CommonService} from './modules/common/common.service';
+import {CurrencySuccessMessages} from './configs/messages/currency';
+import {Controller, Get, HttpException, HttpStatus, Query, Redirect} from '@nestjs/common';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly appService: AppService,
+    private readonly commonService: CommonService,
+  ) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Get('currencies')
+  async getCurrencies(): Promise<IResponse<ICurrency[]>> {
+    const response = await fetch('https://api.fxratesapi.com/currencies');
+    const currencies = await response.json();
+    return ({
+      statusCode: HttpStatus.OK,
+      data: Object.values(currencies),
+      message: CurrencySuccessMessages.findAll,
+    });
+  }
+
+  @Get('confirm-email')
+  // @Redirect(`${process.env.ORIGIN_URL}/auth/sign-in`, HttpStatus.SEE_OTHER)
+  @Redirect('https://github.com/Max-Hirning', HttpStatus.SEE_OTHER)
+  async confirmEmail(@Query('code') code: string): Promise<void> {
+    const codeData = await this.jwtService.decode(code);
+    const user = await this.commonService.findOneUserAPI('_id', codeData.id, false);
+    const isPassValid = bcrypt.compare(codeData.password, user.password);
+    if(user.email === codeData.email && isPassValid) {
+      await this.appService.confirmEmail(user.id);
+      return;
+    }
+    throw new HttpException(AuthErrorMessages.wrongCode, HttpStatus.BAD_REQUEST);
   }
 }
