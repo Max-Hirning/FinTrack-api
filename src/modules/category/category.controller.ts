@@ -68,7 +68,7 @@ export class CategoryController {
         statusCode: HttpStatus.OK,
       });
     }
-    throw new HttpException('Image is required', HttpStatus.BAD_REQUEST);
+    throw new HttpException('Image, mcc are required', HttpStatus.BAD_REQUEST);
   }
 
   @Put(':id')

@@ -8,6 +8,7 @@ export interface ICreateCategory {
   imageId: string;
   parentId?: string;
 }
+export interface ICategory extends HydratedDocument<Category> {
+  children?: HydratedDocument<Category>[];
+}
 export interface IUpdateCategory extends Partial<ICreateCategory> {}
-
-export type ICategory = HydratedDocument<Category>;

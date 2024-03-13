@@ -14,26 +14,64 @@ export class CategoryService {
     const categories = await this.categoryModel.aggregate([
       {
         $lookup: {
+          as: 'children',
+          localField: '_id',
+          from: 'categories',
+          foreignField: 'parentId',
+        }
+      },
+      {
+        $lookup: {
           as: 'image',
           from: 'images',
           foreignField: '_id',
           localField: 'imageId',
-        },
+        }
       },
       {
         $addFields: {
-          avatar: {
-            $arrayElemAt: ['$image.url', 0]
-          },
-        },
+          image: { 
+            $arrayElemAt: ['$image.url', 0] 
+          }
+        }
       },
       {
-        $project: {
-          __v: 0,
-          image: 0,
-          imageId: 0,
-        },
+        $unset: ['__v', 'imageId']
       },
+      {
+        $unwind: '$children'
+      },
+      {
+        $lookup: {
+          from: 'images',
+          foreignField: '_id',
+          as: 'children.image',
+          localField: 'children.imageId',
+        }
+      },
+      {
+        $addFields: {
+          'children.image': {
+            $arrayElemAt: ['$children.image.url', 0]
+          }
+        }
+      },
+      {
+        $unset: ['children.__v', 'children.imageId']
+      },
+      {
+        $group: {
+          _id: '$_id',
+          mcc: {$first: '$mcc'},
+          title: {$first: '$title'},
+          color: {$first: '$color'},
+          image: {$first: '$image'},
+          children: {$push: '$children'},
+        }
+      },
+      {
+        $match: {parentId: null} // Filter out documents without parentId
+      }
     ]);
     if(!categories || categories.length <= 0) throw new HttpException(CategoryErrorMessages.findMany, HttpStatus.NOT_FOUND);
     return categories;
@@ -62,7 +100,7 @@ export class CategoryService {
       },
       {
         $addFields: {
-          avatar: {
+          image: {
             $arrayElemAt: ['$image.url', 0]
           },
         },
@@ -70,7 +108,6 @@ export class CategoryService {
       {
         $project: {
           __v: 0,
-          image: 0,
           imageId: 0,
         },
       },
