@@ -4,7 +4,7 @@ import {Image} from './schemas/image.schema';
 import {InjectModel} from '@nestjs/mongoose';
 import {Collections} from '@/configs/collections';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {ImageErrorMessages, ImageSuccessMessages} from '@/configs/messages/image';
+import {ImageErrorMessages, ImageSuccessMessages} from '@messages/image';
 import {v2 as cloudinary, UploadApiErrorResponse, UploadApiOptions, UploadApiResponse} from 'cloudinary';
 
 @Injectable()

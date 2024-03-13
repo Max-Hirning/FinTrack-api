@@ -1,8 +1,8 @@
 import {Model} from 'mongoose';
 import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
-import {Collections} from './configs/collections';
-import {User} from './modules/user/schemas/user.schema';
+import {Collections} from '@/configs/collections';
+import {User} from '@userModule/schemas/user.schema';
 
 @Injectable()
 export class AppService {

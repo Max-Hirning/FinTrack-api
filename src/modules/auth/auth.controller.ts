@@ -6,8 +6,8 @@ import {IResponse} from '@/types/app.types';
 import {SignUpDto} from './dto/sign-up.dto';
 import {MailerService} from '@nestjs-modules/mailer';
 import {ISignInResponse} from './types/sign-in.types';
-import {CommonService} from '../common/common.service';
-import {AuthErrorMessages, AuthSuccessMessages} from '@/configs/messages/auth';
+import {CommonService} from '@commonModule/common.service';
+import {AuthErrorMessages, AuthSuccessMessages} from '@messages/auth';
 import {Controller, Post, Body, HttpStatus, HttpException} from '@nestjs/common';
 
 @Controller('auth')
@@ -25,7 +25,7 @@ export class AuthController {
     if(user) throw new HttpException(AuthErrorMessages.existedUser, HttpStatus.BAD_REQUEST);
     const password = await bcrypt.hash(signUpDto.password, 5);
     const userId = await this.authService.signUp({...signUpDto, password});
-    const code = this.jwtService.sign({email: signUpDto.email, id: userId, password}, {expiresIn: process.env.EMAIL_CODE_EXPIRES_IN});
+    const code = this.jwtService.sign({email: signUpDto.email, _id: userId, password}, {expiresIn: process.env.EMAIL_CODE_EXPIRES_IN});
     await this.mailerService.sendMail({
       html: `
         <div>
@@ -49,20 +49,20 @@ export class AuthController {
       return ({
         data: {
           userId: process.env.ADMIN_ID,
-          token: this.jwtService.sign({id: process.env.ADMIN_ID, email: process.env.ADMIN_EMAIL, password}),
+          token: this.jwtService.sign({_id: process.env.ADMIN_ID, email: process.env.ADMIN_EMAIL, password}),
         },
         statusCode: HttpStatus.OK,
         message: AuthSuccessMessages.signIn,
       });
     }
-    const user = await this.commonService.findOneUserAPI('email', signInDto.email, true);
+    const user = await this.commonService.findOneUserAPI('email', signInDto.email);
     const isPassValid = bcrypt.compareSync(signInDto.password, user.password);
     if(!isPassValid) throw new HttpException(AuthErrorMessages.wrongPassword, HttpStatus.BAD_REQUEST);
     if(user.__v === 0) throw new HttpException(AuthErrorMessages.confirmEmail, HttpStatus.BAD_REQUEST);
     return ({
       data: {
-        userId: user.id,
-        token: this.jwtService.sign({id: user.id, email: user.email, password: user.password}),
+        userId: user._id.toString(),
+        token: this.jwtService.sign({_id: user._id, email: user.email, password: user.password}),
       },
       statusCode: HttpStatus.OK,
       message: AuthSuccessMessages.signIn,

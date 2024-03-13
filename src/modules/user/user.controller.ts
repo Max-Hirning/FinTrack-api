@@ -2,18 +2,20 @@ import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {UserService} from './user.service';
 import {IResponse} from '@/types/app.types';
-import {ImageService} from '../image/image.service';
+import {AuthSuccessMessages} from '@messages/auth';
+import {UserSuccessMessages} from '@messages/user';
 import {MailerService} from '@nestjs-modules/mailer';
-import {CommonService} from '../common/common.service';
+import {ImageService} from '@imageModule/image.service';
+import {AuthGuard} from '@authModule/guards/auth.guard';
 import {FileInterceptor} from '@nestjs/platform-express';
-import {AuthSuccessMessages} from '@/configs/messages/auth';
-import {UserSuccessMessages} from '@/configs/messages/user';
+import {CommonService} from '@commonModule/common.service';
 import {IUpdateUserProfile, IUser} from './types/user.types';
 import {UpdateUserProfileDto} from './dto/update-user-profile.dto';
 import {UpdateUserSecurityDto} from './dto/update-user-security.dto';
-import {Controller, Get, Body, Put, Param, Delete, UseInterceptors, UploadedFile, HttpStatus, HttpException} from '@nestjs/common';
+import {Controller, Get, Body, Put, Param, Delete, UseInterceptors, UploadedFile, HttpStatus, HttpException, UseGuards} from '@nestjs/common';
 
 @Controller('user')
+@UseGuards(AuthGuard)
 export class UserController {
   constructor(
     private readonly jwtService: JwtService,
@@ -41,6 +43,19 @@ export class UserController {
     return ({
       message: response,
       statusCode: HttpStatus.OK,
+    });
+  }
+
+  @Delete('avatar/:id')
+  async removeAvatar(@Param('id') id: string): Promise<IResponse<undefined>> {
+    const user = await this.commonService.findOneUserAPI('_id', id);
+    if(user.imageId) {
+      await this.imageService.remove(user.imageId);
+      await this.userService.updateProfile(id, {imageId: null});
+    }
+    return ({
+      statusCode: HttpStatus.OK,
+      message: UserSuccessMessages.updateOne,
     });
   }
 

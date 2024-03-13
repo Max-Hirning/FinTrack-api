@@ -1,11 +1,11 @@
 import {Model} from 'mongoose';
-import {ICurrency} from '@/types/app.types';
 import {InjectModel} from '@nestjs/mongoose';
-import {User} from '../user/schemas/user.schema';
+import {ICurrency} from '@/types/currency.types';
+import {UserErrorMessages} from '@messages/user';
 import {Collections} from '@/configs/collections';
 import {IUser} from '@userModule/types/user.types';
-import {UserErrorMessages} from '@/configs/messages/user';
-import {CurrencyErrorMessages} from '@/configs/messages/currency';
+import {User} from '@userModule/schemas/user.schema';
+import {CurrencyErrorMessages} from '@messages/currency';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 
 @Injectable()

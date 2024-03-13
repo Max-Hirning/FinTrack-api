@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
         const isPassValid = bcrypt.compareSync(process.env.ADMIN_PASSWORD, tokenData.password);
         if(isPassValid) return true;
       }
-      const user = await this.commonService.findOneUserAPI('_id', tokenData._id, true);
+      const user = await this.commonService.findOneUserAPI('_id', tokenData._id);
       if(user.email === tokenData.email && tokenData.password === user.password) {
         return true;
       } else {

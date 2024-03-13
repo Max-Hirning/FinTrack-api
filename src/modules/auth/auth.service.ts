@@ -3,8 +3,8 @@ import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import {ISignUp} from './types/sign-up.types';
 import {ISignIn} from './types/sign-in.types';
-import {User} from '../user/schemas/user.schema';
 import {Collections} from '@/configs/collections';
+import {User} from '@userModule/schemas/user.schema';
 
 @Injectable()
 export class AuthService {

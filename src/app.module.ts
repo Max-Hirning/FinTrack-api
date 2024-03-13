@@ -6,15 +6,17 @@ import {AppController} from './app.controller';
 import {MongooseModule} from '@nestjs/mongoose';
 import {Collections} from '@/configs/collections';
 import {UserModule} from '@userModule/user.module';
+import {AuthModule} from '@authModule/auth.module';
+import {CardModule} from '@cardModule/card.module';
 import {MailerModule} from '@nestjs-modules/mailer';
-import {AuthModule} from './modules/auth/auth.module';
-import {CommonModule} from './modules/common/common.module';
-import {UserSchema} from '@/modules/user/schemas/user.schema';
+import {CommonModule} from '@commonModule/common.module';
+import {UserSchema} from '@userModule/schemas/user.schema';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
+    CardModule,
     CommonModule,
     MailerModule.forRoot({
       transport: {

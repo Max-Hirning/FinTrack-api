@@ -1,10 +1,11 @@
 import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {AppService} from './app.service';
-import {ICurrency, IResponse} from './types/app.types';
-import {AuthErrorMessages} from './configs/messages/auth';
-import {CommonService} from './modules/common/common.service';
-import {CurrencySuccessMessages} from './configs/messages/currency';
+import {IResponse} from './types/app.types';
+import {ICurrency} from './types/currency.types';
+import {AuthErrorMessages} from '@messages/auth';
+import {CommonService} from '@commonModule/common.service';
+import {CurrencySuccessMessages} from '@messages/currency';
 import {Controller, Get, HttpException, HttpStatus, Query, Redirect} from '@nestjs/common';
 
 @Controller()
