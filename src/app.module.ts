@@ -11,6 +11,7 @@ import {CardModule} from '@cardModule/card.module';
 import {MailerModule} from '@nestjs-modules/mailer';
 import {CommonModule} from '@commonModule/common.module';
 import {UserSchema} from '@userModule/schemas/user.schema';
+import {CategoryModule} from './modules/category/category.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import {UserSchema} from '@userModule/schemas/user.schema';
     UserModule,
     CardModule,
     CommonModule,
+    CategoryModule,
     MailerModule.forRoot({
       transport: {
         auth: {

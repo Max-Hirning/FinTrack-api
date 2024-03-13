@@ -9,6 +9,8 @@ import {ICard} from '@cardModule/types/card.types';
 import {User} from '@userModule/schemas/user.schema';
 import {Card} from '@cardModule/schemas/card.schema';
 import {CurrencyErrorMessages} from '@messages/currency';
+import {ICategory} from '@categoryModule/types/category.types';
+import {Category} from '@categoryModule/schemas/category.schema';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 
 @Injectable()
@@ -16,6 +18,7 @@ export class CommonService {
   constructor(
     @InjectModel(Collections.users) private readonly userModel: Model<User>,
     @InjectModel(Collections.cards) private readonly cardModel: Model<Card>,
+    @InjectModel(Collections.categories) private readonly categoryModel: Model<Category>,
   ) {}
 
   async findOneCurrency(id: string): Promise<ICurrency> {
@@ -32,6 +35,14 @@ export class CommonService {
       if(!user) throw new HttpException(UserErrorMessages.findOne, HttpStatus.NOT_FOUND);
     }
     return user;
+  }
+
+  async findOneCategoryAPI(key: '_id', value: string, noCheck?: boolean): Promise<ICategory> {
+    const category = await this.categoryModel.findOne({[key]: value});
+    if(!noCheck) {
+      if(!category) throw new HttpException(UserErrorMessages.findOne, HttpStatus.NOT_FOUND);
+    }
+    return category;
   }
 
   async findOneCardAPI(key: '_id'|'ownerId', value: string, noCheck?: boolean): Promise<ICard> {

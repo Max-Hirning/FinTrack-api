@@ -76,7 +76,7 @@ export class UserController {
   @UseInterceptors(FileInterceptor('avatar'))
   async updateProfile(@Param('id') id: string, @UploadedFile() file: Express.Multer.File, @Body() updateUserProfileDto: UpdateUserProfileDto): Promise<IResponse<undefined>> {
     const updateUserProfile: IUpdateUserProfile = {};
-    const user = await this.commonService.findOneUserAPI('_id', id, true);
+    const user = await this.commonService.findOneUserAPI('_id', id);
     if(file) {
       if(user.imageId) {
         await this.imageService.updateOne(user.imageId, file.buffer, {folder: 'FinTrack/avatars'});
