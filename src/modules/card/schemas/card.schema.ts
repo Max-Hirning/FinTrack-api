@@ -34,6 +34,12 @@ export class Card {
     ref: Collections.users, 
   })
     ownerId: string;
+
+  @Prop({
+    required: true,
+    type: Number,
+  })
+    startBalance: number;
 }
 
 export const CardSchema = SchemaFactory.createForClass(Card);

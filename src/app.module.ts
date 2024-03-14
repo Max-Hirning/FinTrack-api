@@ -11,6 +11,7 @@ import {CardModule} from '@cardModule/card.module';
 import {MailerModule} from '@nestjs-modules/mailer';
 import {CommonModule} from '@commonModule/common.module';
 import {UserSchema} from '@userModule/schemas/user.schema';
+import {BalanceModule} from './modules/balance/balance.module';
 import {CategoryModule} from './modules/category/category.module';
 import {TransactionModule} from './modules/transaction/transaction.module';
 
@@ -20,6 +21,7 @@ import {TransactionModule} from './modules/transaction/transaction.module';
     UserModule,
     CardModule,
     CommonModule,
+    BalanceModule,
     CategoryModule,
     TransactionModule,
     MailerModule.forRoot({

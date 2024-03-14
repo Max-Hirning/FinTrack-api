@@ -58,8 +58,8 @@ export class TransactionService {
       {
         $lookup: {
           from: 'images',
-          foreignField: '_id',
           as: 'userImage',
+          foreignField: '_id',
           localField: 'user.imageId',
         },
       },
@@ -121,6 +121,7 @@ export class TransactionService {
           'card.owner.__v': 0,
           'card.owner.date': 0,
           'category.imageId': 0,
+          'card.startBalance': 0,
           'card.owner.imageId': 0,
           'card.owner.password': 0,
         }
@@ -183,8 +184,8 @@ export class TransactionService {
       {
         $lookup: {
           from: 'images',
-          foreignField: '_id',
           as: 'userImage',
+          foreignField: '_id',
           localField: 'user.imageId',
         },
       },
@@ -246,11 +247,12 @@ export class TransactionService {
           'card.owner.__v': 0,
           'card.owner.date': 0,
           'category.imageId': 0,
+          'card.startBalance': 0,
           'card.owner.imageId': 0,
           'card.owner.password': 0,
         }
       }
-    ]);
+    ]).sort({date: -1});
     if(!transactions || transactions.length <= 0) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
     return transactions;
   }

@@ -57,7 +57,14 @@ export class CardController {
   async createOne(@Body() createCardDto: CreateCardDto): Promise<IResponse<undefined>> {
     await this.commonService.findOneUserAPI('_id', createCardDto.ownerId);
     await this.commonService.findOneCurrency(createCardDto.currency);
-    const response = await this.cardService.createOne(createCardDto);
+    const response = await this.cardService.createOne({
+      title: createCardDto.title,
+      color: createCardDto.color,
+      ownerId: createCardDto.ownerId,
+      balance: createCardDto.balance,
+      currency: createCardDto.currency,
+      startBalance: createCardDto.startBalance,
+    });
     return ({
       message: response,
       statusCode: HttpStatus.OK,

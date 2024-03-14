@@ -10,7 +10,8 @@ export interface ICreateCard {
   ownerId: string;
   balance: number;
   currency: string;
+  startBalance: number;
 }
-export interface IUpdateCard extends Partial<Omit<ICreateCard, 'ownerId'|'balance'>> {}
+export interface IUpdateCard extends Partial<Omit<ICreateCard, 'startBalance'|'ownerId'|'balance'>> {}
 
 export type ICard = HydratedDocument<Card>;

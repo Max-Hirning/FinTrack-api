@@ -1,7 +1,9 @@
 import {Types} from 'mongoose';
 import {IResponse} from '@/types/app.types';
 import {IFilters} from './types/transaction.types';
+import {IBalance} from '../balance/types/balance.types';
 import {TransactionService} from './transaction.service';
+import {BalanceService} from '../balance/balance.service';
 import {CommonService} from '@commonModule/common.service';
 import {TransactionSuccessMessages} from '@messages/transaction';
 import {CreateTransactionDto} from './dto/create-transaction.dto';
@@ -13,6 +15,7 @@ import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, Http
 export class TransactionController {
   constructor(
     private readonly commonService: CommonService,
+    private readonly balanceService: BalanceService,
     private readonly transactionService: TransactionService,
   ) {}
 
@@ -67,6 +70,38 @@ export class TransactionController {
   @Post()
   async createOne(@Body() createTransactionDto: CreateTransactionDto): Promise<IResponse<undefined>> {
     const card = await this.commonService.findOneCardAPI('_id', createTransactionDto.cardId);
+    const balance = await this.commonService.findOneBalanceAPI({
+      date: {
+        $lte: new Date(createTransactionDto.date).toISOString().split('T')[0]
+      },
+      cardId: createTransactionDto.cardId
+    }, true);
+    if(balance) {
+      if(balance.date === new Date(createTransactionDto.date).toISOString().split('T')[0]) {
+        await this.balanceService.updateOne(balance._id, {balance: balance.balance + createTransactionDto.amount});
+      } else {
+        await this.balanceService.createOne({
+          cardId: createTransactionDto.cardId,
+          balance: balance.balance + createTransactionDto.amount,
+          date: new Date(createTransactionDto.date).toISOString().split('T')[0]
+        });
+      }
+    } else {
+      await this.balanceService.createOne({
+        cardId: createTransactionDto.cardId,
+        balance: card.startBalance + createTransactionDto.amount,
+        date: new Date(createTransactionDto.date).toISOString().split('T')[0]
+      });
+    }
+    const nextBalances = await this.balanceService.findMany({
+      date: {
+        $gt: new Date(createTransactionDto.date).toISOString().split('T')[0]
+      },
+      cards: [createTransactionDto.cardId]
+    });
+    if(nextBalances.length > 0) {
+      await this.balanceService.updateMany(nextBalances.map((el: IBalance) => el._id.toString()), createTransactionDto.amount);
+    }
     await this.commonService.updateCardBalance(createTransactionDto.cardId, this.commonService.calculateBalance(createTransactionDto.amount, false, card.balance, createTransactionDto.amount));
     const response = await this.transactionService.createOne({
       cardId: createTransactionDto.cardId,

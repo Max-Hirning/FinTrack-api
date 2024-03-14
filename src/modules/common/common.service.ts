@@ -1,6 +1,5 @@
 import {Model} from 'mongoose';
 import {InjectModel} from '@nestjs/mongoose';
-import {CardErrorMessages, CardSuccessMessages} from '@messages/card';
 import {ICurrency} from '@/types/currency.types';
 import {UserErrorMessages} from '@messages/user';
 import {Collections} from '@/configs/collections';
@@ -8,12 +7,16 @@ import {IUser} from '@userModule/types/user.types';
 import {ICard} from '@cardModule/types/card.types';
 import {User} from '@userModule/schemas/user.schema';
 import {Card} from '@cardModule/schemas/card.schema';
+import {IBalance} from '../balance/types/balance.types';
 import {CurrencyErrorMessages} from '@messages/currency';
+import {Balance} from '../balance/schemas/balance.schema';
 import {ICategory} from '@categoryModule/types/category.types';
+import {BalanceErrorMessages} from '@/configs/messages/balance';
 import {Category} from '@categoryModule/schemas/category.schema';
 import {ITransaction} from '../transaction/types/transaction.types';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {Transaction} from '../transaction/schemas/transaction.schema';
+import {CardErrorMessages, CardSuccessMessages} from '@messages/card';
 import {TransactionErrorMessages} from '@/configs/messages/transaction';
 
 @Injectable()
@@ -21,6 +24,7 @@ export class CommonService {
   constructor(
     @InjectModel(Collections.users) private readonly userModel: Model<User>,
     @InjectModel(Collections.cards) private readonly cardModel: Model<Card>,
+    @InjectModel(Collections.balances) private readonly balanceModel: Model<Balance>,
     @InjectModel(Collections.categories) private readonly categoryModel: Model<Category>,
     @InjectModel(Collections.transactions) private readonly transactionModel: Model<Transaction>,
   ) {}
@@ -68,6 +72,23 @@ export class CommonService {
       if(!transaction) throw new HttpException(TransactionErrorMessages.findOne, HttpStatus.NOT_FOUND);
     }
     return transaction;
+  }
+
+  async findOneBalanceAPI(value: {
+    date?: {
+      $gt?:string;
+      $lt?: string;
+      $gte?: string;
+      $lte?: string;
+    };
+    _id?: string;
+    cardId?: string;
+  }, noCheck?: boolean): Promise<IBalance> {
+    const [balance] = await this.balanceModel.find(value).sort({date: -1});
+    if(!noCheck) {
+      if(!balance) throw new HttpException(BalanceErrorMessages.findOne, HttpStatus.NOT_FOUND);
+    }
+    return balance;
   }
 
   calculateBalance(transactionType: number, isActionReverse: boolean, cardBalance: number, transactionAmmount: number): number {
