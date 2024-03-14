@@ -62,7 +62,7 @@ export class CommonService {
     return category;
   }
 
-  async findOneTransactionAPI(key: '_id', value: string, noCheck?: boolean): Promise<ITransaction> {
+  async findOneTransactionAPI(key: '_id'|'categoryId', value: string, noCheck?: boolean): Promise<ITransaction> {
     const transaction = await this.transactionModel.findOne({[key]: value});
     if(!noCheck) {
       if(!transaction) throw new HttpException(TransactionErrorMessages.findOne, HttpStatus.NOT_FOUND);

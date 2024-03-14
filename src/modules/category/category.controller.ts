@@ -41,6 +41,8 @@ export class CategoryController {
   @Delete(':id')
   @UseGuards(AdminGuard)
   async removeOne(@Param('id') id: string): Promise<IResponse<undefined>> {
+    const transaction = await this.commonService.findOneTransactionAPI('categoryId', id, true);
+    if(transaction) throw new HttpException('Category must have no transactions', HttpStatus.NOT_FOUND);
     const category = await this.commonService.findOneCategoryAPI('_id', id);
     await this.imageService.removeOne(category.imageId);
     const response = await this.categoryService.removeOne(id);

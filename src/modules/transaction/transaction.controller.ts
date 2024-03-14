@@ -26,7 +26,6 @@ export class TransactionController {
     const filters: Partial<IFilters> = {
       cards: JSON.parse(cards).map((el: string) => new Types.ObjectId(el))
     };
-
     if(date) {
       const dates = JSON.parse(date);
       filters.date = {
