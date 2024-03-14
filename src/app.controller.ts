@@ -32,10 +32,10 @@ export class AppController {
   @Redirect('https://github.com/Max-Hirning', HttpStatus.SEE_OTHER)
   async confirmEmail(@Query('code') code: string): Promise<void> {
     const codeData = await this.jwtService.decode(code);
-    const user = await this.commonService.findOneUserAPI('_id', codeData.id, false);
+    const user = await this.commonService.findOneUserAPI('_id', codeData._id);
     const isPassValid = bcrypt.compare(codeData.password, user.password);
     if(user.email === codeData.email && isPassValid) {
-      await this.appService.confirmEmail(user.id);
+      await this.appService.confirmEmail(user._id.toString());
       return;
     }
     throw new HttpException(AuthErrorMessages.wrongCode, HttpStatus.BAD_REQUEST);

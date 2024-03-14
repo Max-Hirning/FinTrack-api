@@ -7,6 +7,7 @@ import {UpdateCardDto} from './dto/update-card.dto';
 import {AuthGuard} from '@authModule/guards/auth.guard';
 import {CommonService} from '@commonModule/common.service';
 import {ICard, IFilters, IUpdateCard} from './types/card.types';
+import {TransactionService} from '@transactionModule/transaction.service';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, HttpException, UseGuards} from '@nestjs/common';
 
 @Controller('card')
@@ -15,6 +16,7 @@ export class CardController {
   constructor(
     private readonly cardService: CardService,
     private readonly commonService: CommonService,
+    private readonly transactionService: TransactionService,
   ) {}
 
   @Get(':id')
@@ -28,7 +30,8 @@ export class CardController {
   }
 
   @Delete(':id')
-  async removeOne(@Param('id') id: string): Promise<IResponse<undefined>> { // delete all transactions
+  async removeOne(@Param('id') id: string): Promise<IResponse<undefined>> {
+    await this.transactionService.removeMany(id); // delete all cards transactions
     const response = await this.cardService.removeOne(id);
     return ({
       message: response,
@@ -52,7 +55,7 @@ export class CardController {
 
   @Post()
   async createOne(@Body() createCardDto: CreateCardDto): Promise<IResponse<undefined>> {
-    await this.commonService.findOneUserAPI('_id', createCardDto.ownerId, false);
+    await this.commonService.findOneUserAPI('_id', createCardDto.ownerId);
     await this.commonService.findOneCurrency(createCardDto.currency);
     const response = await this.cardService.createOne(createCardDto);
     return ({

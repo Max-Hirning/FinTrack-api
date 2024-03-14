@@ -1,6 +1,6 @@
 import {Model} from 'mongoose';
 import {InjectModel} from '@nestjs/mongoose';
-import {CardErrorMessages} from '@messages/card';
+import {CardErrorMessages, CardSuccessMessages} from '@messages/card';
 import {ICurrency} from '@/types/currency.types';
 import {UserErrorMessages} from '@messages/user';
 import {Collections} from '@/configs/collections';
@@ -11,7 +11,10 @@ import {Card} from '@cardModule/schemas/card.schema';
 import {CurrencyErrorMessages} from '@messages/currency';
 import {ICategory} from '@categoryModule/types/category.types';
 import {Category} from '@categoryModule/schemas/category.schema';
+import {ITransaction} from '../transaction/types/transaction.types';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import {Transaction} from '../transaction/schemas/transaction.schema';
+import {TransactionErrorMessages} from '@/configs/messages/transaction';
 
 @Injectable()
 export class CommonService {
@@ -19,6 +22,7 @@ export class CommonService {
     @InjectModel(Collections.users) private readonly userModel: Model<User>,
     @InjectModel(Collections.cards) private readonly cardModel: Model<Card>,
     @InjectModel(Collections.categories) private readonly categoryModel: Model<Category>,
+    @InjectModel(Collections.transactions) private readonly transactionModel: Model<Transaction>,
   ) {}
 
   async findOneCurrency(id: string): Promise<ICurrency> {
@@ -27,6 +31,19 @@ export class CommonService {
     const currency = currencies[id];
     if(!currency) throw new HttpException(CurrencyErrorMessages.findOne, HttpStatus.NOT_FOUND);
     return currency;
+  }
+
+  async updateCardBalance(id: string, balance: number): Promise<string> {
+    await this.cardModel.updateOne({_id: id}, {balance});
+    return CardSuccessMessages.updateOne;
+  }
+
+  async findOneCardAPI(key: '_id', value: string, noCheck?: boolean): Promise<ICard> {
+    const card = await this.cardModel.findOne({[key]: value});
+    if(!noCheck) {
+      if(!card) throw new HttpException(CardErrorMessages.findOne, HttpStatus.NOT_FOUND);
+    }
+    return card;
   }
 
   async findOneUserAPI(key: '_id'|'email', value: string, noCheck?: boolean): Promise<IUser> {
@@ -45,11 +62,18 @@ export class CommonService {
     return category;
   }
 
-  async findOneCardAPI(key: '_id'|'ownerId', value: string, noCheck?: boolean): Promise<ICard> {
-    const card = await this.cardModel.findOne({[key]: value});
+  async findOneTransactionAPI(key: '_id', value: string, noCheck?: boolean): Promise<ITransaction> {
+    const transaction = await this.transactionModel.findOne({[key]: value});
     if(!noCheck) {
-      if(!card) throw new HttpException(CardErrorMessages.findOne, HttpStatus.NOT_FOUND);
+      if(!transaction) throw new HttpException(TransactionErrorMessages.findOne, HttpStatus.NOT_FOUND);
     }
-    return card;
+    return transaction;
+  }
+
+  calculateBalance(transactionType: number, isActionReverse: boolean, cardBalance: number, transactionAmmount: number): number {
+    if(transactionType > 0) return (isActionReverse) ? cardBalance - Math.abs(transactionAmmount) : cardBalance + Math.abs(transactionAmmount);
+    if(transactionType < 0) return (isActionReverse) ? cardBalance + Math.abs(transactionAmmount) : cardBalance - Math.abs(transactionAmmount);
+    if(transactionType === 0) return cardBalance;
+    throw new HttpException('TypeId is required', HttpStatus.BAD_REQUEST);
   }
 }

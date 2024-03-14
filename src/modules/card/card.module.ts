@@ -6,13 +6,16 @@ import {CardSchema} from './schemas/card.schema';
 import {CardController} from './card.controller';
 import {Collections} from '@/configs/collections';
 import {CommonModule} from '@commonModule/common.module';
+import {TransactionModule} from '../transaction/transaction.module';
 
 @Module({
   imports: [
     JwtModule,
     CommonModule,
+    TransactionModule,
     MongooseModule.forFeature([{name: Collections.cards, schema: CardSchema}]),
   ],
+  exports: [CardService],
   providers: [CardService],
   controllers: [CardController],
 })
