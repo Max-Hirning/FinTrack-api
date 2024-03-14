@@ -49,6 +49,24 @@ export class TransactionController {
   async removeOne(@Param('id') id: string): Promise<IResponse<undefined>> {
     const transaction = await this.commonService.findOneTransactionAPI('_id', id);
     const card = await this.commonService.findOneCardAPI('_id', transaction.cardId);
+    const balance = await this.commonService.findOneBalanceAPI({
+      date: {
+        $lte: new Date(transaction.date).toISOString().split('T')[0]
+      },
+      cardId: transaction.cardId
+    }, true);
+    if(balance) {
+      await this.balanceService.updateOne(balance._id, {balance: balance.balance - transaction.amount});
+    }
+    const nextBalances = await this.balanceService.findMany({
+      date: {
+        $gt: new Date(transaction.date).toISOString().split('T')[0]
+      },
+      cards: [transaction.cardId]
+    });
+    if(nextBalances.length > 0) {
+      await this.balanceService.updateMany(nextBalances.map((el: IBalance) => el._id.toString()), ((-1) * transaction.amount));
+    }
     await this.commonService.updateCardBalance(transaction.cardId, this.commonService.calculateBalance(transaction.amount, true, card.balance, transaction.amount));
     const response = await this.transactionService.removeOne(id);
     return ({
