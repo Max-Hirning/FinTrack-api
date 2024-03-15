@@ -45,11 +45,10 @@ export class AuthController {
   @Post('sign-in')
   async signIn(@Body() signInDto: SignInDto): Promise<IResponse<ISignInResponse>> {
     if(this.authService.isAdmin(signInDto)) {
-      const password = await bcrypt.hash(process.env.ADMIN_PASSWORD, 5);
       return ({
         data: {
           userId: process.env.ADMIN_ID,
-          token: this.jwtService.sign({_id: process.env.ADMIN_ID, email: process.env.ADMIN_EMAIL, password}),
+          token: this.jwtService.sign({_id: process.env.ADMIN_ID}),
         },
         statusCode: HttpStatus.OK,
         message: AuthSuccessMessages.signIn,
@@ -62,7 +61,7 @@ export class AuthController {
     return ({
       data: {
         userId: user._id.toString(),
-        token: this.jwtService.sign({_id: user._id, email: user.email, password: user.password}),
+        token: this.jwtService.sign({_id: user._id, version: user.version}),
       },
       statusCode: HttpStatus.OK,
       message: AuthSuccessMessages.signIn,

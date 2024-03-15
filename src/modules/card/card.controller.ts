@@ -63,7 +63,7 @@ export class CardController {
       ownerId: createCardDto.ownerId,
       balance: createCardDto.balance,
       currency: createCardDto.currency,
-      startBalance: createCardDto.startBalance,
+      startBalance: createCardDto.balance,
     });
     return ({
       message: response,

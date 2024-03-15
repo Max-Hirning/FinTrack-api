@@ -52,12 +52,12 @@ export class UserService {
   }
 
   async updateProfile(id: string, updateUserProfile: IUpdateUserProfile): Promise<string> {
-    await this.userModel.updateOne({_id: id}, updateUserProfile);
+    await this.userModel.updateOne({_id: id}, {...updateUserProfile, $inc: {version: 0.1}});
     return UserSuccessMessages.updateOne;
   }
 
   async updateSecurity(id: string, updateUserSecurity: IUpdateUserSecurity): Promise<string> {
-    await this.userModel.updateOne({_id: id}, updateUserSecurity);
+    await this.userModel.updateOne({_id: id}, {...updateUserSecurity, $inc: {version: 1}});
     return UserSuccessMessages.updateOne;
   }
 }

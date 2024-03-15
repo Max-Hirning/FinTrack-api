@@ -44,6 +44,13 @@ export class User {
     currency: string;
 
   @Prop({
+    required: false,
+    type: Number,
+    default: 0.1,
+  })
+    version: number;
+
+  @Prop({
     required: false, 
     type: mongoose.Schema.Types.ObjectId, 
     default: null,

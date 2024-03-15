@@ -1,4 +1,3 @@
-import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {CanActivate, ExecutionContext, Injectable, HttpException, HttpStatus} from '@nestjs/common';
 
@@ -14,12 +13,8 @@ export class AdminGuard implements CanActivate {
       const token = authHeader.split(' ')[1];
       if(bearer !== 'Bearer' || !token) throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
       const tokenData = this.jwtService.verify(token, {secret: process.env.SECRET_KEY});
-      if(tokenData._id === process.env.ADMIN_ID && tokenData.email === process.env.ADMIN_EMAIL) {
-        const isPassValid = bcrypt.compareSync(process.env.ADMIN_PASSWORD, tokenData.password);
-        if(isPassValid) return true;
-      } else {
-        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-      }
+      if(tokenData._id === process.env.ADMIN_ID) return true;
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     } catch (e) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }

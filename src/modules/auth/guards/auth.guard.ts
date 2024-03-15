@@ -1,4 +1,3 @@
-import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {CommonService} from '@commonModule/common.service';
 import {CanActivate, ExecutionContext, Injectable, HttpException, HttpStatus} from '@nestjs/common';
@@ -18,12 +17,9 @@ export class AuthGuard implements CanActivate {
       const token = authHeader.split(' ')[1];
       if(bearer !== 'Bearer' || !token) throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
       const tokenData = this.jwtService.verify(token, {secret: process.env.SECRET_KEY});
-      if(tokenData._id === process.env.ADMIN_ID && tokenData.email === process.env.ADMIN_EMAIL) {
-        const isPassValid = bcrypt.compareSync(process.env.ADMIN_PASSWORD, tokenData.password);
-        if(isPassValid) return true;
-      }
+      if(tokenData._id === process.env.ADMIN_ID) return true;
       const user = await this.commonService.findOneUserAPI('_id', tokenData._id);
-      if(user.email === tokenData.email && tokenData.password === user.password) {
+      if(user.version === tokenData.version) {
         return true;
       } else {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);

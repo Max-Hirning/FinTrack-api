@@ -1,4 +1,4 @@
-import {HydratedDocument} from 'mongoose';
+import {Types, HydratedDocument} from 'mongoose';
 import {Transaction} from '../schemas/transaction.schema';
 
 export interface IFilters {
@@ -7,7 +7,7 @@ export interface IFilters {
     $lte: string;
   };
   page: number;
-  cards: string[];
+  cards: Types.ObjectId[];
 }
 export interface ICreateTransaction {
   date: string;

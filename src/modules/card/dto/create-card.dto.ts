@@ -16,9 +16,6 @@ export class CreateCardDto {
   @IsNumber()
     balance: number;
 
-  @IsNumber()
-    startBalance: number;
-
   @IsString()
   @IsNotEmpty()
   @IsFirebasePushId()

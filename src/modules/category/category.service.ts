@@ -39,45 +39,61 @@ export class CategoryService {
         $unset: ['__v', 'imageId']
       },
       {
-        $unwind: '$children'
-      },
-      {
-        $lookup: {
-          from: 'images',
-          foreignField: '_id',
-          as: 'children.image',
-          localField: 'children.imageId',
-        }
-      },
-      {
-        $addFields: {
-          'children.image': {
-            $arrayElemAt: ['$children.image.url', 0]
-          }
-        }
-      },
-      {
-        $unset: ['children.__v', 'children.imageId']
-      },
-      {
         $group: {
-          _id: '$_id',
+          _id: '$parentId',
           mcc: {$first: '$mcc'},
           title: {$first: '$title'},
           color: {$first: '$color'},
           image: {$first: '$image'},
-          children: {$push: '$children'},
+          children: {$push: {
+            _id: '$_id',
+            title: '$title',
+            color: '$color',
+            image: '$image',
+            children: '$children'
+          }},
         }
       },
       {
-        $match: {parentId: null} // Filter out documents without parentId
+        $match: {
+          _id: null
+        }
+      },
+      {
+        $addFields: {
+          children: {
+            $map: {
+              input: '$children',
+              as: 'child',
+              in: {
+                _id: '$$child._id',
+                title: '$$child.title',
+                color: '$$child.color',
+                image: '$$child.image',
+                children: {
+                  $map: {
+                    input: '$$child.children',
+                    as: 'subChild',
+                    in: {
+                      _id: '$$subChild._id',
+                      title: '$$subChild.title',
+                      color: '$$subChild.color',
+                      image: '$$subChild.image',
+                      children: '$$subChild.children'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     ]);
     if(!categories || categories.length <= 0) throw new HttpException(CategoryErrorMessages.findMany, HttpStatus.NOT_FOUND);
-    return categories;
+    return categories[0].children;
   }
 
-  async removeOne(id: string): Promise<string> { // check if there's no transactions with such category
+  async removeOne(id: string): Promise<string> {
     await this.categoryModel.deleteOne({_id: id});
     await this.categoryModel.deleteMany({parentId: id});
     return CategorySuccessMessages.removeOne;

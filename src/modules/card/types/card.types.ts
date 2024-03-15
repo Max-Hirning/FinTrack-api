@@ -1,8 +1,8 @@
 import {Card} from '../schemas/card.schema';
-import mongoose, {HydratedDocument} from 'mongoose';
+import {Types, HydratedDocument} from 'mongoose';
 
 export interface IFilters {
-  ownerId: mongoose.Types.ObjectId;
+  ownerId: Types.ObjectId;
 }
 export interface ICreateCard {
   title: string;
