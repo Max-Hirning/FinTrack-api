@@ -1,7 +1,7 @@
 import {InjectModel} from '@nestjs/mongoose';
 import {IPagintaion} from '@/types/app.types';
 import {Collections} from '@/configs/collections';
-import {IFilters} from './types/transaction.types';
+import {IFilters, ITransactionList} from './types/transaction.types';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {Transaction} from './schemas/transaction.schema';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
@@ -161,7 +161,7 @@ export class TransactionService {
     return TransactionSuccessMessages.updateOne;
   }
 
-  async findMany({page, cards, ...filters}: Partial<IFilters>): Promise<IPagintaion<ITransaction[]>> {
+  async findMany({page, cards, ...filters}: Partial<IFilters>): Promise<IPagintaion<ITransactionList>> {
     const limit = 2;
     let totalPages = null;
     const aggregationPipeLineCopy = [...aggregationPipeLine];
@@ -172,18 +172,46 @@ export class TransactionService {
       const totalEntries = await this.transactionModel.countDocuments({...filters, cardId: {$in: cards}});
       totalPages = Math.ceil(totalEntries / limit);
     }
-    const transactions = await this.transactionModel.aggregate([
+    const [response] = await this.transactionModel.aggregate([
       {
         $match: {
           ...filters,
           cardId: {$in: cards},
         },
       },
-      ...aggregationPipeLineCopy
+      ...aggregationPipeLineCopy,
+      {
+        $lookup: {
+          as: 'card',
+          from: 'cards',
+          foreignField: '_id',
+          localField: 'card._id',
+        }
+      },
+      {
+        $unwind: '$card'
+      },
+      {
+        $group: {
+          _id: null,
+          data: {$push: '$$ROOT'},
+          currencies: {$addToSet: '$card.currency'}
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          data: 1,
+          currencies: 1
+        }
+      }
     ]).sort({date: -1});
-    if(!transactions || transactions.length <= 0) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
+    if(!response && (response.data.length <= 0 || response.currencies.length <= 0)) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
     return ({
-      data: transactions,
+      data: {
+        data: response.data,
+        currencies: response.currencies,
+      },
       page: page || null,
       totalPages: totalPages || null,
       previous: (page && page > 1) ? page - 1 : null,

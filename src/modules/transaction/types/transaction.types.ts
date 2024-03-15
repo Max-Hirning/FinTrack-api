@@ -9,6 +9,10 @@ export interface IFilters {
   page: number;
   cards: Types.ObjectId[];
 }
+export interface ITransactionList {
+  data: ITransaction[];
+  currencies: string[];
+}
 export interface ICreateTransaction {
   date: string;
   cardId: string;

@@ -4,7 +4,7 @@ export interface IResponse<T> {
   statusCode: number;
 }
 export interface IPagintaion<T> {
-  data: T[];
+  data: T;
   page: number|null;
   next: number|null;
   previous: number|null;

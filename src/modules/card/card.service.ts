@@ -83,14 +83,28 @@ export class CardService {
   }
 
   async findMany(filters: Partial<IFilters>): Promise<ICard[]> {
-    const cards = await this.cardModel.aggregate([
+    const [response] = await this.cardModel.aggregate([
       {
         $match: filters
       },
       ...aggregationPipeLine,
+      {
+        $group: {
+          _id: null,
+          cards: {$push: '$$ROOT'},
+          currencies: {$addToSet: '$currency'}
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          cards: 1,
+          currencies: 1
+        }
+      }
     ]);
-    if(!cards || cards.length <= 0) throw new HttpException(CardErrorMessages.findMany, HttpStatus.NOT_FOUND);
-    return cards;
+    if(!response && (response.cards.length <= 0 || response.currencies.length <= 0)) throw new HttpException(CardErrorMessages.findMany, HttpStatus.NOT_FOUND);
+    return response;
   }
 
   async updateOne(id: string, updateCard: IUpdateCard): Promise<string> {

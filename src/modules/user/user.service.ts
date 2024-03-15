@@ -16,6 +16,14 @@ const aggregationPipeLine: PipelineStage[] = [
     },
   },
   {
+    $lookup: {
+      as: 'cards',
+      from: 'cards',
+      localField: '_id',
+      foreignField: 'ownerId',
+    }
+  },
+  {
     $addFields: {
       avatar: {
         $arrayElemAt: ['$image.url', 0]
@@ -30,6 +38,7 @@ const aggregationPipeLine: PipelineStage[] = [
       currency: 1,
       lastName: 1,
       firstName: 1,
+      cardIds: '$cards._id'
     },
   },
 ];
