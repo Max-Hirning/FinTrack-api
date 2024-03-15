@@ -1,10 +1,54 @@
-import mongoose, {Model} from 'mongoose';
 import {Card} from './schemas/card.schema';
 import {InjectModel} from '@nestjs/mongoose';
 import {Collections} from '@/configs/collections';
+import mongoose, {Model, PipelineStage} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {CardErrorMessages, CardSuccessMessages} from '@messages/card';
 import {ICard, ICreateCard, IFilters, IUpdateCard} from './types/card.types';
+
+const aggregationPipeLine: PipelineStage[] = [
+  {
+    $lookup: {
+      as: 'owner',
+      from: 'users',
+      foreignField: '_id',
+      localField: 'ownerId',
+    }
+  },
+  {
+    $unwind: '$owner'
+  },
+  {
+    $lookup: {
+      as: 'avatar',
+      from: 'images',
+      foreignField: '_id',
+      localField: 'owner.imageId',
+    }
+  },
+  {
+    $addFields: {
+      'owner.avatar': {
+        $arrayElemAt: ['$avatar.url', 0]
+      }
+    }
+  },
+  {
+    $project: {
+      '_id': 1,
+      'title': 1,
+      'color': 1,
+      'balance': 1,
+      'currency': 1,
+      'owner._id': 1,
+      'owner.email': 1,
+      'owner.avatar': 1,
+      'owner.currency': 1,
+      'owner.lastName': 1,
+      'owner.firstName': 1,
+    }
+  }
+];
 
 @Injectable()
 export class CardService {
@@ -17,55 +61,7 @@ export class CardService {
           _id: new mongoose.Types.ObjectId(id)
         }
       },
-      {
-        $lookup: {
-          as: 'owner',
-          from: 'users',
-          foreignField: '_id',
-          localField: 'ownerId',
-        }
-      },
-      {
-        $unwind: '$owner'
-      },
-      {
-        $lookup: {
-          as: 'avatar',
-          from: 'images',
-          foreignField: '_id',
-          localField: 'owner.imageId',
-        }
-      },
-      {
-        $addFields: {
-          'owner.avatar': {
-            $arrayElemAt: ['$avatar.url', 0]
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 1,
-          title: 1,
-          owner: {
-            avatar: {
-              $cond: [
-                {$gt: [{$size: '$avatar'}, 0]},
-                {$arrayElemAt: ['$avatar.url', 0]},
-                null
-              ]
-            },
-            _id: '$owner._id',
-            email: '$owner.email',
-            lastName: '$owner.lastName',
-            currency: '$owner.currency',
-            firstName: '$owner.firstName',
-          },
-          color: 1,
-          balance: 1,
-          currency: 1,
-        }
-      }
+      ...aggregationPipeLine,
     ]);
     if(!card) throw new HttpException(CardErrorMessages.findOne, HttpStatus.NOT_FOUND);
     return card;
@@ -81,68 +77,20 @@ export class CardService {
     return CardSuccessMessages.removeMany;
   }
 
-  async findMany(filters: IFilters): Promise<ICard[]> {
+  async createOne(createCard: ICreateCard): Promise<string> {
+    await this.cardModel.create({...createCard, balance: +createCard.balance.toFixed(2), startBalance: +createCard.startBalance.toFixed(2)});
+    return CardSuccessMessages.createOne;
+  }
+
+  async findMany(filters: Partial<IFilters>): Promise<ICard[]> {
     const cards = await this.cardModel.aggregate([
       {
         $match: filters
       },
-      {
-        $lookup: {
-          as: 'owner',
-          from: 'users',
-          foreignField: '_id',
-          localField: 'ownerId',
-        }
-      },
-      {
-        $unwind: '$owner'
-      },
-      {
-        $lookup: {
-          as: 'avatar',
-          from: 'images',
-          foreignField: '_id',
-          localField: 'owner.imageId',
-        }
-      },
-      {
-        $addFields: {
-          'owner.avatar': {
-            $arrayElemAt: ['$avatar.url', 0]
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 1,
-          title: 1,
-          owner: {
-            avatar: {
-              $cond: [
-                {$gt: [{$size: '$avatar'}, 0]},
-                {$arrayElemAt: ['$avatar.url', 0]},
-                null
-              ]
-            },
-            _id: '$owner._id',
-            email: '$owner.email',
-            lastName: '$owner.lastName',
-            currency: '$owner.currency',
-            firstName: '$owner.firstName',
-          },
-          color: 1,
-          balance: 1,
-          currency: 1,
-        }
-      }
+      ...aggregationPipeLine,
     ]);
     if(!cards || cards.length <= 0) throw new HttpException(CardErrorMessages.findMany, HttpStatus.NOT_FOUND);
     return cards;
-  }
-
-  async createOne(createCard: ICreateCard): Promise<string> {
-    await this.cardModel.create({...createCard, balance: +createCard.balance.toFixed(2), startBalance: +createCard.startBalance.toFixed(2)});
-    return CardSuccessMessages.createOne;
   }
 
   async updateOne(id: string, updateCard: IUpdateCard): Promise<string> {

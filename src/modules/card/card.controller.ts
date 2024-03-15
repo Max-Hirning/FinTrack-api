@@ -1,15 +1,15 @@
-import mongoose from 'mongoose';
+import {Types} from 'mongoose';
 import {CardService} from './card.service';
 import {IResponse} from '@/types/app.types';
 import {CardSuccessMessages} from '@messages/card';
 import {CreateCardDto} from './dto/create-card.dto';
 import {UpdateCardDto} from './dto/update-card.dto';
+import {ICard, IUpdateCard} from './types/card.types';
 import {AuthGuard} from '@authModule/guards/auth.guard';
 import {BalanceService} from '../balance/balance.service';
 import {CommonService} from '@commonModule/common.service';
-import {ICard, IFilters, IUpdateCard} from './types/card.types';
 import {TransactionService} from '@transactionModule/transaction.service';
-import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, HttpException, UseGuards} from '@nestjs/common';
+import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, UseGuards, HttpException} from '@nestjs/common';
 
 @Controller('card')
 @UseGuards(AuthGuard)
@@ -43,17 +43,29 @@ export class CardController {
   }
 
   @Get()
-  async findMany(@Query('ownerId') ownerId?: string): Promise<IResponse<ICard[]>> {
-    if(!ownerId) throw new HttpException('"ownerId" is required', HttpStatus.BAD_REQUEST);
-    const filters: IFilters = {
-      ownerId: new mongoose.Types.ObjectId(ownerId)
-    };
-    const response = await this.cardService.findMany(filters);
-    return ({
-      data: response,
-      statusCode: HttpStatus.OK,
-      message: CardSuccessMessages.findMany,
-    });
+  async findMany(
+    @Query('cards') cards?: string,
+    @Query('ownerId') ownerId?: string,
+  ): Promise<IResponse<ICard[]>> {
+    if(cards) {
+      const response = await this.cardService.findMany({_id: {$in: JSON.parse(cards).map((el: string) => new Types.ObjectId(el))}});
+      return ({
+        data: response,
+        statusCode: HttpStatus.OK,
+        message: CardSuccessMessages.findMany,
+      });
+    }
+
+    if(ownerId) {
+      const response = await this.cardService.findMany({ownerId: new Types.ObjectId(ownerId)});
+      return ({
+        data: response,
+        statusCode: HttpStatus.OK,
+        message: CardSuccessMessages.findMany,
+      });
+    }
+
+    throw new HttpException('Either "cards" or "ownerId" is required', HttpStatus.BAD_REQUEST);
   }
 
   @Post()

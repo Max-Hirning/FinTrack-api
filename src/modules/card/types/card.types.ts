@@ -2,7 +2,10 @@ import {Card} from '../schemas/card.schema';
 import {Types, HydratedDocument} from 'mongoose';
 
 export interface IFilters {
-  ownerId: Types.ObjectId;
+  _id: {
+    $in: Types.ObjectId[];
+  };
+  ownerId: Types.ObjectId
 }
 export interface ICreateCard {
   title: string;

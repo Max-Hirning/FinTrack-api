@@ -1,11 +1,127 @@
-import mongoose, {Model} from 'mongoose';
 import {InjectModel} from '@nestjs/mongoose';
+import {IPagintaion} from '@/types/app.types';
 import {Collections} from '@/configs/collections';
 import {IFilters} from './types/transaction.types';
+import mongoose, {Model, PipelineStage} from 'mongoose';
 import {Transaction} from './schemas/transaction.schema';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {TransactionErrorMessages, TransactionSuccessMessages} from '@messages/transaction';
 import {ICreateTransaction, ITransaction, IUpdateTransaction} from './types/transaction.types';
+
+const aggregationPipeLine: PipelineStage[] = [
+  {
+    $lookup: {
+      as: 'card',
+      from: 'cards',
+      foreignField: '_id',
+      localField: 'cardId',
+    },
+  },
+  {
+    $lookup: {
+      as: 'user',
+      from: 'users',
+      foreignField: '_id',
+      localField: 'card.ownerId',
+    },
+  },
+  {
+    $lookup: {
+      as: 'category',
+      from: 'categories',
+      foreignField: '_id',
+      localField: 'categoryId',
+    },
+  },
+  {
+    $lookup: {
+      from: 'images',
+      foreignField: '_id',
+      as: 'categoryImage',
+      localField: 'category.imageId',
+    },
+  },
+  {
+    $lookup: {
+      from: 'images',
+      as: 'userImage',
+      foreignField: '_id',
+      localField: 'user.imageId',
+    },
+  },
+  {
+    $addFields: {
+      'card': {
+        $mergeObjects: [
+          {
+            $arrayElemAt: ['$card', 0]
+          },
+          {
+            owner: {
+              $arrayElemAt: ['$user', 0],
+            },
+          },
+        ],
+      },
+      'category': {
+        $mergeObjects: [
+          {
+            $arrayElemAt: ['$category', 0]
+          },
+        ],
+      },
+    },
+  },
+  {
+    $unset: ['user'],
+  },
+  {
+    $addFields: {
+      'card.owner.image': {
+        $cond: {
+          if: { 
+            $eq: ['$card.owner.imageId', null] 
+          },
+          then: null,
+          else: { 
+            $arrayElemAt: ['$userImage.url', 0] 
+          },
+        },
+      },
+      'category.image': {
+        $arrayElemAt: ['$categoryImage.url', 0]
+      },
+    },
+  },
+  {
+    $unset: ['card.owner.avatar', 'categoryImage', 'userImage'],
+  },
+  {
+    $project: {
+      '_id': 1,
+      'date': 1,
+      'amount': 1,
+      'description': 1,
+      'card._id': 1,
+      'card.title': 1,
+      'card.color': 1,
+      'card.balance': 1,
+      'card.currency': 1,
+      'card.owner._id': 1,
+      'card.owner.email': 1,
+      'card.owner.avatar': 1,
+      'card.owner.currency': 1,
+      'card.owner.lastName': 1,
+      'card.owner.firstName': 1,
+      'category._id': 1,
+      'category.title': 1,
+      'category.mcc': 1,
+      'category.color': 1,
+      'category.parentId': 1,
+      'category.image': 1,
+    },
+  }
+];
 
 @Injectable()
 export class TransactionService {
@@ -23,109 +139,7 @@ export class TransactionService {
           _id: new mongoose.Types.ObjectId(id),
         },
       },
-      {
-        $lookup: {
-          as: 'card',
-          from: 'cards',
-          foreignField: '_id',
-          localField: 'cardId',
-        },
-      },
-      {
-        $lookup: {
-          as: 'user',
-          from: 'users',
-          foreignField: '_id',
-          localField: 'card.ownerId',
-        },
-      },
-      {
-        $lookup: {
-          as: 'category',
-          from: 'categories',
-          foreignField: '_id',
-          localField: 'categoryId',
-        },
-      },
-      {
-        $lookup: {
-          from: 'images',
-          foreignField: '_id',
-          as: 'categoryImage',
-          localField: 'category.imageId',
-        },
-      },
-      {
-        $lookup: {
-          from: 'images',
-          as: 'userImage',
-          foreignField: '_id',
-          localField: 'user.imageId',
-        },
-      },
-      {
-        $addFields: {
-          'card': {
-            $mergeObjects: [
-              {
-                $arrayElemAt: ['$card', 0]
-              },
-              {
-                owner: {
-                  $arrayElemAt: ['$user', 0],
-                },
-              },
-            ],
-          },
-          'category': {
-            $mergeObjects: [
-              {
-                $arrayElemAt: ['$category', 0]
-              },
-            ],
-          },
-        },
-      },
-      {
-        $unset: ['user'],
-      },
-      {
-        $addFields: {
-          'card.owner.image': {
-            $cond: {
-              if: { 
-                $eq: ['$card.owner.imageId', null] 
-              },
-              then: null,
-              else: { 
-                $arrayElemAt: ['$userImage.url', 0] 
-              },
-            },
-          },
-          'category.image': {
-            $arrayElemAt: ['$categoryImage.url', 0]
-          },
-        },
-      },
-      {
-        $unset: ['card.owner.avatar', 'categoryImage', 'userImage'],
-      },
-      {
-        $project: {
-          __v: 0,
-          cardId: 0,
-          categoryId: 0,
-          'card.__v': 0,
-          'category.__v': 0,
-          'card.ownerId': 0,
-          'card.owner.__v': 0,
-          'card.owner.date': 0,
-          'category.imageId': 0,
-          'card.startBalance': 0,
-          'card.owner.imageId': 0,
-          'card.owner.password': 0,
-        }
-      }
+      ...aggregationPipeLine
     ]);
     if(!transaction) throw new HttpException(TransactionErrorMessages.findOne, HttpStatus.NOT_FOUND);
     return transaction;
@@ -141,7 +155,23 @@ export class TransactionService {
     return TransactionSuccessMessages.createOne;
   }
 
-  async findMany({cards, ...filters}: Partial<IFilters>): Promise<ITransaction[]> {
+  async updateOne(id: string, updateTransaction: IUpdateTransaction): Promise<string> {
+    if(updateTransaction.amount) updateTransaction.amount = +updateTransaction.amount.toFixed(2);
+    await this.transactionModel.updateOne({_id: id}, updateTransaction);
+    return TransactionSuccessMessages.updateOne;
+  }
+
+  async findMany({page, cards, ...filters}: Partial<IFilters>): Promise<IPagintaion<ITransaction[]>> {
+    const limit = 2;
+    let totalPages = null;
+    const aggregationPipeLineCopy = [...aggregationPipeLine];
+    if(page) {
+      const skip = (page - 1) * limit;
+      aggregationPipeLineCopy.push({$skip: skip});
+      aggregationPipeLineCopy.push({$limit: limit});
+      const totalEntries = await this.transactionModel.countDocuments({...filters, cardId: {$in: cards}});
+      totalPages = Math.ceil(totalEntries / limit);
+    }
     const transactions = await this.transactionModel.aggregate([
       {
         $match: {
@@ -149,117 +179,15 @@ export class TransactionService {
           cardId: {$in: cards},
         },
       },
-      {
-        $lookup: {
-          as: 'card',
-          from: 'cards',
-          foreignField: '_id',
-          localField: 'cardId',
-        },
-      },
-      {
-        $lookup: {
-          as: 'user',
-          from: 'users',
-          foreignField: '_id',
-          localField: 'card.ownerId',
-        },
-      },
-      {
-        $lookup: {
-          as: 'category',
-          from: 'categories',
-          foreignField: '_id',
-          localField: 'categoryId',
-        },
-      },
-      {
-        $lookup: {
-          from: 'images',
-          foreignField: '_id',
-          as: 'categoryImage',
-          localField: 'category.imageId',
-        },
-      },
-      {
-        $lookup: {
-          from: 'images',
-          as: 'userImage',
-          foreignField: '_id',
-          localField: 'user.imageId',
-        },
-      },
-      {
-        $addFields: {
-          'card': {
-            $mergeObjects: [
-              {
-                $arrayElemAt: ['$card', 0]
-              },
-              {
-                owner: {
-                  $arrayElemAt: ['$user', 0],
-                },
-              },
-            ],
-          },
-          'category': {
-            $mergeObjects: [
-              {
-                $arrayElemAt: ['$category', 0]
-              },
-            ],
-          },
-        },
-      },
-      {
-        $unset: ['user'],
-      },
-      {
-        $addFields: {
-          'card.owner.image': {
-            $cond: {
-              if: { 
-                $eq: ['$card.owner.imageId', null] 
-              },
-              then: null,
-              else: { 
-                $arrayElemAt: ['$userImage.url', 0] 
-              },
-            },
-          },
-          'category.image': {
-            $arrayElemAt: ['$categoryImage.url', 0]
-          },
-        },
-      },
-      {
-        $unset: ['card.owner.avatar', 'categoryImage', 'userImage'],
-      },
-      {
-        $project: {
-          __v: 0,
-          cardId: 0,
-          categoryId: 0,
-          'card.__v': 0,
-          'category.__v': 0,
-          'card.ownerId': 0,
-          'card.owner.__v': 0,
-          'card.owner.date': 0,
-          'category.imageId': 0,
-          'card.startBalance': 0,
-          'card.owner.imageId': 0,
-          'card.owner.password': 0,
-        }
-      }
+      ...aggregationPipeLineCopy
     ]).sort({date: -1});
     if(!transactions || transactions.length <= 0) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
-    return transactions;
-  }
-
-  async updateOne(id: string, updateTransaction: IUpdateTransaction): Promise<string> {
-    if(updateTransaction.amount) updateTransaction.amount = +updateTransaction.amount.toFixed(2);
-    await this.transactionModel.updateOne({_id: id}, updateTransaction);
-    return TransactionSuccessMessages.updateOne;
+    return ({
+      data: transactions,
+      page: page || null,
+      totalPages: totalPages || null,
+      previous: (page && page > 1) ? page - 1 : null,
+      next: (page && page < totalPages) ? page + 1 : null,
+    });
   }
 }

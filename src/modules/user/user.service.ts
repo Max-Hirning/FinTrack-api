@@ -1,10 +1,38 @@
-import mongoose, {Model} from 'mongoose';
 import {User} from './schemas/user.schema';
 import {InjectModel} from '@nestjs/mongoose';
 import {Collections} from '@/configs/collections';
+import mongoose, {Model, PipelineStage} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {UserErrorMessages, UserSuccessMessages} from '@messages/user';
 import {IUpdateUserProfile, IUpdateUserSecurity, IUser} from './types/user.types';
+
+const aggregationPipeLine: PipelineStage[] = [
+  {
+    $lookup: {
+      as: 'image',
+      from: 'images',
+      foreignField: '_id',
+      localField: 'imageId',
+    },
+  },
+  {
+    $addFields: {
+      avatar: {
+        $arrayElemAt: ['$image.url', 0]
+      },
+    },
+  },
+  {
+    $project: {
+      _id: 1,
+      email: 1,
+      avatar: 1,
+      currency: 1,
+      lastName: 1,
+      firstName: 1,
+    },
+  },
+];
 
 @Injectable()
 export class UserService {
@@ -17,30 +45,7 @@ export class UserService {
           _id: new mongoose.Types.ObjectId(id)
         },
       },
-      {
-        $lookup: {
-          as: 'image',
-          from: 'images',
-          foreignField: '_id',
-          localField: 'imageId',
-        },
-      },
-      {
-        $addFields: {
-          avatar: {
-            $arrayElemAt: ['$image.url', 0]
-          },
-        },
-      },
-      {
-        $project: {
-          __v: 0,
-          date: 0,
-          image: 0,
-          imageId: 0,
-          password: 0,
-        },
-      },
+      ...aggregationPipeLine
     ]);
     if(!user) throw new HttpException(UserErrorMessages.findOne, HttpStatus.NOT_FOUND);
     return user;

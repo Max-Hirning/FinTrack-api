@@ -1,5 +1,5 @@
 import {Types} from 'mongoose';
-import {IResponse} from '@/types/app.types';
+import {IPagintaion, IResponse} from '@/types/app.types';
 import {IFilters} from './types/transaction.types';
 import {IBalance} from '../balance/types/balance.types';
 import {TransactionService} from './transaction.service';
@@ -24,7 +24,7 @@ export class TransactionController {
     @Query('date') date?: string,
     @Query('page') page?: string,
     @Query('cards') cards?: string, 
-  ): Promise<IResponse<ITransaction[]>> {
+  ): Promise<IResponse<IPagintaion<ITransaction[]>>> {
     if(!cards) throw new HttpException('Cards are required', HttpStatus.BAD_REQUEST); 
     const filters: Partial<IFilters> = {
       cards: JSON.parse(cards).map((el: string) => new Types.ObjectId(el))
