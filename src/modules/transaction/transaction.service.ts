@@ -137,7 +137,7 @@ export class TransactionService {
   }
 
   async createOne(createTransaction: ICreateTransaction): Promise<string> {
-    await this.transactionModel.create(createTransaction);
+    await this.transactionModel.create({...createTransaction, amount: +createTransaction.amount.toFixed(2)});
     return TransactionSuccessMessages.createOne;
   }
 
@@ -258,6 +258,7 @@ export class TransactionService {
   }
 
   async updateOne(id: string, updateTransaction: IUpdateTransaction): Promise<string> {
+    if(updateTransaction.amount) updateTransaction.amount = +updateTransaction.amount.toFixed(2);
     await this.transactionModel.updateOne({_id: id}, updateTransaction);
     return TransactionSuccessMessages.updateOne;
   }

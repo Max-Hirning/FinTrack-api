@@ -5,6 +5,7 @@ import {CardSuccessMessages} from '@messages/card';
 import {CreateCardDto} from './dto/create-card.dto';
 import {UpdateCardDto} from './dto/update-card.dto';
 import {AuthGuard} from '@authModule/guards/auth.guard';
+import {BalanceService} from '../balance/balance.service';
 import {CommonService} from '@commonModule/common.service';
 import {ICard, IFilters, IUpdateCard} from './types/card.types';
 import {TransactionService} from '@transactionModule/transaction.service';
@@ -16,6 +17,7 @@ export class CardController {
   constructor(
     private readonly cardService: CardService,
     private readonly commonService: CommonService,
+    private readonly balanceService: BalanceService,
     private readonly transactionService: TransactionService,
   ) {}
 
@@ -32,6 +34,7 @@ export class CardController {
   @Delete(':id')
   async removeOne(@Param('id') id: string): Promise<IResponse<undefined>> {
     await this.transactionService.removeMany(id); // delete all cards transactions
+    await this.balanceService.removeMany(id); // delete all cards balances
     const response = await this.cardService.removeOne(id);
     return ({
       message: response,

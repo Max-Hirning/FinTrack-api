@@ -15,8 +15,13 @@ export class BalanceService {
     return BalanceSuccessMessages.removeOne;
   }
 
+  async removeMany(cardId: string): Promise<string> {
+    await this.balanceModel.deleteOne({cardId});
+    return BalanceSuccessMessages.removeOne;
+  }
+
   async createOne(createBalance: ICreateBalance): Promise<string> {
-    await this.balanceModel.create(createBalance);
+    await this.balanceModel.create({...createBalance, balance: +createBalance.balance.toFixed(2)});
     return BalanceSuccessMessages.createOne;
   }
 
@@ -107,7 +112,7 @@ export class BalanceService {
   }
 
   async updateOne(id: string, updateBalance: IUpdateBalance): Promise<string> {
-    await this.balanceModel.updateOne({_id: id}, updateBalance);
+    await this.balanceModel.updateOne({_id: id}, {balance: +updateBalance.balance.toFixed(2)});
     return BalanceSuccessMessages.updateOne;
   }
 

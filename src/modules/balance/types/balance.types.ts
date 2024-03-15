@@ -15,6 +15,6 @@ export interface ICreateBalance {
   cardId: string;
   balance: number;
 }
-export interface IUpdateBalance extends Partial<Pick<ICreateBalance, 'balance'>> {}
+export interface IUpdateBalance extends Pick<ICreateBalance, 'balance'> {}
 
 export type IBalance = HydratedDocument<Balance>;

@@ -141,7 +141,7 @@ export class CardService {
   }
 
   async createOne(createCard: ICreateCard): Promise<string> {
-    await this.cardModel.create(createCard);
+    await this.cardModel.create({...createCard, balance: +createCard.balance.toFixed(2), startBalance: +createCard.startBalance.toFixed(2)});
     return CardSuccessMessages.createOne;
   }
 

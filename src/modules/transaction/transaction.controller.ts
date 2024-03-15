@@ -87,6 +87,7 @@ export class TransactionController {
 
   @Post()
   async createOne(@Body() createTransactionDto: CreateTransactionDto): Promise<IResponse<undefined>> {
+    if(createTransactionDto.amount === 0) throw new HttpException('Amount must not be equal 0', HttpStatus.NOT_FOUND);
     const card = await this.commonService.findOneCardAPI('_id', createTransactionDto.cardId);
     const balance = await this.commonService.findOneBalanceAPI({
       date: {
@@ -196,6 +197,7 @@ export class TransactionController {
       await this.transactionService.updateOne(id, {cardId: updateTransactionDto.cardId});
     }
     if(updateTransactionDto.amount) {
+      if(updateTransactionDto.amount === 0) throw new HttpException('Amount must not be equal 0', HttpStatus.NOT_FOUND);
       const transaction = await this.commonService.findOneTransactionAPI('_id', id);
       const balance = await this.commonService.findOneBalanceAPI({
         date: {
