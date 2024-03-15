@@ -21,10 +21,6 @@ export class BalanceService {
   }
 
   async findMany({cards, ...filters}: Partial<IFilters>): Promise<IBalance[]> {
-    // const balances = await this.balanceModel.find({
-    //   ...filters,
-    //   cardId: {$in: cards},
-    // }).sort({date: 1});
     const balances = await this.balanceModel.aggregate([
       {
         $match: {

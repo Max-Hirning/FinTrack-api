@@ -1,4 +1,4 @@
-import {HydratedDocument} from 'mongoose';
+import {HydratedDocument, Types} from 'mongoose';
 import {Balance} from '../schemas/balance.schema';
 
 export interface IFilters {
@@ -8,7 +8,7 @@ export interface IFilters {
     $gte?: string;
     $lte?: string;
   };
-  cards: string[];
+  cards: Types.ObjectId[];
 }
 export interface ICreateBalance {
   date: string;

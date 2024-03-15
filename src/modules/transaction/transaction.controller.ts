@@ -62,7 +62,7 @@ export class TransactionController {
       date: {
         $gt: new Date(transaction.date).toISOString().split('T')[0]
       },
-      cards: [transaction.cardId]
+      cards: [new Types.ObjectId(transaction.cardId)]
     });
     if(nextBalances.length > 0) {
       await this.balanceService.updateMany(nextBalances.map((el: IBalance) => el._id.toString()), ((-1) * transaction.amount));
@@ -115,7 +115,7 @@ export class TransactionController {
       date: {
         $gt: new Date(createTransactionDto.date).toISOString().split('T')[0]
       },
-      cards: [createTransactionDto.cardId]
+      cards: [new Types.ObjectId(createTransactionDto.cardId)]
     });
     if(nextBalances.length > 0) {
       await this.balanceService.updateMany(nextBalances.map((el: IBalance) => el._id.toString()), createTransactionDto.amount);
@@ -136,14 +136,65 @@ export class TransactionController {
 
   @Put(':id')
   async updateOne(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto): Promise<IResponse<undefined>> {
-    // if(updateTransactionDto.cardId) {
-    //   const transaction = await this.commonService.findOneTransactionAPI('_id', id);
-    //   const prevCard = await this.commonService.findOneCardAPI('_id', transaction.cardId);
-    //   await this.commonService.updateCardBalance(prevCard._id.toString(), this.commonService.calculateBalance(transaction.amount, true, prevCard.balance, transaction.amount));
-    //   const newCard = await this.commonService.findOneCardAPI('_id', updateTransactionDto.cardId);
-    //   await this.commonService.updateCardBalance(newCard._id.toString(), this.commonService.calculateBalance(transaction.amount, false, newCard.balance, transaction.amount));
-    //   await this.transactionService.updateOne(id, {cardId: updateTransactionDto.cardId});
-    // }
+    if(updateTransactionDto.cardId) {
+      const transaction = await this.commonService.findOneTransactionAPI('_id', id);
+      const currentBalance = await this.commonService.findOneBalanceAPI({
+        date: {
+          $lte: new Date(transaction.date).toISOString().split('T')[0]
+        },
+        cardId: transaction.cardId
+      }, true);
+      if(currentBalance) {
+        await this.balanceService.updateOne(currentBalance._id, {balance: currentBalance.balance - transaction.amount});
+      }
+      const currentNextBalances = await this.balanceService.findMany({
+        date: {
+          $gt: new Date(transaction.date).toISOString().split('T')[0]
+        },
+        cards: [new Types.ObjectId(transaction.cardId)]
+      });
+      if(currentNextBalances.length > 0) {
+        await this.balanceService.updateMany(currentNextBalances.map((el: IBalance) => el._id.toString()), ((-1) * transaction.amount));
+      }
+      const newBalance = await this.commonService.findOneBalanceAPI({
+        date: {
+          $lte: new Date(transaction.date).toISOString().split('T')[0]
+        },
+        cardId: updateTransactionDto.cardId
+      }, true);
+      if(newBalance) {
+        if(newBalance.date === new Date(transaction.date).toISOString().split('T')[0]) {
+          await this.balanceService.updateOne(newBalance._id, {balance: newBalance.balance + transaction.amount});
+        } else {
+          await this.balanceService.createOne({
+            cardId: updateTransactionDto.cardId,
+            balance: newBalance.balance + transaction.amount,
+            date: new Date(transaction.date).toISOString().split('T')[0]
+          });
+        }
+      } else {
+        const card = await this.commonService.findOneCardAPI('_id', updateTransactionDto.cardId);
+        await this.balanceService.createOne({
+          cardId: updateTransactionDto.cardId,
+          balance: card.startBalance + transaction.amount,
+          date: new Date(transaction.date).toISOString().split('T')[0]
+        });
+      }
+      const newNextBalances = await this.balanceService.findMany({
+        date: {
+          $gt: new Date(transaction.date).toISOString().split('T')[0]
+        },
+        cards: [new Types.ObjectId(updateTransactionDto.cardId)]
+      });
+      if(newNextBalances.length > 0) {
+        await this.balanceService.updateMany(newNextBalances.map((el: IBalance) => el._id.toString()), transaction.amount);
+      }
+      const prevCard = await this.commonService.findOneCardAPI('_id', transaction.cardId);
+      await this.commonService.updateCardBalance(prevCard._id.toString(), this.commonService.calculateBalance(transaction.amount, true, prevCard.balance, transaction.amount));
+      const newCard = await this.commonService.findOneCardAPI('_id', updateTransactionDto.cardId);
+      await this.commonService.updateCardBalance(newCard._id.toString(), this.commonService.calculateBalance(transaction.amount, false, newCard.balance, transaction.amount));
+      await this.transactionService.updateOne(id, {cardId: updateTransactionDto.cardId});
+    }
     if(updateTransactionDto.amount) {
       const transaction = await this.commonService.findOneTransactionAPI('_id', id);
       const balance = await this.commonService.findOneBalanceAPI({
@@ -159,7 +210,7 @@ export class TransactionController {
         date: {
           $gt: new Date(transaction.date).toISOString().split('T')[0]
         },
-        cards: [transaction.cardId]
+        cards: [new Types.ObjectId(transaction.cardId)]
       });
       if(nextBalances.length > 0) {
         await this.balanceService.updateMany(nextBalances.map((el: IBalance) => el._id.toString()), (updateTransactionDto.amount - transaction.amount));
@@ -210,7 +261,7 @@ export class TransactionController {
         date: {
           $gt: new Date(transaction.date).toISOString().split('T')[0]
         },
-        cards: [transaction.cardId]
+        cards: [new Types.ObjectId(transaction.cardId)]
       });
       if(curentFutureBalances.length > 0) {
         await this.balanceService.updateMany(curentFutureBalances.map((el: IBalance) => el._id.toString()), ((-1) * transaction.amount));
@@ -219,7 +270,7 @@ export class TransactionController {
         date: {
           $gt: new Date(updateTransactionDto.date).toISOString().split('T')[0]
         },
-        cards: [transaction.cardId]
+        cards: [new Types.ObjectId(transaction.cardId)]
       });
       if(nextFutureBalances.length > 0) {
         await this.balanceService.updateMany(nextFutureBalances.map((el: IBalance) => el._id.toString()), transaction.amount);
