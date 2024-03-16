@@ -181,6 +181,11 @@ export class TransactionService {
       },
       ...aggregationPipeLineCopy,
       {
+        $sort: {
+          'date': -1 
+        }
+      },
+      {
         $lookup: {
           as: 'card',
           from: 'cards',
@@ -204,9 +209,10 @@ export class TransactionService {
           data: 1,
           currencies: 1
         }
-      }
-    ]).sort({date: -1});
-    if(!response && (response.data.length <= 0 || response.currencies.length <= 0)) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
+      },
+    ]);
+    if(!response) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
+    if(response && (response?.data.length <= 0 || response?.currencies.length <= 0)) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
     return ({
       data: {
         data: response.data,

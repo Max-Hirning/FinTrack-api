@@ -34,6 +34,11 @@ export class BalanceService {
         },
       },
       {
+        $sort: {
+          'date': 1, // Sort by date in ascending order
+        }
+      },
+      {
         $lookup: {
           as: 'card',
           from: 'cards',
@@ -80,12 +85,12 @@ export class BalanceService {
         $addFields: {
           'card.owner.image': {
             $cond: {
-              if: { 
-                $eq: ['$card.owner.imageId', null] 
+              if: {
+                $eq: ['$card.owner.imageId', null]
               },
               then: null,
-              else: { 
-                $arrayElemAt: ['$userImage.url', 0] 
+              else: {
+                $arrayElemAt: ['$userImage.url', 0]
               },
             },
           },
@@ -107,7 +112,7 @@ export class BalanceService {
           'card.owner.password': 0,
         }
       }
-    ]).sort({date: 1});
+    ]);
     return balances;
   }
 

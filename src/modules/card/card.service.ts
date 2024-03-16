@@ -103,7 +103,8 @@ export class CardService {
         }
       }
     ]);
-    if(!response && (response.cards.length <= 0 || response.currencies.length <= 0)) throw new HttpException(CardErrorMessages.findMany, HttpStatus.NOT_FOUND);
+    if(!response) throw new HttpException(CardErrorMessages.findMany, HttpStatus.NOT_FOUND);
+    if(response && (response?.cards.length <= 0 || response?.currencies.length <= 0)) throw new HttpException(CardErrorMessages.findMany, HttpStatus.NOT_FOUND);
     return response;
   }
 

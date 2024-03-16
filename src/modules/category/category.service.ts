@@ -30,6 +30,7 @@ const aggregationPipeLine: PipelineStage[] = [
   {
     $project: {
       _id: 1,
+      mcc: 1,
       title: 1,
       color: 1,
       parentId: 1,
