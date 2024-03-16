@@ -9,80 +9,34 @@ import {ICategory, ICreateCategory, IUpdateCategory} from './types/category.type
 const aggregationPipeLine: PipelineStage[] = [
   {
     $lookup: {
-      as: 'children',
-      localField: '_id',
-      from: 'categories',
-      foreignField: 'parentId',
-    }
-  },
-  {
-    $lookup: {
       as: 'image',
-      from: 'images',
+      from: 'images', // Collection name of the Image model
       foreignField: '_id',
       localField: 'imageId',
-    }
+    },
   },
   {
-    $addFields: {
-      image: { 
-        $arrayElemAt: ['$image.url', 0] 
-      }
-    }
+    $project: {
+      _id: 1,
+      mcc: 1,
+      image: {
+        $arrayElemAt: ['$image', 0], // Take the first element of the 'image' array
+      },
+      title: 1,
+      color: 1,
+      parentId: 1,
+    },
   },
   {
-    $unset: ['__v', 'imageId']
+    $project: {
+      _id: 1,
+      title: 1,
+      color: 1,
+      parentId: 1,
+      children: [],
+      image: '$image.url', // Extract the 'url' field from the 'image' document
+    },
   },
-  {
-    $group: {
-      _id: '$parentId',
-      mcc: {$first: '$mcc'},
-      title: {$first: '$title'},
-      color: {$first: '$color'},
-      image: {$first: '$image'},
-      children: {$push: {
-        _id: '$_id',
-        title: '$title',
-        color: '$color',
-        image: '$image',
-        children: '$children'
-      }},
-    }
-  },
-  {
-    $match: {
-      _id: null
-    }
-  },
-  {
-    $addFields: {
-      children: {
-        $map: {
-          input: '$children',
-          as: 'child',
-          in: {
-            _id: '$$child._id',
-            title: '$$child.title',
-            color: '$$child.color',
-            image: '$$child.image',
-            children: {
-              $map: {
-                input: '$$child.children',
-                as: 'subChild',
-                in: {
-                  _id: '$$subChild._id',
-                  title: '$$subChild.title',
-                  color: '$$subChild.color',
-                  image: '$$subChild.image',
-                  children: '$$subChild.children'
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
 ];
 
 @Injectable()
@@ -92,7 +46,14 @@ export class CategoryService {
   async findMany(): Promise<ICategory[]> {
     const categories = await this.categoryModel.aggregate(aggregationPipeLine);
     if(!categories || categories.length <= 0) throw new HttpException(CategoryErrorMessages.findMany, HttpStatus.NOT_FOUND);
-    return categories[0].children;
+    return Object.values(categories.reduce((res, el: ICategory) => {
+      if(el.parentId) {
+        res[el.parentId].children.push(el);
+      } else {
+        res[el._id] = el;
+      }
+      return res;
+    }, {}));
   }
 
   async removeOne(id: string): Promise<string> {
