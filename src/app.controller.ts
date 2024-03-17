@@ -28,8 +28,7 @@ export class AppController {
   }
 
   @Get('confirm-email')
-  // @Redirect(`${process.env.ORIGIN_URL}/auth/sign-in`, HttpStatus.SEE_OTHER)
-  @Redirect('https://github.com/Max-Hirning', HttpStatus.SEE_OTHER)
+  @Redirect(`${process.env.ORIGIN_URL}/auth/sign-in`, HttpStatus.SEE_OTHER)
   async confirmEmail(@Query('code') code: string): Promise<void> {
     const codeData = await this.jwtService.decode(code);
     const user = await this.commonService.findOneUserAPI('_id', codeData._id);
