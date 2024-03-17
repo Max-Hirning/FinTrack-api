@@ -7,17 +7,17 @@ import {IUser} from '@userModule/types/user.types';
 import {ICard} from '@cardModule/types/card.types';
 import {User} from '@userModule/schemas/user.schema';
 import {Card} from '@cardModule/schemas/card.schema';
-import {IBalance} from '../balance/types/balance.types';
+import {BalanceErrorMessages} from '@messages/balance';
 import {CurrencyErrorMessages} from '@messages/currency';
-import {Balance} from '../balance/schemas/balance.schema';
+import {IBalance} from '@balanceModule/types/balance.types';
+import {Balance} from '@balanceModule/schemas/balance.schema';
 import {ICategory} from '@categoryModule/types/category.types';
-import {BalanceErrorMessages} from '@/configs/messages/balance';
+import {TransactionErrorMessages} from '@messages/transaction';
 import {Category} from '@categoryModule/schemas/category.schema';
-import {ITransaction} from '../transaction/types/transaction.types';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {Transaction} from '../transaction/schemas/transaction.schema';
 import {CardErrorMessages, CardSuccessMessages} from '@messages/card';
-import {TransactionErrorMessages} from '@/configs/messages/transaction';
+import {ITransaction} from '@transactionModule/types/transaction.types';
+import {Transaction} from '@transactionModule/schemas/transaction.schema';
 
 @Injectable()
 export class CommonService {

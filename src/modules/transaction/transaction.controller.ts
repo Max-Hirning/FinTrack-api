@@ -1,13 +1,13 @@
 import {Types} from 'mongoose';
 import {IPagintaion, IResponse} from '@/types/app.types';
-import {IFilters, ITransactionList} from './types/transaction.types';
-import {IBalance} from '../balance/types/balance.types';
 import {TransactionService} from './transaction.service';
-import {BalanceService} from '../balance/balance.service';
 import {CommonService} from '@commonModule/common.service';
+import {IBalance} from '@balanceModule/types/balance.types';
+import {BalanceService} from '@balanceModule/balance.service';
 import {TransactionSuccessMessages} from '@messages/transaction';
 import {CreateTransactionDto} from './dto/create-transaction.dto';
 import {UpdateTransactionDto} from './dto/update-transaction.dto';
+import {IFilters, ITransactionList} from './types/transaction.types';
 import {ITransaction, IUpdateTransaction} from './types/transaction.types';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, HttpException} from '@nestjs/common';
 
@@ -24,6 +24,7 @@ export class TransactionController {
     @Query('date') date?: string,
     @Query('page') page?: string,
     @Query('cards') cards?: string, 
+    @Query('perPage') perPage?: string,
   ): Promise<IResponse<IPagintaion<ITransactionList>>> {
     if(!cards) throw new HttpException('Cards are required', HttpStatus.BAD_REQUEST); 
     const filters: Partial<IFilters> = {
@@ -36,7 +37,10 @@ export class TransactionController {
         $lte: new Date(dates[1]).toISOString()
       };
     }
-    if(page) filters.page = +page;
+    if(page && perPage) {
+      filters.page = +page;
+      filters.perPage = +perPage;
+    }
     const response = await this.transactionService.findMany(filters);
     return ({
       data: response,

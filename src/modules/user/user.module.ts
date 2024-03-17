@@ -8,7 +8,7 @@ import {Collections} from '@/configs/collections';
 import {CardModule} from '@cardModule/card.module';
 import {ImageModule} from '@imageModule/image.module';
 import {CommonModule} from '@commonModule/common.module';
-import {TransactionModule} from '../transaction/transaction.module';
+import {TransactionModule} from '@transactionModule/transaction.module';
 
 @Module({
   imports: [

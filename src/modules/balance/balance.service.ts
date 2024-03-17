@@ -3,7 +3,7 @@ import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import {Balance} from './schemas/balance.schema';
 import {Collections} from '@/configs/collections';
-import {BalanceSuccessMessages} from '@/configs/messages/balance';
+import {BalanceSuccessMessages} from '@messages/balance';
 import {IBalance, ICreateBalance, IFilters, IUpdateBalance} from './types/balance.types';
 
 @Injectable()

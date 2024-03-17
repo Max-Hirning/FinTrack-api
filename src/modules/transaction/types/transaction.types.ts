@@ -7,6 +7,7 @@ export interface IFilters {
     $lte: string;
   };
   page: number;
+  perPage: number;
   cards: Types.ObjectId[];
 }
 export interface ITransactionList {

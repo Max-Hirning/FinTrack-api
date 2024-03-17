@@ -6,8 +6,8 @@ import {CreateCardDto} from './dto/create-card.dto';
 import {UpdateCardDto} from './dto/update-card.dto';
 import {ICard, IUpdateCard} from './types/card.types';
 import {AuthGuard} from '@authModule/guards/auth.guard';
-import {BalanceService} from '../balance/balance.service';
 import {CommonService} from '@commonModule/common.service';
+import {BalanceService} from '@balanceModule/balance.service';
 import {TransactionService} from '@transactionModule/transaction.service';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, UseGuards, HttpException} from '@nestjs/common';
 

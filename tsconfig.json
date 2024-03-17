@@ -8,6 +8,7 @@
       "@messages/*": ["src/configs/messages/*"],
       "@imageModule/*": ["src/modules/image/*"],
       "@commonModule/*": ["src/modules/common/*"],
+      "@balanceModule/*": ["src/modules/balance/*"],
       "@categoryModule/*": ["src/modules/category/*"],
       "@firebaseModule/*": ["src/modules/firebase/*"],
       "@transactionModule/*": ["src/modules/transaction/*"],

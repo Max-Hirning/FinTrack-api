@@ -1,10 +1,10 @@
 import {Module} from '@nestjs/common';
 import {JwtModule} from '@nestjs/jwt';
 import {MongooseModule} from '@nestjs/mongoose';
-import {ImageModule} from '../image/image.module';
 import {Collections} from '@/configs/collections';
 import {CategoryService} from './category.service';
-import {CommonModule} from '../common/common.module';
+import {ImageModule} from '@imageModule/image.module';
+import {CommonModule} from '@commonModule/common.module';
 import {CategoryController} from './category.controller';
 import {CategorySchema} from './schemas/category.schema';
 

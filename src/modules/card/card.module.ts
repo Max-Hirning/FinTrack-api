@@ -7,7 +7,7 @@ import {CardController} from './card.controller';
 import {Collections} from '@/configs/collections';
 import {BalanceModule} from '../balance/balance.module';
 import {CommonModule} from '@commonModule/common.module';
-import {TransactionModule} from '../transaction/transaction.module';
+import {TransactionModule} from '@transactionModule/transaction.module';
 
 @Module({
   imports: [

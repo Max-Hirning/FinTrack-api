@@ -15,7 +15,7 @@ import {CommonService} from '@commonModule/common.service';
 import {IUpdateUserProfile, IUser} from './types/user.types';
 import {UpdateUserProfileDto} from './dto/update-user-profile.dto';
 import {UpdateUserSecurityDto} from './dto/update-user-security.dto';
-import {TransactionService} from '../transaction/transaction.service';
+import {TransactionService} from '@transactionModule/transaction.service';
 import {Controller, Get, Body, Put, Param, Delete, UseInterceptors, UploadedFile, HttpStatus, HttpException, UseGuards} from '@nestjs/common';
 
 @Controller('user')

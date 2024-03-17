@@ -1,9 +1,9 @@
 import {InjectModel} from '@nestjs/mongoose';
 import {IPagintaion} from '@/types/app.types';
 import {Collections} from '@/configs/collections';
-import {IFilters, ITransactionList} from './types/transaction.types';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {Transaction} from './schemas/transaction.schema';
+import {IFilters, ITransactionList} from './types/transaction.types';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {TransactionErrorMessages, TransactionSuccessMessages} from '@messages/transaction';
 import {ICreateTransaction, ITransaction, IUpdateTransaction} from './types/transaction.types';
@@ -161,16 +161,15 @@ export class TransactionService {
     return TransactionSuccessMessages.updateOne;
   }
 
-  async findMany({page, cards, ...filters}: Partial<IFilters>): Promise<IPagintaion<ITransactionList>> {
-    const limit = 2;
+  async findMany({page, perPage, cards, ...filters}: Partial<IFilters>): Promise<IPagintaion<ITransactionList>> {
     let totalPages = null;
     const aggregationPipeLineCopy = [...aggregationPipeLine];
-    if(page) {
-      const skip = (page - 1) * limit;
+    if(page && perPage) {
+      const skip = (page - 1) * perPage;
       aggregationPipeLineCopy.push({$skip: skip});
-      aggregationPipeLineCopy.push({$limit: limit});
+      aggregationPipeLineCopy.push({$limit: perPage});
       const totalEntries = await this.transactionModel.countDocuments({...filters, cardId: {$in: cards}});
-      totalPages = Math.ceil(totalEntries / limit);
+      totalPages = Math.ceil(totalEntries / perPage);
     }
     const [response] = await this.transactionModel.aggregate([
       {
