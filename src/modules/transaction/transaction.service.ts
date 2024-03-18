@@ -178,12 +178,12 @@ export class TransactionService {
           cardId: {$in: cards},
         },
       },
-      ...aggregationPipeLineCopy,
       {
         $sort: {
           'date': -1 
         }
       },
+      ...aggregationPipeLineCopy,
       {
         $lookup: {
           as: 'card',

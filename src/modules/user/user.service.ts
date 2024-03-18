@@ -66,7 +66,9 @@ export class UserService {
   }
 
   async updateProfile(id: string, updateUserProfile: IUpdateUserProfile): Promise<string> {
-    await this.userModel.updateOne({_id: id}, {...updateUserProfile, $inc: {version: 0.1}});
+    const data = {...updateUserProfile};
+    if(updateUserProfile.email) data['$inc'] = {version: 0.1};
+    await this.userModel.updateOne({_id: id}, data);
     return UserSuccessMessages.updateOne;
   }
 
