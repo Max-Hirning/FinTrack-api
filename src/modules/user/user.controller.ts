@@ -90,9 +90,23 @@ export class UserController {
     const user = await this.commonService.findOneUserAPI('_id', id);
     if(file) {
       if(user.imageId) {
-        await this.imageService.updateOne(user.imageId, file.buffer, {folder: 'FinTrack/avatars'});
+        await this.imageService.updateOne(user.imageId, file.buffer, {
+          folder: 'FinTrack/avatars',
+          fetch_format: 'png',
+          gravity: 'face', 
+          crop: 'fill',
+          height: 250, 
+          width: 250, 
+        });
       } else {
-        updateUserProfile.imageId = await this.imageService.createOne(file.buffer, {folder: 'FinTrack/avatars'});
+        updateUserProfile.imageId = await this.imageService.createOne(file.buffer, {
+          folder: 'FinTrack/avatars',
+          fetch_format: 'png',
+          gravity: 'face', 
+          crop: 'fill',
+          height: 250, 
+          width: 250, 
+        });
       }
     }
     if(updateUserProfileDto.currency) {

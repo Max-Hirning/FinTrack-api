@@ -5,7 +5,15 @@ import {InjectModel} from '@nestjs/mongoose';
 import {Collections} from '@/configs/collections';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {ImageErrorMessages, ImageSuccessMessages} from '@messages/image';
-import {v2 as cloudinary, UploadApiErrorResponse, UploadApiOptions, UploadApiResponse} from 'cloudinary';
+import {v2 as cloudinary, CropMode, Gravity, ImageFormat, UploadApiErrorResponse, UploadApiOptions, UploadApiResponse} from 'cloudinary';
+
+interface IOptions extends Required<Pick<UploadApiOptions, 'folder'>> {
+  fetch_format?: ImageFormat;
+  gravity?: Gravity;
+  crop?: CropMode;
+  height?: number;
+  width?: number;
+}
 
 @Injectable()
 export class ImageService {
@@ -27,11 +35,12 @@ export class ImageService {
     throw new HttpException(ImageErrorMessages.removeOne, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  async createOne(file: Buffer, options: Required<Pick<UploadApiOptions, 'folder'>>): Promise<string> {
+  async createOne(file: Buffer, options: IOptions): Promise<string> {
     const {public_id, secure_url}: UploadApiResponse|UploadApiErrorResponse = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          resource_type: 'auto',
+          allowed_formats: ['svg', 'jpeg', 'png'],
+          resource_type: 'image',
           ...options,
         },
         (error, result) => {
@@ -50,12 +59,13 @@ export class ImageService {
     throw new HttpException(ImageErrorMessages.createOne, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  async updateOne(id: string, file: Buffer, options: Required<Pick<UploadApiOptions, 'folder'>>): Promise<string> {
+  async updateOne(id: string, file: Buffer, options: IOptions): Promise<string> {
     const image = await this.findOne(id);
     const {public_id, secure_url}: UploadApiResponse|UploadApiErrorResponse = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          resource_type: 'auto',
+          allowed_formats: ['svg', 'jpeg', 'png'],
+          resource_type: 'image',
           ...options,
         },
         (error, result) => {

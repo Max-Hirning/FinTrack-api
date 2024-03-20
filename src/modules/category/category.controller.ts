@@ -57,7 +57,13 @@ export class CategoryController {
   @UseInterceptors(FileInterceptor('image'))
   async create(@UploadedFile() file: Express.Multer.File, @Body() createCategoryDto: CreateCategoryDto): Promise<IResponse<undefined>> {
     if(file && (createCategoryDto.mcc && Array.isArray(JSON.parse(createCategoryDto.mcc)))) {
-      const imageId = await this.imageService.createOne(file.buffer, {folder: 'FinTrack/categories'});
+      const imageId = await this.imageService.createOne(file.buffer, {
+        folder: 'FinTrack/categories',
+        fetch_format: 'svg',
+        crop: 'fill',
+        height: 50, 
+        width: 50, 
+      });
       const response = await this.categoryService.createOne({
         imageId,
         title: createCategoryDto.title,
@@ -80,7 +86,13 @@ export class CategoryController {
     const updateCategory: IUpdateCategory = {};
     if(file) {
       const category = await this.commonService.findOneCategoryAPI('_id', id);
-      await this.imageService.updateOne(category.imageId, file.buffer, {folder: 'FinTrack/categories'});
+      await this.imageService.updateOne(category.imageId, file.buffer, {
+        folder: 'FinTrack/categories',
+        fetch_format: 'svg',
+        crop: 'fill',
+        height: 50, 
+        width: 50, 
+      });
     }
     if(updateCategoryDto.title) updateCategory.title = updateCategoryDto.title;
     if(updateCategoryDto.color) updateCategory.color = updateCategoryDto.color;
