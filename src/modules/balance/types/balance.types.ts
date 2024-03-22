@@ -11,6 +11,10 @@ export interface IFilters {
   };
   cards: Types.ObjectId[];
 }
+export interface IBalancesList {
+  currencies: string[];
+  data: IBalanceResponse[];
+}
 export interface ICreateBalance {
   date: string;
   cardId: string;

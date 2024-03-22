@@ -13,6 +13,7 @@ To get started with the Rivegs API, follow these steps:
 - [Jest](https://jestjs.io/): A JavaScript testing framework.
 - [Supertest](https://github.com/visionmedia/supertest): A library for testing HTTP servers.
 - [ESLint](https://eslint.org/): A tool for identifying and reporting on patterns found in ECMAScript/JavaScript code.
+- [FXRatesAPI](https://fxratesapi.com/docs): Currencies rates API.
 
 Clone the repository:
 

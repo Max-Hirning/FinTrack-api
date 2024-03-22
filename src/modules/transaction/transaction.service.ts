@@ -187,20 +187,20 @@ export class TransactionService {
       {
         $group: {
           _id: null,
-          transactions: {$push: '$$ROOT'},
+          data: {$push: '$$ROOT'},
           currencies: {$addToSet: '$card.currency'},
         },
       },
       {
         $project: {
           _id: 0, 
+          data: 1,
           currencies: 1,
-          transactions: 1 
         },
       },
     ]);
     if(!response) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
-    if(response && (response?.transactions.length <= 0 || response?.currencies.length <= 0)) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
+    if(response && (response?.data.length <= 0 || response?.currencies.length <= 0)) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
     return ({
       data: response,
       page: page || null,

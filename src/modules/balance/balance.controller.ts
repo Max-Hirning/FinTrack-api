@@ -1,9 +1,19 @@
 import {Types} from 'mongoose';
 import {IResponse} from '@/types/app.types';
 import {BalanceService} from './balance.service';
-import {IBalance, IFilters} from './types/balance.types';
+import {IBalancesList, IFilters} from './types/balance.types';
 import {TransactionSuccessMessages} from '@messages/transaction';
 import {Controller, Get, HttpStatus, Query, HttpException} from '@nestjs/common';
+
+export interface ICurrencyResponse<T> {
+  rates: T;
+  base: string;
+  date: string;
+  terms: string;
+  privacy: string;
+  success: boolean;
+  timestamp: number;
+}
 
 @Controller('balance')
 export class BalanceController {
@@ -13,7 +23,7 @@ export class BalanceController {
   async findMany(
     @Query('date') date?: string,
     @Query('cards') cards?: string, 
-  ): Promise<IResponse<IBalance[]>> {
+  ): Promise<IResponse<IBalancesList>> {
     if(!cards) throw new HttpException('Cards are required', HttpStatus.BAD_REQUEST); 
     const filters: Partial<IFilters> = {
       cards: JSON.parse(cards).map((el: string) => new Types.ObjectId(el))
@@ -25,9 +35,9 @@ export class BalanceController {
         $lte: new Date(dates[1]).toISOString()
       };
     }
-    const response = await this.balanceService.findMany(filters);
+    const data = await this.balanceService.findMany(filters);
     return ({
-      data: response,
+      data: data,
       statusCode: HttpStatus.OK,
       message: TransactionSuccessMessages.findMany,
     });

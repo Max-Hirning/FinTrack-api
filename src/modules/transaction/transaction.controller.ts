@@ -2,12 +2,12 @@ import {Types} from 'mongoose';
 import {IPagintaion, IResponse} from '@/types/app.types';
 import {TransactionService} from './transaction.service';
 import {CommonService} from '@commonModule/common.service';
-import {IBalance} from '@balanceModule/types/balance.types';
 import {IUpdateTransaction} from './types/transaction.types';
 import {BalanceService} from '@balanceModule/balance.service';
 import {TransactionSuccessMessages} from '@messages/transaction';
 import {CreateTransactionDto} from './dto/create-transaction.dto';
 import {UpdateTransactionDto} from './dto/update-transaction.dto';
+import {IBalanceResponse} from '@balanceModule/types/balance.types';
 import {IFilters, ITransactionList, ITransactionResponse} from './types/transaction.types';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, HttpException} from '@nestjs/common';
 
@@ -68,8 +68,8 @@ export class TransactionController {
       },
       cards: [new Types.ObjectId(transaction.cardId)]
     });
-    if(nextBalances.length > 0) {
-      await this.balanceService.updateMany(nextBalances.map((el: IBalance) => el._id.toString()), ((-1) * transaction.amount));
+    if(nextBalances.data.length > 0) {
+      await this.balanceService.updateMany(nextBalances.data.map((el: IBalanceResponse) => el._id.toString()), ((-1) * transaction.amount));
     }
     await this.commonService.updateCardBalance(transaction.cardId, this.commonService.calculateBalance(transaction.amount, true, card.balance, transaction.amount));
     const response = await this.transactionService.removeOne(id);
@@ -91,7 +91,8 @@ export class TransactionController {
 
   @Post()
   async createOne(@Body() createTransactionDto: CreateTransactionDto): Promise<IResponse<undefined>> {
-    if(createTransactionDto.amount === 0) throw new HttpException('Amount must not be equal 0', HttpStatus.NOT_FOUND);
+    if(new Date(createTransactionDto.date) > new Date()) throw new HttpException('You can not add future transaction', HttpStatus.BAD_REQUEST);
+    if(createTransactionDto.amount === 0) throw new HttpException('Amount must not be equal 0', HttpStatus.BAD_REQUEST);
     const card = await this.commonService.findOneCardAPI('_id', createTransactionDto.cardId);
     const balance = await this.commonService.findOneBalanceAPI({
       date: {
@@ -122,8 +123,8 @@ export class TransactionController {
       },
       cards: [new Types.ObjectId(createTransactionDto.cardId)]
     });
-    if(nextBalances.length > 0) {
-      await this.balanceService.updateMany(nextBalances.map((el: IBalance) => el._id.toString()), createTransactionDto.amount);
+    if(nextBalances.data.length > 0) {
+      await this.balanceService.updateMany(nextBalances.data.map((el: IBalanceResponse) => el._id.toString()), createTransactionDto.amount);
     }
     await this.commonService.updateCardBalance(createTransactionDto.cardId, this.commonService.calculateBalance(createTransactionDto.amount, false, card.balance, createTransactionDto.amount));
     const response = await this.transactionService.createOne({
@@ -158,8 +159,8 @@ export class TransactionController {
         },
         cards: [new Types.ObjectId(transaction.cardId)]
       });
-      if(currentNextBalances.length > 0) {
-        await this.balanceService.updateMany(currentNextBalances.map((el: IBalance) => el._id.toString()), ((-1) * transaction.amount));
+      if(currentNextBalances.data.length > 0) {
+        await this.balanceService.updateMany(currentNextBalances.data.map((el: IBalanceResponse) => el._id.toString()), ((-1) * transaction.amount));
       }
       const newBalance = await this.commonService.findOneBalanceAPI({
         date: {
@@ -191,8 +192,8 @@ export class TransactionController {
         },
         cards: [new Types.ObjectId(updateTransactionDto.cardId)]
       });
-      if(newNextBalances.length > 0) {
-        await this.balanceService.updateMany(newNextBalances.map((el: IBalance) => el._id.toString()), transaction.amount);
+      if(newNextBalances.data.length > 0) {
+        await this.balanceService.updateMany(newNextBalances.data.map((el: IBalanceResponse) => el._id.toString()), transaction.amount);
       }
       const prevCard = await this.commonService.findOneCardAPI('_id', transaction.cardId);
       await this.commonService.updateCardBalance(prevCard._id.toString(), this.commonService.calculateBalance(transaction.amount, true, prevCard.balance, transaction.amount));
@@ -218,8 +219,8 @@ export class TransactionController {
         },
         cards: [new Types.ObjectId(transaction.cardId)]
       });
-      if(nextBalances.length > 0) {
-        await this.balanceService.updateMany(nextBalances.map((el: IBalance) => el._id.toString()), (updateTransactionDto.amount - transaction.amount));
+      if(nextBalances.data.length > 0) {
+        await this.balanceService.updateMany(nextBalances.data.map((el: IBalanceResponse) => el._id.toString()), (updateTransactionDto.amount - transaction.amount));
       }
       const card = await this.commonService.findOneCardAPI('_id', transaction.cardId);
       const prevCardAmount = this.commonService.calculateBalance(transaction.amount, true, card.balance, transaction.amount);
@@ -269,8 +270,8 @@ export class TransactionController {
         },
         cards: [new Types.ObjectId(transaction.cardId)]
       });
-      if(curentFutureBalances.length > 0) {
-        await this.balanceService.updateMany(curentFutureBalances.map((el: IBalance) => el._id.toString()), ((-1) * transaction.amount));
+      if(curentFutureBalances.data.length > 0) {
+        await this.balanceService.updateMany(curentFutureBalances.data.map((el: IBalanceResponse) => el._id.toString()), ((-1) * transaction.amount));
       }
       const nextFutureBalances = await this.balanceService.findMany({
         date: {
@@ -278,8 +279,8 @@ export class TransactionController {
         },
         cards: [new Types.ObjectId(transaction.cardId)]
       });
-      if(nextFutureBalances.length > 0) {
-        await this.balanceService.updateMany(nextFutureBalances.map((el: IBalance) => el._id.toString()), transaction.amount);
+      if(nextFutureBalances.data.length > 0) {
+        await this.balanceService.updateMany(nextFutureBalances.data.map((el: IBalanceResponse) => el._id.toString()), transaction.amount);
       }
       updateTransaction.date = updateTransactionDto.date;
     }

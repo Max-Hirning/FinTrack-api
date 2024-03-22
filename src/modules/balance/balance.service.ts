@@ -1,10 +1,10 @@
 import {Model} from 'mongoose';
-import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import {Balance} from './schemas/balance.schema';
 import {Collections} from '@/configs/collections';
-import {BalanceSuccessMessages} from '@messages/balance';
-import {IBalance, ICreateBalance, IFilters, IUpdateBalance} from './types/balance.types';
+import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import {BalanceErrorMessages, BalanceSuccessMessages} from '@messages/balance';
+import {IBalancesList, ICreateBalance, IFilters, IUpdateBalance} from './types/balance.types';
 
 @Injectable()
 export class BalanceService {
@@ -25,8 +25,18 @@ export class BalanceService {
     return BalanceSuccessMessages.createOne;
   }
 
-  async findMany({cards, ...filters}: Partial<IFilters>): Promise<IBalance[]> {
-    const balances = await this.balanceModel.aggregate([
+  async updateMany(ids: string[], updateBalanceOn: number): Promise<string> {
+    await this.balanceModel.updateMany({_id: {$in: ids}}, {$inc: {balance: updateBalanceOn}});
+    return BalanceSuccessMessages.updateMany;
+  }
+
+  async updateOne(id: string, updateBalance: IUpdateBalance): Promise<string> {
+    await this.balanceModel.updateOne({_id: id}, {balance: +updateBalance.balance.toFixed(2)});
+    return BalanceSuccessMessages.updateOne;
+  }
+
+  async findMany({cards, ...filters}: Partial<IFilters>): Promise<IBalancesList> {
+    const [response] = await this.balanceModel.aggregate([
       {
         $match: {
           ...filters,
@@ -35,7 +45,7 @@ export class BalanceService {
       },
       {
         $sort: {
-          'date': 1, // Sort by date in ascending order
+          'date': 1,
         }
       },
       {
@@ -108,6 +118,7 @@ export class BalanceService {
           'card.title': 1,
           'card.color': 1,
           'card.balance': 1,
+          'card.currency': 1,
           'card.owner._id': 1,
           'card.owner.email': 1,
           'card.owner.avatar': 1,
@@ -115,18 +126,24 @@ export class BalanceService {
           'card.owner.lastName': 1,
           'card.owner.firstName': 1,
         }
-      }
+      },
+      {
+        $group: {
+          _id: null,
+          data: {$push: '$$ROOT'},
+          currencies: {$addToSet: '$card.currency'},
+        },
+      },
+      {
+        $project: {
+          _id: 0, 
+          data: 1,
+          currencies: 1,
+        },
+      },
     ]);
-    return balances;
-  }
-
-  async updateOne(id: string, updateBalance: IUpdateBalance): Promise<string> {
-    await this.balanceModel.updateOne({_id: id}, {balance: +updateBalance.balance.toFixed(2)});
-    return BalanceSuccessMessages.updateOne;
-  }
-
-  async updateMany(ids: string[], updateBalanceOn: number): Promise<string> {
-    await this.balanceModel.updateMany({_id: {$in: ids}}, {$inc: {balance: updateBalanceOn}});
-    return BalanceSuccessMessages.updateMany;
+    if(!response) throw new HttpException(BalanceErrorMessages.findMany, HttpStatus.NOT_FOUND);
+    if(response && (response?.data.length <= 0 || response?.currencies.length <= 0)) throw new HttpException(BalanceErrorMessages.findMany, HttpStatus.NOT_FOUND);
+    return response;
   }
 }
