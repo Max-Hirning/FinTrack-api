@@ -4,7 +4,7 @@ import {Collections} from '@/configs/collections';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {CardErrorMessages, CardSuccessMessages} from '@messages/card';
-import {ICard, ICreateCard, IFilters, IUpdateCard} from './types/card.types';
+import {ICardResponse, ICreateCard, IFilters, IUpdateCard} from './types/card.types';
 
 const aggregationPipeLine: PipelineStage[] = [
   {
@@ -54,7 +54,12 @@ const aggregationPipeLine: PipelineStage[] = [
 export class CardService {
   constructor(@InjectModel(Collections.cards) private readonly cardModel: Model<Card>) {}
 
-  async findOne(id: string): Promise<ICard> {
+  async removeOne(id: string): Promise<string> {
+    await this.cardModel.deleteOne({_id: id});
+    return CardSuccessMessages.removeOne;
+  }
+
+  async findOne(id: string): Promise<ICardResponse> {
     const [card] = await this.cardModel.aggregate([
       {
         $match: {
@@ -67,11 +72,6 @@ export class CardService {
     return card;
   }
 
-  async removeOne(id: string): Promise<string> {
-    await this.cardModel.deleteOne({_id: id});
-    return CardSuccessMessages.removeOne;
-  }
-
   async removeMany(ownerId: string): Promise<string> {
     await this.cardModel.deleteMany({ownerId: ownerId});
     return CardSuccessMessages.removeMany;
@@ -82,7 +82,7 @@ export class CardService {
     return CardSuccessMessages.createOne;
   }
 
-  async findMany(filters: Partial<IFilters>): Promise<ICard[]> {
+  async findMany(filters: Partial<IFilters>): Promise<ICardResponse[]> {
     const [response] = await this.cardModel.aggregate([
       {
         $match: filters

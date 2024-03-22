@@ -7,7 +7,7 @@ import {CommonService} from '@commonModule/common.service';
 import {CategorySuccessMessages} from '@messages/category';
 import {CreateCategoryDto} from './dto/create-category.dto';
 import {UpdateCategoryDto} from './dto/update-category.dto';
-import {ICategory, IUpdateCategory} from './types/category.types';
+import {ICategoryResponse, IUpdateCategory} from './types/category.types';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, UseGuards, UseInterceptors, HttpException, UploadedFile} from '@nestjs/common';
 
 @Controller('category')
@@ -19,7 +19,7 @@ export class CategoryController {
   ) {}
 
   @Get()
-  async findMany(): Promise<IResponse<ICategory[]>> {
+  async findMany(): Promise<IResponse<ICategoryResponse[]>> {
     const response = await this.categoryService.findMany();
     return ({
       data: response,
@@ -29,7 +29,7 @@ export class CategoryController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<IResponse<ICategory>> {
+  async findOne(@Param('id') id: string): Promise<IResponse<ICategoryResponse>> {
     const response = await this.categoryService.findOne(id);
     return ({
       data: response,

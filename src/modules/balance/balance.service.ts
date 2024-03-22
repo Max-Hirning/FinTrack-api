@@ -83,7 +83,7 @@ export class BalanceService {
       },
       {
         $addFields: {
-          'card.owner.image': {
+          'card.owner.avatar': {
             $cond: {
               if: {
                 $eq: ['$card.owner.imageId', null]
@@ -97,19 +97,23 @@ export class BalanceService {
         },
       },
       {
-        $unset: ['card.owner.avatar', 'userImage'],
+        $unset: ['userImage'],
       },
       {
         $project: {
-          __v: 0,
-          cardId: 0,
-          'card.__v': 0,
-          'card.ownerId': 0,
-          'card.owner.__v': 0,
-          'card.owner.date': 0,
-          'card.startBalance': 0,
-          'card.owner.imageId': 0,
-          'card.owner.password': 0,
+          '_id': 1,
+          'date': 1,
+          'balance': 1,
+          'card._id': 1,
+          'card.title': 1,
+          'card.color': 1,
+          'card.balance': 1,
+          'card.owner._id': 1,
+          'card.owner.email': 1,
+          'card.owner.avatar': 1,
+          'card.owner.currency': 1,
+          'card.owner.lastName': 1,
+          'card.owner.firstName': 1,
         }
       }
     ]);

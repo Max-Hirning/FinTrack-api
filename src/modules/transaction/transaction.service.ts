@@ -3,10 +3,10 @@ import {IPagintaion} from '@/types/app.types';
 import {Collections} from '@/configs/collections';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {Transaction} from './schemas/transaction.schema';
-import {IFilters, ITransactionList} from './types/transaction.types';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import {ICreateTransaction, IUpdateTransaction} from './types/transaction.types';
 import {TransactionErrorMessages, TransactionSuccessMessages} from '@messages/transaction';
-import {ICreateTransaction, ITransaction, IUpdateTransaction} from './types/transaction.types';
+import {IFilters, ITransactionList, ITransactionResponse} from './types/transaction.types';
 
 const aggregationPipeLine: PipelineStage[] = [
   {
@@ -42,14 +42,6 @@ const aggregationPipeLine: PipelineStage[] = [
     },
   },
   {
-    $lookup: {
-      from: 'images',
-      as: 'userImage',
-      foreignField: '_id',
-      localField: 'user.imageId',
-    },
-  },
-  {
     $addFields: {
       'card': {
         $mergeObjects: [
@@ -73,11 +65,19 @@ const aggregationPipeLine: PipelineStage[] = [
     },
   },
   {
+    $lookup: {
+      from: 'images',
+      as: 'userImage',
+      foreignField: '_id',
+      localField: 'card.owner.imageId',
+    },
+  },
+  {
     $unset: ['user'],
   },
   {
     $addFields: {
-      'card.owner.image': {
+      'card.owner.avatar': {
         $cond: {
           if: { 
             $eq: ['$card.owner.imageId', null] 
@@ -94,7 +94,7 @@ const aggregationPipeLine: PipelineStage[] = [
     },
   },
   {
-    $unset: ['card.owner.avatar', 'categoryImage', 'userImage'],
+    $unset: ['categoryImage', 'userImage'],
   },
   {
     $project: {
@@ -132,7 +132,12 @@ export class TransactionService {
     return TransactionSuccessMessages.removeOne;
   }
 
-  async findOne(id: string): Promise<ITransaction> {
+  async removeMany(cardId: string): Promise<string> {
+    await this.transactionModel.deleteMany({cardId});
+    return TransactionSuccessMessages.removeMany;
+  }
+
+  async findOne(id: string): Promise<ITransactionResponse> {
     const [transaction] = await this.transactionModel.aggregate([
       {
         $match: {
@@ -143,11 +148,6 @@ export class TransactionService {
     ]);
     if(!transaction) throw new HttpException(TransactionErrorMessages.findOne, HttpStatus.NOT_FOUND);
     return transaction;
-  }
-
-  async removeMany(cardId: string): Promise<string> {
-    await this.transactionModel.deleteMany({cardId});
-    return TransactionSuccessMessages.removeMany;
   }
 
   async createOne(createTransaction: ICreateTransaction): Promise<string> {
@@ -185,38 +185,24 @@ export class TransactionService {
       },
       ...aggregationPipeLineCopy,
       {
-        $lookup: {
-          as: 'card',
-          from: 'cards',
-          foreignField: '_id',
-          localField: 'card._id',
-        }
-      },
-      {
-        $unwind: '$card'
-      },
-      {
         $group: {
           _id: null,
-          data: {$push: '$$ROOT'},
-          currencies: {$addToSet: '$card.currency'}
-        }
+          transactions: {$push: '$$ROOT'},
+          currencies: {$addToSet: '$card.currency'},
+        },
       },
       {
         $project: {
-          _id: 0,
-          data: 1,
-          currencies: 1
-        }
+          _id: 0, 
+          currencies: 1,
+          transactions: 1 
+        },
       },
     ]);
     if(!response) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
-    if(response && (response?.data.length <= 0 || response?.currencies.length <= 0)) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
+    if(response && (response?.transactions.length <= 0 || response?.currencies.length <= 0)) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
     return ({
-      data: {
-        data: response.data,
-        currencies: response.currencies,
-      },
+      data: response,
       page: page || null,
       totalPages: totalPages || null,
       previous: (page && page > 1) ? page - 1 : null,

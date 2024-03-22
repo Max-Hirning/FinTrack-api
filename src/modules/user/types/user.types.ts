@@ -11,5 +11,9 @@ export interface IUpdateUserProfile {
 export interface IUpdateUserSecurity {
   password: string;
 }
+export interface IUserResponse extends Pick<IUser, '_id'|'email'|'lastName'|'firstName'|'currency'> {
+  cardIds: string[];
+  avatar: null|string;
+}
 
 export type IUser = HydratedDocument<User>;

@@ -8,7 +8,11 @@ export interface ICreateCategory {
   imageId: string;
   parentId?: string;
 }
-export interface ICategory extends HydratedDocument<Category> {
-  children?: HydratedDocument<Category>[];
-}
 export interface IUpdateCategory extends Partial<ICreateCategory> {}
+export interface ICategoryResponse extends Pick<ICategory, '_id'|'mcc'|'title'|'color'> {
+  image: string;
+  parentId?: string;
+  children?: ICategoryResponse[];
+}
+
+export type ICategory = HydratedDocument<Category>

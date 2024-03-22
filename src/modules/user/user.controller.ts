@@ -3,7 +3,6 @@ import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {UserService} from './user.service';
 import {IResponse} from '@/types/app.types';
-import {ICard} from '@cardModule/types/card.types';
 import {AuthSuccessMessages} from '@messages/auth';
 import {UserSuccessMessages} from '@messages/user';
 import {CardService} from '@cardModule/card.service';
@@ -11,9 +10,10 @@ import {MailerService} from '@nestjs-modules/mailer';
 import {ImageService} from '@imageModule/image.service';
 import {AuthGuard} from '@authModule/guards/auth.guard';
 import {FileInterceptor} from '@nestjs/platform-express';
+import {ICardResponse} from '@cardModule/types/card.types';
 import {CommonService} from '@commonModule/common.service';
-import {IUpdateUserProfile, IUser} from './types/user.types';
 import {UpdateUserProfileDto} from './dto/update-user-profile.dto';
+import {IUpdateUserProfile, IUserResponse} from './types/user.types';
 import {UpdateUserSecurityDto} from './dto/update-user-security.dto';
 import {TransactionService} from '@transactionModule/transaction.service';
 import {Controller, Get, Body, Put, Param, Delete, UseInterceptors, UploadedFile, HttpStatus, HttpException, UseGuards} from '@nestjs/common';
@@ -32,7 +32,7 @@ export class UserController {
   ) {}
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<IResponse<IUser>> {
+  async findOne(@Param('id') id: string): Promise<IResponse<IUserResponse>> {
     const response = await this.userService.findOne(id);
     return ({
       data: response,
@@ -45,7 +45,7 @@ export class UserController {
   async removeOne(@Param('id') id: string): Promise<IResponse<undefined>> {
     const user = await this.commonService.findOneUserAPI('_id', id);
     const cards = await this.cardService.findMany({ownerId: new mongoose.Types.ObjectId(id)});
-    cards.map(async (el: ICard) => { // delete all cards transactions
+    cards.map(async (el: ICardResponse) => { // delete all cards transactions
       await this.transactionService.removeMany(el._id.toString());
     });
     await this.cardService.removeMany(id); // delete all users cards

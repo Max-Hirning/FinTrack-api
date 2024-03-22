@@ -4,7 +4,7 @@ import {Category} from './schemas/category.schema';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {CategoryErrorMessages, CategorySuccessMessages} from '@messages/category';
-import {ICategory, ICreateCategory, IUpdateCategory} from './types/category.types';
+import {ICategoryResponse, ICreateCategory, IUpdateCategory} from './types/category.types';
 
 const aggregationPipeLine: PipelineStage[] = [
   {
@@ -44,10 +44,10 @@ const aggregationPipeLine: PipelineStage[] = [
 export class CategoryService {
   constructor(@InjectModel(Collections.categories) private readonly categoryModel: Model<Category>) {}
 
-  async findMany(): Promise<ICategory[]> {
+  async findMany(): Promise<ICategoryResponse[]> {
     const categories = await this.categoryModel.aggregate(aggregationPipeLine);
     if(!categories || categories.length <= 0) throw new HttpException(CategoryErrorMessages.findMany, HttpStatus.NOT_FOUND);
-    return Object.values(categories.reduce((res, el: ICategory) => {
+    return Object.values(categories.reduce((res, el: ICategoryResponse) => {
       if(el.parentId) {
         res[el.parentId].children.push(el);
       } else {
@@ -63,7 +63,7 @@ export class CategoryService {
     return CategorySuccessMessages.removeOne;
   }
 
-  async findOne(id: string): Promise<ICategory> {
+  async findOne(id: string): Promise<ICategoryResponse> {
     const [category] = await this.categoryModel.aggregate([
       {
         $match: {

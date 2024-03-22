@@ -4,9 +4,9 @@ import {IResponse} from '@/types/app.types';
 import {CardSuccessMessages} from '@messages/card';
 import {CreateCardDto} from './dto/create-card.dto';
 import {UpdateCardDto} from './dto/update-card.dto';
-import {ICard, IUpdateCard} from './types/card.types';
 import {AuthGuard} from '@authModule/guards/auth.guard';
 import {CommonService} from '@commonModule/common.service';
+import {ICardResponse, IUpdateCard} from './types/card.types';
 import {BalanceService} from '@balanceModule/balance.service';
 import {TransactionService} from '@transactionModule/transaction.service';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, UseGuards, HttpException} from '@nestjs/common';
@@ -22,7 +22,7 @@ export class CardController {
   ) {}
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<IResponse<ICard>> {
+  async findOne(@Param('id') id: string): Promise<IResponse<ICardResponse>> {
     const response = await this.cardService.findOne(id);
     return ({
       data: response,
@@ -46,7 +46,7 @@ export class CardController {
   async findMany(
     @Query('cards') cards?: string,
     @Query('ownerId') ownerId?: string,
-  ): Promise<IResponse<ICard[]>> {
+  ): Promise<IResponse<ICardResponse[]>> {
     if(cards) {
       const response = await this.cardService.findMany({_id: {$in: JSON.parse(cards).map((el: string) => new Types.ObjectId(el))}});
       return ({

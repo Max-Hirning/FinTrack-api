@@ -1,5 +1,7 @@
 import {Types, HydratedDocument} from 'mongoose';
 import {Transaction} from '../schemas/transaction.schema';
+import {ICardResponse} from '@/modules/card/types/card.types';
+import {ICategoryResponse} from '@/modules/category/types/category.types';
 
 export interface IFilters {
   date: {
@@ -22,5 +24,9 @@ export interface ICreateTransaction {
   description: string;
 }
 export interface IUpdateTransaction extends Partial<ITransaction> {}
+export interface ITransactionResponse extends Pick<ITransaction, '_id'|'date'|'amount'|'description'> {
+  card: ICardResponse;
+  category: ICategoryResponse;
+}
 
 export type ITransaction = HydratedDocument<Transaction>;

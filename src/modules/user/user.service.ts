@@ -4,7 +4,7 @@ import {Collections} from '@/configs/collections';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {UserErrorMessages, UserSuccessMessages} from '@messages/user';
-import {IUpdateUserProfile, IUpdateUserSecurity, IUser} from './types/user.types';
+import {IUpdateUserProfile, IUpdateUserSecurity, IUserResponse} from './types/user.types';
 
 const aggregationPipeLine: PipelineStage[] = [
   {
@@ -47,7 +47,7 @@ const aggregationPipeLine: PipelineStage[] = [
 export class UserService {
   constructor(@InjectModel(Collections.users) private readonly userModel: Model<User>) {}
 
-  async findOne(id: string): Promise<IUser> {
+  async findOne(id: string): Promise<IUserResponse> {
     const [user] = await this.userModel.aggregate([
       {
         $match: {

@@ -3,12 +3,12 @@ import {IPagintaion, IResponse} from '@/types/app.types';
 import {TransactionService} from './transaction.service';
 import {CommonService} from '@commonModule/common.service';
 import {IBalance} from '@balanceModule/types/balance.types';
+import {IUpdateTransaction} from './types/transaction.types';
 import {BalanceService} from '@balanceModule/balance.service';
 import {TransactionSuccessMessages} from '@messages/transaction';
 import {CreateTransactionDto} from './dto/create-transaction.dto';
 import {UpdateTransactionDto} from './dto/update-transaction.dto';
-import {IFilters, ITransactionList} from './types/transaction.types';
-import {ITransaction, IUpdateTransaction} from './types/transaction.types';
+import {IFilters, ITransactionList, ITransactionResponse} from './types/transaction.types';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, HttpException} from '@nestjs/common';
 
 @Controller('transaction')
@@ -80,7 +80,7 @@ export class TransactionController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<IResponse<ITransaction>> {
+  async findOne(@Param('id') id: string): Promise<IResponse<ITransactionResponse>> {
     const response = await this.transactionService.findOne(id);
     return ({
       data: response,
