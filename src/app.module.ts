@@ -34,6 +34,8 @@ import {TransactionModule} from './modules/transaction/transaction.module';
         host: 'smtp.gmail.com',
       },
       defaults: {
+        sender: process.env.EMAIL,
+        replyTo: process.env.EMAIL,
         from: `"No Reply" ${process.env.EMAIL}`,
       },
     }),
