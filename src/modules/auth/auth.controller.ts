@@ -48,7 +48,7 @@ export class AuthController {
       return ({
         data: {
           userId: process.env.ADMIN_ID,
-          token: this.jwtService.sign({_id: process.env.ADMIN_ID}),
+          token: this.jwtService.sign({_id: process.env.ADMIN_ID, role: 'Admin'}),
         },
         statusCode: HttpStatus.OK,
         message: AuthSuccessMessages.signIn,
@@ -58,10 +58,20 @@ export class AuthController {
     const isPassValid = bcrypt.compareSync(signInDto.password, user.password);
     if(!isPassValid) throw new HttpException(AuthErrorMessages.wrongPassword, HttpStatus.BAD_REQUEST);
     if(user.__v === 0) throw new HttpException(AuthErrorMessages.confirmEmail, HttpStatus.BAD_REQUEST);
+    if(signInDto.email === 'test@gmail.com') {
+      return ({
+        data: {
+          userId: user._id.toString(),
+          token: this.jwtService.sign({_id: user._id, version: user.version, role: 'Test'}),
+        },
+        statusCode: HttpStatus.OK,
+        message: AuthSuccessMessages.signIn,
+      });
+    }
     return ({
       data: {
         userId: user._id.toString(),
-        token: this.jwtService.sign({_id: user._id, version: user.version}),
+        token: this.jwtService.sign({_id: user._id, version: user.version, role: 'User'}),
       },
       statusCode: HttpStatus.OK,
       message: AuthSuccessMessages.signIn,

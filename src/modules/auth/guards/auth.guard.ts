@@ -17,9 +17,15 @@ export class AuthGuard implements CanActivate {
       const token = authHeader.split(' ')[1];
       if(bearer !== 'Bearer' || !token) throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
       const tokenData = this.jwtService.verify(token, {secret: process.env.SECRET_KEY});
-      if(tokenData._id === process.env.ADMIN_ID) return true;
+      if(tokenData._id === process.env.ADMIN_ID && tokenData.role === 'Admin') {
+        req['_id'] = tokenData._id;
+        req['role'] = tokenData.role;
+        return true;
+      }
       const user = await this.commonService.findOneUserAPI('_id', tokenData._id);
       if(user.version === tokenData.version) {
+        req['_id'] = tokenData._id;
+        req['role'] = tokenData.role;
         return true;
       } else {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);

@@ -1,3 +1,4 @@
+import {JwtModule} from '@nestjs/jwt';
 import {Module} from '@nestjs/common';
 import {MongooseModule} from '@nestjs/mongoose';
 import {Collections} from '@/configs/collections';
@@ -8,6 +9,7 @@ import {TransactionSchema} from './schemas/transaction.schema';
 
 @Module({
   imports: [
+    JwtModule,
     CommonModule,
     MongooseModule.forFeature([{name: Collections.transactions, schema: TransactionSchema}]),
   ],

@@ -16,6 +16,10 @@ export interface ICreateCard {
   currency: string;
   startBalance: number;
 }
+export interface ICardsList {
+  currencies: string[];
+  cards: ICardResponse[];
+}
 export interface ICardResponse extends Pick<ICard, '_id'|'title'|'color'|'balance'|'currency'> {
   owner: Omit<IUserResponse, 'cardIds'>;
 }

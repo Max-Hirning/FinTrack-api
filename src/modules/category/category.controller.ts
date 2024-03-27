@@ -1,14 +1,14 @@
-import {IResponse} from '@/types/app.types';
+import {ICustomRequest, IResponse} from '@/types/app.types';
 import {CategoryService} from './category.service';
+import {AuthGuard} from '../auth/guards/auth.guard';
 import {ImageService} from '@imageModule/image.service';
 import {FileInterceptor} from '@nestjs/platform-express';
-import {AdminGuard} from '@authModule/guards/admin.guard';
 import {CommonService} from '@commonModule/common.service';
 import {CategorySuccessMessages} from '@messages/category';
 import {CreateCategoryDto} from './dto/create-category.dto';
 import {UpdateCategoryDto} from './dto/update-category.dto';
 import {ICategoryResponse, IUpdateCategory} from './types/category.types';
-import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, UseGuards, UseInterceptors, HttpException, UploadedFile} from '@nestjs/common';
+import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, UseGuards, UseInterceptors, HttpException, UploadedFile, Request} from '@nestjs/common';
 
 @Controller('category')
 export class CategoryController {
@@ -39,8 +39,9 @@ export class CategoryController {
   }
 
   @Delete(':id')
-  @UseGuards(AdminGuard)
-  async removeOne(@Param('id') id: string): Promise<IResponse<undefined>> {
+  @UseGuards(AuthGuard)
+  async removeOne(@Request() req: ICustomRequest, @Param('id') id: string): Promise<IResponse<undefined>> {
+    if(req.role !== 'Admin') throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     const transaction = await this.commonService.findOneTransactionAPI('categoryId', id, true);
     if(transaction) throw new HttpException('Category must have no transactions', HttpStatus.NOT_FOUND);
     const category = await this.commonService.findOneCategoryAPI('_id', id);
@@ -53,9 +54,10 @@ export class CategoryController {
   }
 
   @Post()
-  @UseGuards(AdminGuard)
-  @UseInterceptors(FileInterceptor('image'))
-  async create(@UploadedFile() file: Express.Multer.File, @Body() createCategoryDto: CreateCategoryDto): Promise<IResponse<undefined>> {
+  @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async create(@Request() req: ICustomRequest, @UploadedFile() file: Express.Multer.File, @Body() createCategoryDto: CreateCategoryDto): Promise<IResponse<undefined>> {
+    if(req.role !== 'Admin') throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     if(file && (createCategoryDto.mcc && Array.isArray(JSON.parse(createCategoryDto.mcc)))) {
       const imageId = await this.imageService.createOne(file.buffer, {
         folder: 'FinTrack/categories',
@@ -80,9 +82,10 @@ export class CategoryController {
   }
 
   @Put(':id')
-  @UseGuards(AdminGuard)
-  @UseInterceptors(FileInterceptor('image'))
-  async updateOne(@Param('id') id: string, @UploadedFile() file: Express.Multer.File, @Body() updateCategoryDto: UpdateCategoryDto): Promise<IResponse<undefined>> {
+  @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async updateOne(@Request() req: ICustomRequest, @Param('id') id: string, @UploadedFile() file: Express.Multer.File, @Body() updateCategoryDto: UpdateCategoryDto): Promise<IResponse<undefined>> {
+    if(req.role !== 'Admin') throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     const updateCategory: IUpdateCategory = {};
     if(file) {
       const category = await this.commonService.findOneCategoryAPI('_id', id);

@@ -10,3 +10,7 @@ export interface IPagintaion<T> {
   previous: number|null;
   totalPages: number|null;
 }
+export interface ICustomRequest {
+  _id: string;
+  role: 'Test'|'Admin'|'User';
+}

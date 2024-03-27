@@ -1,14 +1,16 @@
 import {Types} from 'mongoose';
-import {IPagintaion, IResponse} from '@/types/app.types';
+import {AuthGuard} from '../auth/guards/auth.guard';
 import {TransactionService} from './transaction.service';
 import {CommonService} from '@commonModule/common.service';
 import {IUpdateTransaction} from './types/transaction.types';
 import {TransactionSuccessMessages} from '@messages/transaction';
 import {CreateTransactionDto} from './dto/create-transaction.dto';
 import {UpdateTransactionDto} from './dto/update-transaction.dto';
+import {ICustomRequest, IPagintaion, IResponse} from '@/types/app.types';
 import {IFilters, ITransactionList, ITransactionResponse} from './types/transaction.types';
-import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, HttpException} from '@nestjs/common';
+import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, HttpException, Request, UseGuards} from '@nestjs/common';
 
+@UseGuards(AuthGuard)
 @Controller('transaction')
 export class TransactionController {
   constructor(
@@ -46,18 +48,6 @@ export class TransactionController {
     });
   }
 
-  @Delete(':id')
-  async removeOne(@Param('id') id: string): Promise<IResponse<undefined>> {
-    const transaction = await this.commonService.findOneTransactionAPI('_id', id);
-    const card = await this.commonService.findOneCardAPI('_id', transaction.cardId);
-    await this.commonService.updateCardBalance(transaction.cardId, this.commonService.calculateBalance(transaction.amount, true, card.balance, transaction.amount));
-    const response = await this.transactionService.removeOne(id);
-    return ({
-      message: response,
-      statusCode: HttpStatus.OK,
-    });
-  }
-
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<IResponse<ITransactionResponse>> {
     const response = await this.transactionService.findOne(id);
@@ -68,11 +58,27 @@ export class TransactionController {
     });
   }
 
+  @Delete(':id')
+  async removeOne(@Request() req: ICustomRequest, @Param('id') id: string): Promise<IResponse<undefined>> {
+    const transaction = await this.commonService.findOneTransactionAPI('_id', id);
+    const card = await this.commonService.findOneCardAPI('_id', transaction.cardId);
+    if(req._id === card.ownerId.toString() || req.role === 'Admin') {
+      await this.commonService.updateCardBalance(transaction.cardId, this.commonService.calculateBalance(transaction.amount, true, card.balance, transaction.amount));
+      const response = await this.transactionService.removeOne(id);
+      return ({
+        message: response,
+        statusCode: HttpStatus.OK,
+      });
+    }
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+  }
+
   @Post()
-  async createOne(@Body() createTransactionDto: CreateTransactionDto): Promise<IResponse<undefined>> {
+  async createOne(@Request() req: ICustomRequest, @Body() createTransactionDto: CreateTransactionDto): Promise<IResponse<undefined>> {
     if(new Date(createTransactionDto.date) > new Date()) throw new HttpException('You can not add future transaction', HttpStatus.BAD_REQUEST);
     if(createTransactionDto.amount === 0) throw new HttpException('Amount must not be equal 0', HttpStatus.BAD_REQUEST);
     const card = await this.commonService.findOneCardAPI('_id', createTransactionDto.cardId);
+    if(req._id !== card.ownerId.toString()) throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     await this.commonService.updateCardBalance(createTransactionDto.cardId, this.commonService.calculateBalance(createTransactionDto.amount, false, card.balance, createTransactionDto.amount));
     const response = await this.transactionService.createOne({
       cardId: createTransactionDto.cardId,
@@ -88,7 +94,10 @@ export class TransactionController {
   }
 
   @Put(':id')
-  async updateOne(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto): Promise<IResponse<undefined>> {
+  async updateOne(@Request() req: ICustomRequest, @Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto): Promise<IResponse<undefined>> {
+    const transaction = await this.commonService.findOneTransactionAPI('_id', id);
+    const card = await this.commonService.findOneCardAPI('_id', transaction.cardId);
+    if(req._id !== card.ownerId.toString()) throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     if(updateTransactionDto.cardId) {
       const transaction = await this.commonService.findOneTransactionAPI('_id', id);
       const prevCard = await this.commonService.findOneCardAPI('_id', transaction.cardId);

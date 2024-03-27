@@ -4,7 +4,7 @@ import {Collections} from '@/configs/collections';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {CardErrorMessages, CardSuccessMessages} from '@messages/card';
-import {ICardResponse, ICreateCard, IFilters, IUpdateCard} from './types/card.types';
+import {ICardResponse, ICardsList, ICreateCard, IFilters, IUpdateCard} from './types/card.types';
 
 const aggregationPipeLine: PipelineStage[] = [
   {
@@ -82,7 +82,7 @@ export class CardService {
     return CardSuccessMessages.createOne;
   }
 
-  async findMany(filters: Partial<IFilters>): Promise<ICardResponse[]> {
+  async findMany(filters: Partial<IFilters>): Promise<ICardsList> {
     const [response] = await this.cardModel.aggregate([
       {
         $match: filters
