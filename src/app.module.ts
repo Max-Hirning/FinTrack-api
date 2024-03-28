@@ -16,6 +16,7 @@ import {TransactionModule} from './modules/transaction/transaction.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({envFilePath: '.env', isGlobal: true}),
     AuthModule,
     UserModule,
     CardModule,
@@ -39,7 +40,6 @@ import {TransactionModule} from './modules/transaction/transaction.module';
         from: `"No Reply" ${process.env.EMAIL}`,
       },
     }),
-    ConfigModule.forRoot({envFilePath: '.env', isGlobal: true}),
     MongooseModule.forRoot(process.env.DB_URL, {dbName: 'FinTrack'}),
     MongooseModule.forFeature([{name: Collections.users, schema: UserSchema}]),
     JwtModule.register({signOptions: {expiresIn: process.env.JWT_TOKEN_EXPIRES_IN}, secret: process.env.SECRET_KEY}),

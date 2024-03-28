@@ -1,7 +1,7 @@
+import {Response} from 'express';
 import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {AppService} from './app.service';
-import {ICustomRequest, IResponse} from './types/app.types';
 import {ICurrency} from './types/currency.types';
 import {AuthErrorMessages} from '@messages/auth';
 import {ContactUsDto} from './dto/contact-us.dto';
@@ -9,7 +9,8 @@ import {MailerService} from '@nestjs-modules/mailer';
 import {AuthGuard} from './modules/auth/guards/auth.guard';
 import {CommonService} from '@commonModule/common.service';
 import {CurrencySuccessMessages} from '@messages/currency';
-import {Body, Controller, Get, HttpException, HttpStatus, Post, Query, Redirect, Request, UseGuards} from '@nestjs/common';
+import {ICustomRequest, IResponse} from './types/app.types';
+import {Body, Controller, Get, HttpException, HttpStatus, Post, Query, Request, Res, UseGuards} from '@nestjs/common';
 
 @Controller()
 export class AppController {
@@ -32,8 +33,8 @@ export class AppController {
   }
 
   @Get('confirm-email')
-  @Redirect(`${process.env.ORIGIN_URL}/auth/sign-in`, HttpStatus.SEE_OTHER)
-  async confirmEmail(@Query('code') code: string): Promise<void> {
+  async confirmEmail(@Res() res: Response, @Query('code') code: string): Promise<void> {
+    res.redirect(`${process.env.ORIGIN_URL}/auth/sign-in`);
     const codeData = await this.jwtService.decode(code);
     const user = await this.commonService.findOneUserAPI('_id', codeData._id);
     const isPassValid = bcrypt.compare(codeData.password, user.password);
