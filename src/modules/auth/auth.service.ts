@@ -5,6 +5,7 @@ import {ISignUp} from './types/sign-up.types';
 import {ISignIn} from './types/sign-in.types';
 import {Collections} from '@/configs/collections';
 import {User} from '@userModule/schemas/user.schema';
+import {AuthSuccessMessages} from '@/configs/messages/auth';
 
 @Injectable()
 export class AuthService {
@@ -15,8 +16,13 @@ export class AuthService {
     return false;
   }
 
-  async signUp(signUpDto: ISignUp): Promise<string> {
-    const user = await this.userModel.create(signUpDto);
+  async signUp(signUp: ISignUp): Promise<string> {
+    const user = await this.userModel.create(signUp);
     return user._id.toString();
+  }
+
+  async resetPassword(id: string, resetPassword: Pick<ISignUp, 'password'>): Promise<string> {
+    await this.userModel.updateOne({_id: id}, {password: resetPassword.password, $inc: {version: 1}});
+    return AuthSuccessMessages.resetPassword;
   }
 }

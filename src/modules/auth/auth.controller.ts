@@ -6,6 +6,8 @@ import {IResponse} from '@/types/app.types';
 import {SignUpDto} from './dto/sign-up.dto';
 import {MailerService} from '@nestjs-modules/mailer';
 import {ISignInResponse} from './types/sign-in.types';
+import {EmailRequestDto} from './dto/email-request.dto';
+import {ResetPasswordDto} from './dto/reset-password.dto';
 import {CommonService} from '@commonModule/common.service';
 import {AuthErrorMessages, AuthSuccessMessages} from '@messages/auth';
 import {Controller, Post, Body, HttpStatus, HttpException} from '@nestjs/common';
@@ -35,6 +37,9 @@ export class AuthController {
       `,
       to: signUpDto.email,
       subject: 'Confirm your email',
+      from: process.env.ADMIN_EMAIL,
+      sender: process.env.ADMIN_EMAIL,
+      replyTo: process.env.ADMIN_EMAIL,
     });
     return ({
       statusCode: HttpStatus.CREATED,
@@ -75,6 +80,43 @@ export class AuthController {
       },
       statusCode: HttpStatus.OK,
       message: AuthSuccessMessages.signIn,
+    });
+  }
+
+  @Post('email-request')
+  async emailRequest(@Body() emailRequestDto: EmailRequestDto): Promise<IResponse<undefined>> {
+    const user = await this.commonService.findOneUserAPI('email', emailRequestDto.email);
+    const code = this.jwtService.sign({email: user.email, _id: user._id, password: user.password}, {expiresIn: process.env.EMAIL_CODE_EXPIRES_IN});
+    await this.mailerService.sendMail({
+      html: `
+        <div>
+          <h3>Please, do not reply to this letter</h3>
+          <a href="${emailRequestDto.url}/?code=${code}">Update your security data</a>
+        </div>
+      `,
+      to: user.email,
+      from: process.env.ADMIN_EMAIL,
+      sender: process.env.ADMIN_EMAIL,
+      replyTo: process.env.ADMIN_EMAIL,
+      subject: 'Update your security data',
+    });
+    return ({
+      statusCode: HttpStatus.OK,
+      message: AuthSuccessMessages.sentEmail,
+    });
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<IResponse<undefined>> {
+    if(!resetPasswordDto.code) throw new HttpException(AuthErrorMessages.wrongCode, HttpStatus.BAD_REQUEST);
+    const tokenData = this.jwtService.verify(resetPasswordDto.code, {secret: process.env.SECRET_KEY});
+    const password = await bcrypt.hash(resetPasswordDto.password, 5);
+    const user = await this.commonService.findOneUserAPI('_id', tokenData._id);
+    if(user.email === 'test@gmail.com') throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    const response = await this.authService.resetPassword(user._id.toString(), {password});
+    return ({
+      message: response,
+      statusCode: HttpStatus.OK,
     });
   }
 }

@@ -133,6 +133,9 @@ export class UserController {
           </div>
         `,
         to: updateUserProfile.email,
+        from: process.env.ADMIN_EMAIL,
+        sender: process.env.ADMIN_EMAIL,
+        replyTo: process.env.ADMIN_EMAIL,
         subject: 'Confirm your new email',
       });
       return ({

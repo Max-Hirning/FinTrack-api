@@ -2,7 +2,7 @@
 Welcome to the FinTrack API, a backend service for a fintrack app built using NestJS, MongoDB, and other technologies.
 
 ## Getting Started
-To get started with the Rivegs API, follow these steps:
+To get started with the FinTrack API, follow these steps:
 
 - [NestJS](https://nestjs.com/): A progressive Node.js framework for building efficient, reliable, and scalable server-side applications.
 - [MongoDB](https://www.mongodb.com/): A NoSQL database for storing recipe data.
