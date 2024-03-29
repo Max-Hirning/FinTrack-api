@@ -24,6 +24,8 @@ export class TransactionController {
     @Query('page') page?: string,
     @Query('cards') cards?: string, 
     @Query('perPage') perPage?: string,
+    @Query('onlyIncomes') onlyIncomes?: string, 
+    @Query('onlyExpenses') onlyExpenses?: string, 
   ): Promise<IResponse<IPagintaion<ITransactionList>>> {
     if(!cards) throw new HttpException('Cards are required', HttpStatus.BAD_REQUEST); 
     const filters: Partial<IFilters> = {
@@ -35,6 +37,16 @@ export class TransactionController {
         $gte: new Date(dates[0]).toISOString(),
         $lte: new Date(dates[1]).toISOString()
       };
+    }
+    if(onlyIncomes) {
+      if(JSON.parse(onlyIncomes)) {
+        filters.amount = {$gt: 0};
+      }
+    }
+    if(onlyExpenses) {
+      if(JSON.parse(onlyExpenses)) {
+        filters.amount = {$lt: 0};
+      }
     }
     if(page && perPage) {
       filters.page = +page;

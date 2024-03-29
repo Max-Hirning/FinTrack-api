@@ -11,6 +11,7 @@ export interface IFilters {
   page: number;
   perPage: number;
   cards: Types.ObjectId[];
+  amount: {$gt: number} | {$lt: number};
 }
 export interface ITransactionList {
   data: ITransaction[];
