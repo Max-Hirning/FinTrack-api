@@ -3,13 +3,13 @@ import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {AppService} from './app.service';
 import {ICurrency} from './types/currency.types';
-import {AuthErrorMessages} from '@messages/auth';
 import {ContactUsDto} from './dto/contact-us.dto';
 import {MailerService} from '@nestjs-modules/mailer';
+import {AuthErrorMessages} from '@configs/messages/auth';
 import {AuthGuard} from './modules/auth/guards/auth.guard';
 import {CommonService} from '@commonModule/common.service';
-import {CurrencySuccessMessages} from '@messages/currency';
 import {ICustomRequest, IResponse} from './types/app.types';
+import {CurrencySuccessMessages} from '@configs/messages/currency';
 import {Body, Controller, Get, HttpException, HttpStatus, Post, Query, Request, Res, UseGuards} from '@nestjs/common';
 
 @Controller()

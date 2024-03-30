@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["src/*"],
+      "@configs/*": ["src/configs/*"],
       "@authModule/*": ["src/modules/auth/*"],
       "@cardModule/*": ["src/modules/card/*"],
       "@userModule/*": ["src/modules/user/*"],
-      "@messages/*": ["src/configs/messages/*"],
       "@imageModule/*": ["src/modules/image/*"],
       "@commonModule/*": ["src/modules/common/*"],
       "@balanceModule/*": ["src/modules/balance/*"],

@@ -4,7 +4,7 @@ import {AppService} from './app.service';
 import {ConfigModule} from '@nestjs/config';
 import {AppController} from './app.controller';
 import {MongooseModule} from '@nestjs/mongoose';
-import {Collections} from '@/configs/collections';
+import {Collections} from '@configs/collections';
 import {UserModule} from '@userModule/user.module';
 import {AuthModule} from '@authModule/auth.module';
 import {CardModule} from '@cardModule/card.module';

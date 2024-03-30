@@ -1,11 +1,11 @@
 import {Types} from 'mongoose';
 import {CardService} from './card.service';
-import {CardSuccessMessages} from '@messages/card';
 import {CreateCardDto} from './dto/create-card.dto';
 import {UpdateCardDto} from './dto/update-card.dto';
 import {AuthGuard} from '@authModule/guards/auth.guard';
+import {CardSuccessMessages} from '@configs/messages/card';
 import {CommonService} from '@commonModule/common.service';
-import {ICustomRequest, IResponse} from '@/types/app.types';
+import {ICustomRequest, IResponse} from 'src/types/app.types';
 import {ICardResponse, ICardsList, IUpdateCard} from './types/card.types';
 import {TransactionService} from '@transactionModule/transaction.service';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, UseGuards, HttpException, Request} from '@nestjs/common';

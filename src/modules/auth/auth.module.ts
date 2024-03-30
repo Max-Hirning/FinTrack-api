@@ -4,7 +4,7 @@ import {AuthService} from './auth.service';
 import {ConfigModule} from '@nestjs/config';
 import {MongooseModule} from '@nestjs/mongoose';
 import {AuthController} from './auth.controller';
-import {Collections} from '@/configs/collections';
+import {Collections} from '@configs/collections';
 import {CommonModule} from '@commonModule/common.module';
 import {UserSchema} from '@userModule/schemas/user.schema';
 

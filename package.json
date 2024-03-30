@@ -9,12 +9,11 @@
     },
     "rootDir": "src",
     "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/../src/$1",
+      "^@configs/(.*)$": "<rootDir>/../src/configs/$1",
       "^@authModule/(.*)$": "<rootDir>/../src/modules/auth/$1",
       "^@cardModule/(.*)$": "<rootDir>/../src/modules/card/$1",
       "^@userModule/(.*)$": "<rootDir>/../src/modules/user/$1",
       "^@imageModule/(.*)$": "<rootDir>/../src/modules/image/$1",
-      "^@messages/(.*)$": "<rootDir>/../src/configs/messages/$1",
       "^@commonModule/(.*)$": "<rootDir>/../src/modules/common/$1",
       "^@balanceModule/(.*)$": "<rootDir>/../src/modules/balance/$1",
       "^@categoryModule/(.*)$": "<rootDir>/../src/modules/category/$1",

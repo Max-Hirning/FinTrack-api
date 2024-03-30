@@ -3,10 +3,10 @@ import {AuthGuard} from '../auth/guards/auth.guard';
 import {TransactionService} from './transaction.service';
 import {CommonService} from '@commonModule/common.service';
 import {IUpdateTransaction} from './types/transaction.types';
-import {TransactionSuccessMessages} from '@messages/transaction';
 import {CreateTransactionDto} from './dto/create-transaction.dto';
 import {UpdateTransactionDto} from './dto/update-transaction.dto';
-import {ICustomRequest, IPagintaion, IResponse} from '@/types/app.types';
+import {TransactionSuccessMessages} from '@configs/messages/transaction';
+import {ICustomRequest, IPagintaion, IResponse} from 'src/types/app.types';
 import {IFilters, ITransactionList, ITransactionResponse} from './types/transaction.types';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, HttpException, Request, UseGuards} from '@nestjs/common';
 

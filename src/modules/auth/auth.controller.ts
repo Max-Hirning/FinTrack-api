@@ -2,14 +2,14 @@ import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {AuthService} from './auth.service';
 import {SignInDto} from './dto/sign-in.dto';
-import {IResponse} from '@/types/app.types';
 import {SignUpDto} from './dto/sign-up.dto';
+import {IResponse} from 'src/types/app.types';
 import {MailerService} from '@nestjs-modules/mailer';
 import {ISignInResponse} from './types/sign-in.types';
 import {EmailRequestDto} from './dto/email-request.dto';
 import {ResetPasswordDto} from './dto/reset-password.dto';
 import {CommonService} from '@commonModule/common.service';
-import {AuthErrorMessages, AuthSuccessMessages} from '@messages/auth';
+import {AuthErrorMessages, AuthSuccessMessages} from '@configs/messages/auth';
 import {Controller, Post, Body, HttpStatus, HttpException} from '@nestjs/common';
 
 @Controller('auth')
