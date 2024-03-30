@@ -16,7 +16,7 @@ async function bootstrap(): Promise<void> {
       process.env.ORIGIN_URL,
       'http://localhost:3000',
     ],
-    methods: 'GET, PUT, POST, DELETE',
+    methods: 'GET, PUT, POST, DELETE, OPTIONS',
   });
   await app.listen(process.env.PORT);
   // eslint-disable-next-line no-console
