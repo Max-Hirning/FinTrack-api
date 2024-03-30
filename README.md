@@ -39,7 +39,6 @@ Clone the repository:
 * `SECRET_KEY=""` 
 * `ORIGIN_API_URL=""` 
 * `DB_URL=""` 
-* `ACCESS_TOKEN_CURRENCY=""`
 
 5. Start the development server:
 `npm run start:dev`

@@ -23,6 +23,7 @@ export class AuthController {
 
   @Post('sign-up')
   async signUp(@Body() signUpDto: SignUpDto): Promise<IResponse<undefined>> {
+    throw new HttpException('Sorry, there is no free space', HttpStatus.FORBIDDEN);
     const user = await this.commonService.findOneUserAPI('email', signUpDto.email, true);
     if(user) throw new HttpException(AuthErrorMessages.existedUser, HttpStatus.BAD_REQUEST);
     const password = await bcrypt.hash(signUpDto.password, 5);
