@@ -12,9 +12,9 @@ async function bootstrap(): Promise<void> {
     api_secret: process.env.CLOUDINARY_APISECRET,
   });
   app.enableCors({
+    credentials: true,
     origin: process.env.ORIGIN_URL,
     methods: 'GET, PUT, POST, DELETE',
-    allowedHeaders: 'Content-Type, Authorization',
   });
   await app.listen(process.env.PORT);
   // eslint-disable-next-line no-console
