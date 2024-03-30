@@ -16,7 +16,6 @@ async function bootstrap(): Promise<void> {
       process.env.ORIGIN_URL,
       'http://localhost:3000',
     ],
-    credentials: true,
     methods: 'GET, PUT, POST, DELETE',
   });
   await app.listen(process.env.PORT);
