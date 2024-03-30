@@ -1,8 +1,7 @@
-import {IsNotEmpty, IsHexColor, IsString, IsNumber, IsOptional, MaxLength, MinLength, IsFirebasePushId} from 'class-validator';
+import {IsNotEmpty, IsHexColor, IsString, IsNumber, MaxLength, MinLength, IsMongoId, IsISO4217CurrencyCode} from 'class-validator';
 
 export class CreateCardDto {
   @IsString()
-  @IsOptional()
   @IsNotEmpty()
   @IsHexColor()
     color: string;
@@ -17,11 +16,12 @@ export class CreateCardDto {
     balance: number;
 
   @IsString()
+  @IsMongoId()
   @IsNotEmpty()
-  @IsFirebasePushId()
     ownerId: string;
 
   @IsString()
   @IsNotEmpty()
+  @IsISO4217CurrencyCode()
     currency: string;
 }

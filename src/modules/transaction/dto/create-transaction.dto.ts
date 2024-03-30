@@ -1,4 +1,4 @@
-import {IsNotEmpty, IsString, IsNumber, IsFirebasePushId, MaxLength, MinLength, IsDateString} from 'class-validator';
+import {IsNotEmpty, IsString, IsNumber, MaxLength, MinLength, IsDateString, IsMongoId} from 'class-validator';
 
 export class CreateTransactionDto {
   @IsString()
@@ -7,16 +7,16 @@ export class CreateTransactionDto {
     date: string;
 
   @IsString()
+  @IsMongoId()
   @IsNotEmpty()
-  @IsFirebasePushId()
     cardId: string;
 
   @IsNumber()
     amount: number;
 
   @IsString()
+  @IsMongoId()
   @IsNotEmpty()
-  @IsFirebasePushId()
     categoryId: string;
 
   @IsString()

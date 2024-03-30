@@ -1,4 +1,4 @@
-import {IsHexColor, IsNotEmpty, IsOptional, IsString} from 'class-validator';
+import {IsHexColor, IsMongoId, IsNotEmpty, IsOptional, IsString} from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
@@ -14,6 +14,7 @@ export class CreateCategoryDto {
     color: string;
 
   @IsString()
+  @IsMongoId()
   @IsNotEmpty()
   @IsOptional()
     parentId: string;
