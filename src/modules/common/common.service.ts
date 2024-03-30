@@ -4,17 +4,17 @@ import {ICard} from '../card/types/card.types';
 import {IUser} from '../user/types/user.types';
 import {User} from '../user/schemas/user.schema';
 import {Card} from '../card/schemas/card.schema';
-import {ICurrency} from 'src/types/currency.types';
-import {Collections} from 'src/configs/collections';
+import {ICurrency} from '../../types/currency.types';
+import {Collections} from '../../configs/collections';
 import {ICategory} from '../category/types/category.types';
-import {UserErrorMessages} from 'src/configs/messages/user';
+import {UserErrorMessages} from '../../configs/messages/user';
 import {Category} from '../category/schemas/category.schema';
 import {ITransaction} from '../transaction/types/transaction.types';
-import {CurrencyErrorMessages} from 'src/configs/messages/currency';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import {CurrencyErrorMessages} from '../../configs/messages/currency';
 import {Transaction} from '../transaction/schemas/transaction.schema';
-import {TransactionErrorMessages} from 'src/configs/messages/transaction';
-import {CardSuccessMessages, CardErrorMessages} from 'src/configs/messages/card';
+import {TransactionErrorMessages} from '../../configs/messages/transaction';
+import {CardSuccessMessages, CardErrorMessages} from '../../configs/messages/card';
 
 @Injectable()
 export class CommonService {

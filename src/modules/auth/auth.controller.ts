@@ -3,14 +3,14 @@ import {JwtService} from '@nestjs/jwt';
 import {AuthService} from './auth.service';
 import {SignInDto} from './dto/sign-in.dto';
 import {SignUpDto} from './dto/sign-up.dto';
-import {IResponse} from 'src/types/app.types';
+import {IResponse} from '../../types/app.types';
 import {MailerService} from '@nestjs-modules/mailer';
 import {ISignInResponse} from './types/sign-in.types';
 import {CommonService} from '../common/common.service';
 import {EmailRequestDto} from './dto/email-request.dto';
 import {ResetPasswordDto} from './dto/reset-password.dto';
 import {Controller, Post, Body, HttpStatus, HttpException} from '@nestjs/common';
-import {AuthErrorMessages, AuthSuccessMessages} from 'src/configs/messages/auth';
+import {AuthErrorMessages, AuthSuccessMessages} from '../../configs/messages/auth';
 
 @Controller('auth')
 export class AuthController {

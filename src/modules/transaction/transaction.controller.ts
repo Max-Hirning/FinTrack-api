@@ -1,13 +1,13 @@
 import {Types} from 'mongoose';
 import {AuthGuard} from '../auth/guards/auth.guard';
 import {CommonService} from '../common/common.service';
-import {IPagintaion} from 'src/types/pagination.types';
+import {IPagintaion} from '../../types/pagination.types';
 import {TransactionService} from './transaction.service';
 import {IUpdateTransaction} from './types/transaction.types';
-import {ICustomRequest, IResponse} from 'src/types/app.types';
+import {ICustomRequest, IResponse} from '../../types/app.types';
 import {CreateTransactionDto} from './dto/create-transaction.dto';
 import {UpdateTransactionDto} from './dto/update-transaction.dto';
-import {TransactionSuccessMessages} from 'src/configs/messages/transaction';
+import {TransactionSuccessMessages} from '../../configs/messages/transaction';
 import {IFilters, ITransactionList, ITransactionResponse} from './types/transaction.types';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, HttpException, Request, UseGuards} from '@nestjs/common';
 

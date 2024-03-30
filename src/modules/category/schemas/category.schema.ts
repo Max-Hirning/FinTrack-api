@@ -1,5 +1,5 @@
 import mongoose, {Document} from 'mongoose';
-import {Collections} from 'src/configs/collections';
+import {Collections} from '../../../configs/collections';
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 
 @Schema()

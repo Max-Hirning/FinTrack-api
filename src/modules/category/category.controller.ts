@@ -5,8 +5,8 @@ import {CommonService} from '../common/common.service';
 import {FileInterceptor} from '@nestjs/platform-express';
 import {CreateCategoryDto} from './dto/create-category.dto';
 import {UpdateCategoryDto} from './dto/update-category.dto';
-import {IResponse, ICustomRequest} from 'src/types/app.types';
-import {CategorySuccessMessages} from 'src/configs/messages/category';
+import {IResponse, ICustomRequest} from '../../types/app.types';
+import {CategorySuccessMessages} from '../../configs/messages/category';
 import {ICategoryResponse, IUpdateCategory} from './types/category.types';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, UseGuards, UseInterceptors, HttpException, UploadedFile, Request} from '@nestjs/common';
 

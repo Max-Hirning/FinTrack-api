@@ -1,7 +1,7 @@
 import {Types, HydratedDocument} from 'mongoose';
 import {Transaction} from '../schemas/transaction.schema';
-import {ICardResponse} from 'src/modules/card/types/card.types';
-import {ICategoryResponse} from 'src/modules/category/types/category.types';
+import {ICardResponse} from '../../../modules/card/types/card.types';
+import {ICategoryResponse} from '../../../modules/category/types/category.types';
 
 export interface IFilters {
   date: {

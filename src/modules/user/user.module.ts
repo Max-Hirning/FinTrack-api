@@ -6,8 +6,8 @@ import {MongooseModule} from '@nestjs/mongoose';
 import {UserSchema} from './schemas/user.schema';
 import {UserController} from './user.controller';
 import {ImageModule} from '../image/image.module';
-import {Collections} from 'src/configs/collections';
 import {CommonModule} from '../common/common.module';
+import {Collections} from '../../configs/collections';
 import {TransactionModule} from '../transaction/transaction.module';
 
 @Module({

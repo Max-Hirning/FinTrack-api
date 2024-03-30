@@ -4,8 +4,8 @@ import {InjectModel} from '@nestjs/mongoose';
 import {ISignUp} from './types/sign-up.types';
 import {ISignIn} from './types/sign-in.types';
 import {User} from '../user/schemas/user.schema';
-import {Collections} from 'src/configs/collections';
-import {AuthSuccessMessages} from 'src/configs/messages/auth';
+import {Collections} from '../../configs/collections';
+import {AuthSuccessMessages} from '../../configs/messages/auth';
 
 @Injectable()
 export class AuthService {

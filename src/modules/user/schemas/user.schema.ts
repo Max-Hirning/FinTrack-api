@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import {Collections} from 'src/configs/collections';
+import {Collections} from '../../../configs/collections';
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Image} from 'src/modules/image/schemas/image.schema';
+import {Image} from '../../../modules/image/schemas/image.schema';
 
 @Schema()
 export class User {

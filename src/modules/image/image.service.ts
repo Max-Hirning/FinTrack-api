@@ -2,9 +2,9 @@ import {Model} from 'mongoose';
 import {IImage} from './types/image.types';
 import {Image} from './schemas/image.schema';
 import {InjectModel} from '@nestjs/mongoose';
-import {Collections} from 'src/configs/collections';
+import {Collections} from '../../configs/collections';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {ImageErrorMessages, ImageSuccessMessages} from 'src/configs/messages/image';
+import {ImageErrorMessages, ImageSuccessMessages} from '../../configs/messages/image';
 import {v2 as cloudinary, CropMode, Gravity, ImageFormat, UploadApiErrorResponse, UploadApiOptions, UploadApiResponse} from 'cloudinary';
 
 interface IOptions extends Required<Pick<UploadApiOptions, 'folder'>> {

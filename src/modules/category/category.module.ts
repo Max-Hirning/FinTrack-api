@@ -3,8 +3,8 @@ import {JwtModule} from '@nestjs/jwt';
 import {MongooseModule} from '@nestjs/mongoose';
 import {ImageModule} from '../image/image.module';
 import {CategoryService} from './category.service';
-import {Collections} from 'src/configs/collections';
 import {CommonModule} from '../common/common.module';
+import {Collections} from '../../configs/collections';
 import {CategoryController} from './category.controller';
 import {CategorySchema} from './schemas/category.schema';
 
