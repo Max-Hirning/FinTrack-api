@@ -1,3 +1,4 @@
+import 'module-alias/register';
 import {AppModule} from './app.module';
 import {NestFactory} from '@nestjs/core';
 import {v2 as cloudinary} from 'cloudinary';
