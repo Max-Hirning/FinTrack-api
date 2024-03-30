@@ -3,6 +3,19 @@
   "license": "MIT",
   "version": "1.0.0",
   "name": "fintrack-api",
+  "_moduleAliases": {
+    "@configs": "src/configs",
+    "@authModule": "src/modules/auth",
+    "@cardModule": "src/modules/card",
+    "@userModule": "src/modules/user",
+    "@imageModule": "src/modules/image",
+    "@commonModule": "src/modules/common",
+    "@balanceModule": "src/modules/balance",
+    "@categoryModule": "src/modules/category",
+    "@firebaseModule": "src/modules/firebase",
+    "@transactionModule": "src/modules/transaction",
+    "@balanceHistoryModule": "src/modules/balance-history"
+  },
   "jest": {
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -70,6 +83,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cloudinary": "^2.0.3",
+    "module-alias": "^2.2.3",
     "mongoose": "^8.1.1",
     "multer": "^1.4.5-lts.1",
     "reflect-metadata": "^0.2.0",
