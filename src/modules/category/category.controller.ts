@@ -1,12 +1,12 @@
-import {ICustomRequest, IResponse} from '@/types/app.types';
 import {CategoryService} from './category.service';
 import {AuthGuard} from '../auth/guards/auth.guard';
-import {ImageService} from '@imageModule/image.service';
+import {ImageService} from '../image/image.service';
+import {CommonService} from '../common/common.service';
 import {FileInterceptor} from '@nestjs/platform-express';
-import {CommonService} from '@commonModule/common.service';
-import {CategorySuccessMessages} from '@messages/category';
 import {CreateCategoryDto} from './dto/create-category.dto';
 import {UpdateCategoryDto} from './dto/update-category.dto';
+import {IResponse, ICustomRequest} from 'src/types/app.types';
+import {CategorySuccessMessages} from 'src/configs/messages/category';
 import {ICategoryResponse, IUpdateCategory} from './types/category.types';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, UseGuards, UseInterceptors, HttpException, UploadedFile, Request} from '@nestjs/common';
 

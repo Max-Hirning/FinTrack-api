@@ -1,12 +1,12 @@
 import {InjectModel} from '@nestjs/mongoose';
-import {IPagintaion} from '@/types/app.types';
-import {Collections} from '@/configs/collections';
+import {Collections} from 'src/configs/collections';
+import {IPagintaion} from 'src/types/pagination.types';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {Transaction} from './schemas/transaction.schema';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {ICreateTransaction, IUpdateTransaction} from './types/transaction.types';
-import {TransactionErrorMessages, TransactionSuccessMessages} from '@messages/transaction';
 import {IFilters, ITransactionList, ITransactionResponse} from './types/transaction.types';
+import {TransactionErrorMessages, TransactionSuccessMessages} from 'src/configs/messages/transaction';
 
 const aggregationPipeLine: PipelineStage[] = [
   {

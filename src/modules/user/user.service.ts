@@ -1,9 +1,9 @@
 import {User} from './schemas/user.schema';
 import {InjectModel} from '@nestjs/mongoose';
-import {Collections} from '@/configs/collections';
+import {Collections} from 'src/configs/collections';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {UserErrorMessages, UserSuccessMessages} from '@messages/user';
+import {UserErrorMessages, UserSuccessMessages} from 'src/configs/messages/user';
 import {IUpdateUserProfile, IUpdateUserSecurity, IUserResponse} from './types/user.types';
 
 @Injectable()

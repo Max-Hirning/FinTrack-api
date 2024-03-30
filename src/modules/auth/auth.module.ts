@@ -4,9 +4,9 @@ import {AuthService} from './auth.service';
 import {ConfigModule} from '@nestjs/config';
 import {MongooseModule} from '@nestjs/mongoose';
 import {AuthController} from './auth.controller';
-import {Collections} from '@/configs/collections';
-import {CommonModule} from '@commonModule/common.module';
-import {UserSchema} from '@userModule/schemas/user.schema';
+import {Collections} from 'src/configs/collections';
+import {CommonModule} from '../common/common.module';
+import {UserSchema} from '../user/schemas/user.schema';
 
 @Module({
   imports: [

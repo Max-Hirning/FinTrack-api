@@ -1,14 +1,14 @@
 import {JwtModule} from '@nestjs/jwt';
 import {Module} from '@nestjs/common';
 import {UserService} from './user.service';
+import {CardModule} from '../card/card.module';
 import {MongooseModule} from '@nestjs/mongoose';
 import {UserSchema} from './schemas/user.schema';
 import {UserController} from './user.controller';
-import {Collections} from '@/configs/collections';
-import {CardModule} from '@cardModule/card.module';
-import {ImageModule} from '@imageModule/image.module';
-import {CommonModule} from '@commonModule/common.module';
-import {TransactionModule} from '@transactionModule/transaction.module';
+import {ImageModule} from '../image/image.module';
+import {Collections} from 'src/configs/collections';
+import {CommonModule} from '../common/common.module';
+import {TransactionModule} from '../transaction/transaction.module';
 
 @Module({
   imports: [

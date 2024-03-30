@@ -4,9 +4,9 @@ import {CardService} from './card.service';
 import {MongooseModule} from '@nestjs/mongoose';
 import {CardSchema} from './schemas/card.schema';
 import {CardController} from './card.controller';
-import {Collections} from '@/configs/collections';
-import {CommonModule} from '@commonModule/common.module';
-import {TransactionModule} from '@transactionModule/transaction.module';
+import {Collections} from 'src/configs/collections';
+import {CommonModule} from '../common/common.module';
+import {TransactionModule} from '../transaction/transaction.module';
 
 @Module({
   imports: [

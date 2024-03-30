@@ -1,5 +1,5 @@
 import {JwtService} from '@nestjs/jwt';
-import {CommonService} from '@commonModule/common.service';
+import {CommonService} from 'src/modules/common/common.service';
 import {CanActivate, ExecutionContext, Injectable, HttpException, HttpStatus} from '@nestjs/common';
 
 @Injectable()

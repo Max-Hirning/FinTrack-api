@@ -1,9 +1,9 @@
 import {JwtModule} from '@nestjs/jwt';
 import {Module} from '@nestjs/common';
 import {MongooseModule} from '@nestjs/mongoose';
-import {Collections} from '@/configs/collections';
+import {Collections} from 'src/configs/collections';
+import {CommonModule} from '../common/common.module';
 import {TransactionService} from './transaction.service';
-import {CommonModule} from '@commonModule/common.module';
 import {TransactionController} from './transaction.controller';
 import {TransactionSchema} from './schemas/transaction.schema';
 

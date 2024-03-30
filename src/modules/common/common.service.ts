@@ -1,20 +1,20 @@
 import {Model} from 'mongoose';
 import {InjectModel} from '@nestjs/mongoose';
-import {ICurrency} from '@/types/currency.types';
-import {UserErrorMessages} from '@messages/user';
-import {Collections} from '@/configs/collections';
-import {IUser} from '@userModule/types/user.types';
-import {ICard} from '@cardModule/types/card.types';
-import {User} from '@userModule/schemas/user.schema';
-import {Card} from '@cardModule/schemas/card.schema';
-import {CurrencyErrorMessages} from '@messages/currency';
-import {ICategory} from '@categoryModule/types/category.types';
-import {TransactionErrorMessages} from '@messages/transaction';
-import {Category} from '@categoryModule/schemas/category.schema';
+import {ICard} from '../card/types/card.types';
+import {IUser} from '../user/types/user.types';
+import {User} from '../user/schemas/user.schema';
+import {Card} from '../card/schemas/card.schema';
+import {ICurrency} from 'src/types/currency.types';
+import {Collections} from 'src/configs/collections';
+import {ICategory} from '../category/types/category.types';
+import {UserErrorMessages} from 'src/configs/messages/user';
+import {Category} from '../category/schemas/category.schema';
+import {ITransaction} from '../transaction/types/transaction.types';
+import {CurrencyErrorMessages} from 'src/configs/messages/currency';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {CardErrorMessages, CardSuccessMessages} from '@messages/card';
-import {ITransaction} from '@transactionModule/types/transaction.types';
-import {Transaction} from '@transactionModule/schemas/transaction.schema';
+import {Transaction} from '../transaction/schemas/transaction.schema';
+import {TransactionErrorMessages} from 'src/configs/messages/transaction';
+import {CardSuccessMessages, CardErrorMessages} from 'src/configs/messages/card';
 
 @Injectable()
 export class CommonService {

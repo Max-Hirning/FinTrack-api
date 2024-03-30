@@ -1,10 +1,10 @@
 import {InjectModel} from '@nestjs/mongoose';
-import {Collections} from '@/configs/collections';
 import {Category} from './schemas/category.schema';
+import {Collections} from 'src/configs/collections';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {CategoryErrorMessages, CategorySuccessMessages} from '@messages/category';
 import {ICategoryResponse, ICreateCategory, IUpdateCategory} from './types/category.types';
+import {CategoryErrorMessages, CategorySuccessMessages} from 'src/configs/messages/category';
 
 const aggregationPipeLine: PipelineStage[] = [
   {

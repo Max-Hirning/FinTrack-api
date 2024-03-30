@@ -1,19 +1,5 @@
 {
   "compilerOptions": {
-    "paths": {
-      "@/*": ["src/*"],
-      "@authModule/*": ["src/modules/auth/*"],
-      "@cardModule/*": ["src/modules/card/*"],
-      "@userModule/*": ["src/modules/user/*"],
-      "@messages/*": ["src/configs/messages/*"],
-      "@imageModule/*": ["src/modules/image/*"],
-      "@commonModule/*": ["src/modules/common/*"],
-      "@balanceModule/*": ["src/modules/balance/*"],
-      "@categoryModule/*": ["src/modules/category/*"],
-      "@firebaseModule/*": ["src/modules/firebase/*"],
-      "@transactionModule/*": ["src/modules/transaction/*"],
-      "@balanceHistoryModule/*": ["src/modules/balance-history/*"],
-    },
     "baseUrl": "./",
     "sourceMap": true,
     "target": "ES2021",
