@@ -16,7 +16,7 @@
         "OPTIONS"
       ],
       "headers": {
-        "Access-Control-Allow-Origin": "*"
+        "Access-Control-Allow-Origin": "https://fin-track-web.vercel.app"
       },
       "src": "/(.*)",
       "dest": "src/main.ts"
