@@ -12,8 +12,12 @@
         "GET",
         "PUT",
         "POST",
-        "DELETE"
+        "DELETE",
+        "OPTIONS"
       ],
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      },
       "src": "/(.*)",
       "dest": "src/main.ts"
     }
