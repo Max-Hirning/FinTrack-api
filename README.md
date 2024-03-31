@@ -73,3 +73,8 @@ Thank you for using the Fintrack API! We hope it helps you manage your finance w
 
 ## About the Author
 FinTrack API is developed and maintained by Max Hirning. For more projects and updates, visit the [GitHub repository](https://github.com/Max-Hirning).
+
+
+## Future updates
+* Invest tracker(stocks)
+* Crypto tracker(cryptocurrencies)
