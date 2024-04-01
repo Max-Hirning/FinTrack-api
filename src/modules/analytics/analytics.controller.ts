@@ -76,7 +76,7 @@ export class AnalyticsController {
       }, 0);
       return ({
         statusCode: HttpStatus.OK,
-        message: 'Expenses analytics were calculated',
+        message: 'Analytics were calculated',
         data: {...totalExpensesIncomes, balance: totalBalance},
       });
     }
@@ -132,7 +132,7 @@ export class AnalyticsController {
       return ({
         data: cardsExpenses,
         statusCode: HttpStatus.OK,
-        message: 'Expenses analytics were calculated',
+        message: 'Analytics were calculated',
       });
     }
     throw new HttpException('Date, cards and currency are required', HttpStatus.BAD_REQUEST);
@@ -174,7 +174,7 @@ export class AnalyticsController {
       return ({
         data: responseObj,
         statusCode: HttpStatus.OK,
-        message: 'Expenses analytics were calculated',
+        message: 'Analytics were calculated',
       });
     }
     throw new HttpException('Date, cards and currency are required', HttpStatus.BAD_REQUEST);
@@ -229,7 +229,7 @@ export class AnalyticsController {
       return ({
         data: categoriesExpenses,
         statusCode: HttpStatus.OK,
-        message: 'Expenses analytics were calculated',
+        message: 'Analytics were calculated',
       });
     }
     throw new HttpException('Date, cards and currency are required', HttpStatus.BAD_REQUEST);
@@ -284,7 +284,7 @@ export class AnalyticsController {
       return ({
         data: responseObj,
         statusCode: HttpStatus.OK,
-        message: 'Expenses analytics were calculated',
+        message: 'Analytics were calculated',
       });
     }
     throw new HttpException('Date, frequency, cards and currency are required', HttpStatus.BAD_REQUEST);
