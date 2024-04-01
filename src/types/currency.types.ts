@@ -7,3 +7,7 @@ export interface ICurrency {
   symbol_native: string;
   decimal_digits: number;
 }
+
+export interface ICurrencyRate {
+  [key: string]: number;
+}
