@@ -302,6 +302,7 @@ export class AnalyticsController {
     const startDateObj = new Date(startDate);
     const dateObj: {[key: string]: T} = {};
     const currentDate = new Date(startDateObj);
+    if(frequency === 'm') currentDate.setDate(1);
     while (currentDate <= endDateObj) {
       dateObj[this.formatDate(new Date(currentDate))] = JSON.parse(JSON.stringify(value));
       if(frequency === 'm') {
