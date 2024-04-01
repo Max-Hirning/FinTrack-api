@@ -11,6 +11,7 @@ import {IMonthlyExpensesResponse} from './types/monthlyExpenses';
 import {TransactionService} from '../transaction/transaction.service';
 import {ITransactionsStatistics} from './types/transactionsStatistics';
 import {ICategoriesExpensesResponse} from './types/categoriesExpenses';
+import {AnalyticsErrorMessages, AnalyticsSuccessMessages} from 'src/configs/messages/analytics';
 import {IFilters, ITransactionResponse} from '../transaction/types/transaction.types';
 import {Controller, Get, HttpException, HttpStatus, Query, UseGuards} from '@nestjs/common';
 
@@ -76,11 +77,11 @@ export class AnalyticsController {
       }, 0);
       return ({
         statusCode: HttpStatus.OK,
-        message: 'Analytics were calculated',
+        message: AnalyticsSuccessMessages.calculate,
         data: {...totalExpensesIncomes, balance: totalBalance},
       });
     }
-    throw new HttpException('Date, cards and currency are required', HttpStatus.BAD_REQUEST);
+    throw new HttpException(AnalyticsErrorMessages.calculate, HttpStatus.BAD_REQUEST);
   }
 
   @Get('expenses/cards')
@@ -132,10 +133,10 @@ export class AnalyticsController {
       return ({
         data: cardsExpenses,
         statusCode: HttpStatus.OK,
-        message: 'Analytics were calculated',
+        message: AnalyticsSuccessMessages.calculate,
       });
     }
-    throw new HttpException('Date, cards and currency are required', HttpStatus.BAD_REQUEST);
+    throw new HttpException(AnalyticsErrorMessages.calculate, HttpStatus.BAD_REQUEST);
   }
 
   @Get('expenses/monthly')
@@ -174,10 +175,10 @@ export class AnalyticsController {
       return ({
         data: responseObj,
         statusCode: HttpStatus.OK,
-        message: 'Analytics were calculated',
+        message: AnalyticsSuccessMessages.calculate,
       });
     }
-    throw new HttpException('Date, cards and currency are required', HttpStatus.BAD_REQUEST);
+    throw new HttpException(AnalyticsErrorMessages.calculate, HttpStatus.BAD_REQUEST);
   }
 
   @Get('expenses/categories')
@@ -229,10 +230,10 @@ export class AnalyticsController {
       return ({
         data: categoriesExpenses,
         statusCode: HttpStatus.OK,
-        message: 'Analytics were calculated',
+        message: AnalyticsSuccessMessages.calculate,
       });
     }
-    throw new HttpException('Date, cards and currency are required', HttpStatus.BAD_REQUEST);
+    throw new HttpException(AnalyticsErrorMessages.calculate, HttpStatus.BAD_REQUEST);
   }
 
   @Get('transactions')
@@ -284,10 +285,10 @@ export class AnalyticsController {
       return ({
         data: responseObj,
         statusCode: HttpStatus.OK,
-        message: 'Analytics were calculated',
+        message: AnalyticsSuccessMessages.calculate,
       });
     }
-    throw new HttpException('Date, frequency, cards and currency are required', HttpStatus.BAD_REQUEST);
+    throw new HttpException(AnalyticsErrorMessages.calculateTransactions, HttpStatus.BAD_REQUEST);
   }
 
 
