@@ -16,10 +16,21 @@
         "OPTIONS"
       ],
       "headers": {
-        "Access-Control-Allow-Origin": [
-          "http://localhost:3000",
-          "https://fin-track-web.vercel.app"
-        ]
+        "Access-Control-Allow-Origin": "http://localhost:3000"
+      },
+      "src": "/(.*)",
+      "dest": "src/main.ts"
+    },
+    {
+      "methods": [
+        "GET",
+        "PUT",
+        "POST",
+        "DELETE",
+        "OPTIONS"
+      ],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://fin-track-web.vercel.app"
       },
       "src": "/(.*)",
       "dest": "src/main.ts"
