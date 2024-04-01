@@ -14,8 +14,8 @@ export interface IFilters {
   amount: {$gt: number} | {$lt: number};
 }
 export interface ITransactionList {
-  data: ITransaction[];
   currencies: string[];
+  data: ITransactionResponse[];
 }
 export interface ICreateTransaction {
   date: string;

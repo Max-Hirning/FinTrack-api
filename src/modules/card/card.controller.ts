@@ -99,7 +99,7 @@ export class CardController {
     }
     if(updateCardDto.color) updateCard.color = updateCardDto.color;
     if(updateCardDto.title) updateCard.title = updateCardDto.title;
-    const response = await this.cardService.updateOne(id, updateCardDto);
+    const response = await this.cardService.updateOne(id, updateCard);
     return ({
       message: response,
       statusCode: HttpStatus.OK,
