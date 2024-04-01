@@ -53,7 +53,7 @@ export class AnalyticsController {
         cardsCurrenciesRates = result.rates;
       }
       const totalExpensesIncomes: Pick<IAccountResponse, 'incomes'|'expenses'> = (transactionsResponse.data.data || []).reduce((res: Pick<IAccountResponse, 'incomes'|'expenses'>, el: ITransactionResponse): Pick<IAccountResponse, 'incomes'|'expenses'> => {
-        const currencyRate = transactionsCurrenciesRates[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
+        const currencyRate = transactionsCurrenciesRates?.[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
         if(el.amount > 0) {
           if((currency !== el.card.currency) && currencyRate) {
             res.incomes += +((res.incomes + (el.amount / currencyRate)).toFixed(2));
@@ -70,8 +70,9 @@ export class AnalyticsController {
         return res;
       }, {incomes: 0, expenses: 0});
       const totalBalance: number = (cardsResponse.cards || []).reduce((res: number, el: ICardResponse): number => {
-        if((currency !== el.currency) && cardsCurrenciesRates[el.currency]) {
-          res = +((res + (el.balance / cardsCurrenciesRates[el.currency])).toFixed(2));
+        const currencyRate = cardsCurrenciesRates?.[el.currency];
+        if((currency !== el.currency) && currencyRate) {
+          res = +((res + (el.balance / currencyRate)).toFixed(2));
         } else {
           res = +((res + el.balance).toFixed(2));
         }
@@ -107,7 +108,7 @@ export class AnalyticsController {
       const currenciesRates = await this.getCurrencies(start, end, currency, new Set(transactionsResponse.data.currencies));
       const cardsExpenses = (transactionsResponse.data.data || []).reduce((res: {[key: string]: ICardsExpensesResponse}, el: ITransactionResponse): {[key: string]: ICardsExpensesResponse} => {
         if(el.amount < 0) {
-          const currencyRate = currenciesRates[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
+          const currencyRate = currenciesRates?.[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
             if(res[el.card._id.toString()]) {
               res[el.card._id.toString()].amount = +((res[el.card._id.toString()].amount + (el.amount / currencyRate)).toFixed(2));
@@ -132,6 +133,7 @@ export class AnalyticsController {
         }
         return res;
       }, {});
+      if(Object.keys(cardsExpenses).length <= 0) throw new HttpException(AnalyticsErrorMessages.NotFound, HttpStatus.NOT_FOUND);
       return ({
         data: cardsExpenses,
         statusCode: HttpStatus.OK,
@@ -166,7 +168,7 @@ export class AnalyticsController {
         date.setDate(1);
         const dateString = date.toISOString().split('T')[0];
         if(responseObj[dateString] !== undefined) {
-          const currencyRate = currenciesRates[`${date.toISOString().split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
+          const currencyRate = currenciesRates?.[`${date.toISOString().split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
             responseObj[dateString] = +((responseObj[dateString] + (Math.abs(el.amount)/currencyRate)).toFixed(2));
           } else {
@@ -174,6 +176,7 @@ export class AnalyticsController {
           }
         }
       });
+      if(Object.keys(responseObj).length <= 0) throw new HttpException(AnalyticsErrorMessages.NotFound, HttpStatus.NOT_FOUND);
       return ({
         data: responseObj,
         statusCode: HttpStatus.OK,
@@ -204,7 +207,7 @@ export class AnalyticsController {
       const currenciesRates = await this.getCurrencies(start, end, currency, new Set(transactionsResponse.data.currencies));
       const categoriesExpenses = (transactionsResponse.data.data || []).reduce((res: {[key: string]: ICategoriesExpensesResponse}, el: ITransactionResponse) => {
         if(el.amount < 0) {
-          const currencyRate = currenciesRates[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
+          const currencyRate = currenciesRates?.[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
             if(res[el.category._id]) {
               res[el.category._id].amount = +((res[el.category._id].amount + (el.amount / currencyRate)).toFixed(2));
@@ -229,6 +232,7 @@ export class AnalyticsController {
         }
         return res;
       }, {});
+      if(Object.keys(categoriesExpenses).length <= 0) throw new HttpException(AnalyticsErrorMessages.NotFound, HttpStatus.NOT_FOUND);
       return ({
         data: categoriesExpenses,
         statusCode: HttpStatus.OK,
