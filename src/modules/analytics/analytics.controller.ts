@@ -1,19 +1,19 @@
 import {Types} from 'mongoose';
-import {IResponse} from 'src/types/app.types';
+import {IResponse} from '../../types/app.types';
 import {CardService} from '../card/card.service';
 import {IAccountResponse} from './types/account';
 import {AuthGuard} from '../auth/guards/auth.guard';
-import {ICurrencyRate} from 'src/types/currency.types';
 import {CommonService} from '../common/common.service';
 import {ICardResponse} from '../card/types/card.types';
+import {ICurrencyRate} from '../../types/currency.types';
 import {ICardsExpensesResponse} from './types/cardsExpenses';
 import {IMonthlyExpensesResponse} from './types/monthlyExpenses';
 import {TransactionService} from '../transaction/transaction.service';
 import {ITransactionsStatistics} from './types/transactionsStatistics';
 import {ICategoriesExpensesResponse} from './types/categoriesExpenses';
-import {AnalyticsErrorMessages, AnalyticsSuccessMessages} from 'src/configs/messages/analytics';
 import {IFilters, ITransactionResponse} from '../transaction/types/transaction.types';
 import {Controller, Get, HttpException, HttpStatus, Query, UseGuards} from '@nestjs/common';
+import {AnalyticsErrorMessages, AnalyticsSuccessMessages} from '../../configs/messages/analytics';
 
 @UseGuards(AuthGuard)
 @Controller('analytics')
