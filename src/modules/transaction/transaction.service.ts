@@ -199,12 +199,10 @@ export class TransactionService {
         },
       },
     ]);
-    if(!response) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
-    if(response && (response?.data.length <= 0 || response?.currencies.length <= 0)) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
     return ({
-      data: response,
       page: page || null,
       totalPages: totalPages || null,
+      data: response || {data: [], currencies: []},
       previous: (page && page > 1) ? page - 1 : null,
       next: (page && page < totalPages) ? page + 1 : null,
     });

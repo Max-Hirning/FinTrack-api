@@ -103,9 +103,7 @@ export class CardService {
         }
       }
     ]);
-    if(!response) throw new HttpException(CardErrorMessages.findMany, HttpStatus.NOT_FOUND);
-    if(response && (response?.cards.length <= 0 || response?.currencies.length <= 0)) throw new HttpException(CardErrorMessages.findMany, HttpStatus.NOT_FOUND);
-    return response;
+    return response || {currencies: [], cards: []};
   }
 
   async updateOne(id: string, updateCard: IUpdateCard): Promise<string> {

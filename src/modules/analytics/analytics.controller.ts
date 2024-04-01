@@ -42,25 +42,27 @@ export class AnalyticsController {
       };
       const transactionsResponse = await this.transactionService.findMany(transactionsFilters);
       const cardsResponse = await this.cardService.findMany({_id: {$in: transactionsFilters.cards}});
-      let currenciesRates: {[key: string]: number} = {};
-      const currencies = new Set(transactionsResponse.data.currencies);
-      currencies.delete(currency);
-      if(currencies.size > 0) {
-        const url = `https://api.fxratesapi.com/latest?base=${currency}&currencies=${Array.from(currencies).join(',')}&resolution=1m&amount=1&places=6&format=json`;
+      let cardsCurrenciesRates: {[key: string]: number} = {};
+      const cardsCurrencies = new Set(cardsResponse.currencies);
+      cardsCurrencies.delete(currency);
+      const transactionsCurrenciesRates = await this.getCurrencies(start, end, currency, new Set(transactionsResponse.data.currencies));
+      if(cardsCurrencies.size > 0) {
+        const url = `https://api.fxratesapi.com/latest?base=${currency}&currencies=${Array.from(cardsCurrencies).join(',')}&resolution=1m&amount=1&places=6&format=json`;
         const response = await fetch(url);
         const result = await response.json();
-        currenciesRates = result.rates;
+        cardsCurrenciesRates = result.rates;
       }
       const totalExpensesIncomes: Pick<IAccountResponse, 'incomes'|'expenses'> = (transactionsResponse.data.data || []).reduce((res: Pick<IAccountResponse, 'incomes'|'expenses'>, el: ITransactionResponse): Pick<IAccountResponse, 'incomes'|'expenses'> => {
+        const currencyRate = transactionsCurrenciesRates[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
         if(el.amount > 0) {
-          if((currency !== el.card.currency) && currenciesRates) {
-            res.incomes += +((res.incomes + (el.amount / currenciesRates[el.card.currency])).toFixed(2));
+          if((currency !== el.card.currency) && currencyRate) {
+            res.incomes += +((res.incomes + (el.amount / currencyRate)).toFixed(2));
           } else {
             res.incomes += +((res.incomes + el.amount).toFixed(2));
           }
         } else if(el.amount < 0) {
-          if((currency !== el.card.currency) && currenciesRates) {
-            res.expenses = +((res.expenses + (el.amount / currenciesRates[el.card.currency])).toFixed(2));
+          if((currency !== el.card.currency) && currencyRate) {
+            res.expenses = +((res.expenses + (el.amount / currencyRate)).toFixed(2));
           } else {
             res.expenses = +((res.expenses + el.amount).toFixed(2));
           }
@@ -68,8 +70,8 @@ export class AnalyticsController {
         return res;
       }, {incomes: 0, expenses: 0});
       const totalBalance: number = (cardsResponse.cards || []).reduce((res: number, el: ICardResponse): number => {
-        if((currency !== el.currency) && currenciesRates) {
-          res = +((res + (el.balance / currenciesRates[el.currency])).toFixed(2));
+        if((currency !== el.currency) && cardsCurrenciesRates[el.currency]) {
+          res = +((res + (el.balance / cardsCurrenciesRates[el.currency])).toFixed(2));
         } else {
           res = +((res + el.balance).toFixed(2));
         }
