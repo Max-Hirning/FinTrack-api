@@ -2,6 +2,7 @@ import {Types} from 'mongoose';
 import {IResponse} from 'src/types/app.types';
 import {CardService} from '../card/card.service';
 import {IAccountResponse} from './types/account';
+import {AuthGuard} from '../auth/guards/auth.guard';
 import {ICurrencyRate} from 'src/types/currency.types';
 import {CommonService} from '../common/common.service';
 import {ICardResponse} from '../card/types/card.types';
@@ -10,9 +11,10 @@ import {IMonthlyExpensesResponse} from './types/monthlyExpenses';
 import {TransactionService} from '../transaction/transaction.service';
 import {ITransactionsStatistics} from './types/transactionsStatistics';
 import {ICategoriesExpensesResponse} from './types/categoriesExpenses';
-import {Controller, Get, HttpException, HttpStatus, Query} from '@nestjs/common';
 import {IFilters, ITransactionResponse} from '../transaction/types/transaction.types';
+import {Controller, Get, HttpException, HttpStatus, Query, UseGuards} from '@nestjs/common';
 
+@UseGuards(AuthGuard)
 @Controller('analytics')
 export class AnalyticsController {
   constructor(
@@ -51,24 +53,24 @@ export class AnalyticsController {
       const totalExpensesIncomes: Pick<IAccountResponse, 'incomes'|'expenses'> = (transactionsResponse.data.data || []).reduce((res: Pick<IAccountResponse, 'incomes'|'expenses'>, el: ITransactionResponse): Pick<IAccountResponse, 'incomes'|'expenses'> => {
         if(el.amount > 0) {
           if((currency !== el.card.currency) && currenciesRates) {
-            res.incomes = res.incomes + +((el.amount / currenciesRates[el.card.currency]).toFixed(2));
+            res.incomes += +((res.incomes + (el.amount / currenciesRates[el.card.currency])).toFixed(2));
           } else {
-            res.incomes = res.incomes + +(el.amount.toFixed(2));
+            res.incomes += +((res.incomes + el.amount).toFixed(2));
           }
         } else if(el.amount < 0) {
           if((currency !== el.card.currency) && currenciesRates) {
-            res.expenses = res.expenses + +((el.amount / currenciesRates[el.card.currency]).toFixed(2));
+            res.expenses = +((res.expenses + (el.amount / currenciesRates[el.card.currency])).toFixed(2));
           } else {
-            res.expenses = res.expenses + +(el.amount.toFixed(2));
+            res.expenses = +((res.expenses + el.amount).toFixed(2));
           }
         }
         return res;
       }, {incomes: 0, expenses: 0});
       const totalBalance: number = (cardsResponse.cards || []).reduce((res: number, el: ICardResponse): number => {
         if((currency !== el.currency) && currenciesRates) {
-          res = res + +((el.balance / currenciesRates[el.currency]).toFixed(2));
+          res = +((res + (el.balance / currenciesRates[el.currency])).toFixed(2));
         } else {
-          res = res + +(el.balance.toFixed(2));
+          res = +((res + el.balance).toFixed(2));
         }
         return res;
       }, 0);
@@ -105,17 +107,17 @@ export class AnalyticsController {
           const currencyRate = currenciesRates[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
             if(res[el.card._id.toString()]) {
-              res[el.card._id.toString()].amount = +(res[el.card._id.toString()].amount + +((el.amount / +(currencyRate.toFixed(2))).toFixed(2))).toFixed(2);
+              res[el.card._id.toString()].amount = +((res[el.card._id.toString()].amount + (el.amount / currencyRate)).toFixed(2));
             } else {
               res[el.card._id.toString()] = {
                 color: el.card.color,
                 label: el.card.title,
-                amount: +((el.amount / +(currencyRate.toFixed(2))).toFixed(2)),
+                amount: +((el.amount / currencyRate).toFixed(2)),
               };
             }
           } else {
             if(res[el.card._id.toString()]) {
-              res[el.card._id.toString()].amount = +(res[el.card._id.toString()].amount + +((el.amount).toFixed(2))).toFixed(2);
+              res[el.card._id.toString()].amount = +((res[el.card._id.toString()].amount + el.amount).toFixed(2));
             } else {
               res[el.card._id.toString()] = {
                 color: el.card.color,
@@ -163,9 +165,9 @@ export class AnalyticsController {
         if(responseObj[dateString] !== undefined) {
           const currencyRate = currenciesRates[`${date.toISOString().split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
-            responseObj[dateString] = +(((responseObj[dateString] as number) + (Math.abs(el.amount)/currencyRate)).toFixed(2));
+            responseObj[dateString] = +((responseObj[dateString] + (Math.abs(el.amount)/currencyRate)).toFixed(2));
           } else {
-            responseObj[dateString] = +(((responseObj[dateString] as number) + Math.abs(el.amount)).toFixed(2));
+            responseObj[dateString] = +((responseObj[dateString] + Math.abs(el.amount)).toFixed(2));
           }
         }
       });
@@ -202,17 +204,17 @@ export class AnalyticsController {
           const currencyRate = currenciesRates[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
             if(res[el.category._id]) {
-              res[el.category._id].amount = +(res[el.category._id].amount + +((el.amount / +(currencyRate.toFixed(2))).toFixed(2))).toFixed(2);
+              res[el.category._id].amount = +((res[el.category._id].amount + (el.amount / currencyRate)).toFixed(2));
             } else {
               res[el.category._id] = {
                 color: el.category.color,
                 label: el.category.title,
-                amount: +((el.amount / +(currencyRate.toFixed(2))).toFixed(2)),
+                amount: +((el.amount / currencyRate).toFixed(2)),
               };
             }
           } else {
             if(res[el.category._id]) {
-              res[el.category._id].amount = +(res[el.category._id].amount + +((el.amount).toFixed(2))).toFixed(2);
+              res[el.category._id].amount = +((res[el.category._id].amount + el.amount).toFixed(2));
             } else {
               res[el.category._id] = {
                 color: el.category.color,
@@ -266,15 +268,15 @@ export class AnalyticsController {
           const currencyRate = currenciesRates[`${dateString}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
             if(el.amount < 0) {
-              (responseObj[dateString] as ITransactionsStatistics).expenses = +((responseObj[dateString] as ITransactionsStatistics).expenses + +((Math.abs(el.amount) / +(currencyRate.toFixed(2))).toFixed(2))).toFixed(2);
+              (responseObj[dateString] as ITransactionsStatistics).expenses = +(((responseObj[dateString] as ITransactionsStatistics).expenses + (Math.abs(el.amount) / currencyRate)).toFixed(2));
             } else if(el.amount > 0) {
-              (responseObj[dateString] as ITransactionsStatistics).incomes = +((responseObj[dateString] as ITransactionsStatistics).incomes + +((Math.abs(el.amount) / +(currencyRate.toFixed(2))).toFixed(2))).toFixed(2);
+              (responseObj[dateString] as ITransactionsStatistics).incomes = +(((responseObj[dateString] as ITransactionsStatistics).incomes + (Math.abs(el.amount) / currencyRate)).toFixed(2));
             }
           } else {
             if(el.amount < 0) {
-              (responseObj[dateString] as ITransactionsStatistics).expenses = +((responseObj[dateString] as ITransactionsStatistics).expenses + Math.abs(el.amount)).toFixed(2);
+              (responseObj[dateString] as ITransactionsStatistics).expenses = +(((responseObj[dateString] as ITransactionsStatistics).expenses + Math.abs(el.amount)).toFixed(2));
             } else if(el.amount > 0) {
-              (responseObj[dateString] as ITransactionsStatistics).incomes = +((responseObj[dateString] as ITransactionsStatistics).incomes + Math.abs(el.amount)).toFixed(2);
+              (responseObj[dateString] as ITransactionsStatistics).incomes = +(((responseObj[dateString] as ITransactionsStatistics).incomes + Math.abs(el.amount)).toFixed(2));
             }
           }
         }
