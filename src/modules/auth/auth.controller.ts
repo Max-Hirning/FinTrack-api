@@ -3,14 +3,15 @@ import {JwtService} from '@nestjs/jwt';
 import {AuthService} from './auth.service';
 import {SignInDto} from './dto/sign-in.dto';
 import {SignUpDto} from './dto/sign-up.dto';
-import {IResponse} from '../../types/app.types';
+import {AuthGuard} from './guards/auth.guard';
 import {MailerService} from '@nestjs-modules/mailer';
 import {ISignInResponse} from './types/sign-in.types';
 import {CommonService} from '../common/common.service';
 import {EmailRequestDto} from './dto/email-request.dto';
 import {ResetPasswordDto} from './dto/reset-password.dto';
-import {Controller, Post, Body, HttpStatus, HttpException} from '@nestjs/common';
+import {ICustomRequest, IResponse} from '../../types/app.types';
 import {AuthErrorMessages, AuthSuccessMessages} from '../../configs/messages/auth';
+import {Controller, Post, Body, HttpStatus, HttpException, UseGuards, Request} from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
@@ -28,8 +29,8 @@ export class AuthController {
     const user = await this.commonService.findOneUserAPI('email', signUpDto.email, true);
     if(user) throw new HttpException(AuthErrorMessages.existedUser, HttpStatus.BAD_REQUEST);
     const password = await bcrypt.hash(signUpDto.password, 5);
-    const userId = await this.authService.signUp({...signUpDto, password});
-    const code = this.jwtService.sign({email: signUpDto.email, _id: userId, password}, {expiresIn: process.env.EMAIL_CODE_EXPIRES_IN});
+    const createdUser = await this.authService.signUp({...signUpDto, password});
+    const code = this.jwtService.sign({version: createdUser.version, _id: createdUser._id}, {expiresIn: process.env.EMAIL_CODE_EXPIRES_IN});
     await this.mailerService.sendMail({
       html: `
         <div>
@@ -55,7 +56,7 @@ export class AuthController {
       return ({
         data: {
           userId: process.env.ADMIN_ID,
-          token: this.jwtService.sign({_id: process.env.ADMIN_ID, role: 'Admin'}),
+          token: this.jwtService.sign({_id: process.env.ADMIN_ID, version: 0, role: 'Admin'}),
         },
         statusCode: HttpStatus.OK,
         message: AuthSuccessMessages.signIn,
@@ -87,8 +88,9 @@ export class AuthController {
 
   @Post('email-request')
   async emailRequest(@Body() emailRequestDto: EmailRequestDto): Promise<IResponse<undefined>> {
+    if(emailRequestDto.email === 'test@gmail.com') throw new HttpException('No such email', HttpStatus.FORBIDDEN);
     const user = await this.commonService.findOneUserAPI('email', emailRequestDto.email);
-    const code = this.jwtService.sign({email: user.email, _id: user._id, password: user.password}, {expiresIn: process.env.EMAIL_CODE_EXPIRES_IN});
+    const code = this.jwtService.sign({_id: user._id, version: user.version, role: 'User'}, {expiresIn: process.env.EMAIL_CODE_EXPIRES_IN});
     await this.mailerService.sendMail({
       html: `
         <div>
@@ -108,13 +110,12 @@ export class AuthController {
     });
   }
 
+  @UseGuards(AuthGuard)
   @Post('reset-password')
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<IResponse<undefined>> {
-    if(!resetPasswordDto.code) throw new HttpException(AuthErrorMessages.wrongCode, HttpStatus.BAD_REQUEST);
-    const tokenData = this.jwtService.verify(resetPasswordDto.code, {secret: process.env.SECRET_KEY});
-    const password = await bcrypt.hash(resetPasswordDto.password, 5);
-    const user = await this.commonService.findOneUserAPI('_id', tokenData._id);
+  async resetPassword(@Request() req: ICustomRequest, @Body() resetPasswordDto: ResetPasswordDto): Promise<IResponse<undefined>> {
+    const user = await this.commonService.findOneUserAPI('_id', req._id);
     if(user.email === 'test@gmail.com') throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    const password = await bcrypt.hash(resetPasswordDto.password, 5);
     const response = await this.authService.resetPassword(user._id.toString(), {password});
     return ({
       message: response,

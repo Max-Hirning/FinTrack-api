@@ -3,6 +3,7 @@ import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import {ISignUp} from './types/sign-up.types';
 import {ISignIn} from './types/sign-in.types';
+import {IUser} from '../user/types/user.types';
 import {User} from '../user/schemas/user.schema';
 import {Collections} from '../../configs/collections';
 import {AuthSuccessMessages} from '../../configs/messages/auth';
@@ -16,9 +17,9 @@ export class AuthService {
     return false;
   }
 
-  async signUp(signUp: ISignUp): Promise<string> {
+  async signUp(signUp: ISignUp): Promise<IUser> {
     const user = await this.userModel.create(signUp);
-    return user._id.toString();
+    return user;
   }
 
   async resetPassword(id: string, resetPassword: Pick<ISignUp, 'password'>): Promise<string> {

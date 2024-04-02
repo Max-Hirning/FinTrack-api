@@ -1,5 +1,4 @@
 import {Response} from 'express';
-import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {AppService} from './app.service';
 import {ICurrency} from './types/currency.types';
@@ -37,8 +36,7 @@ export class AppController {
     res.redirect(`${process.env.ORIGIN_URL}/auth/sign-in`);
     const codeData = await this.jwtService.decode(code);
     const user = await this.commonService.findOneUserAPI('_id', codeData._id);
-    const isPassValid = bcrypt.compare(codeData.password, user.password);
-    if(user.email === codeData.email && isPassValid) {
+    if(user.version === codeData.version) {
       await this.appService.confirmEmail(user._id.toString());
       return;
     }
