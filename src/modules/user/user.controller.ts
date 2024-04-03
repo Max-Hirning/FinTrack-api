@@ -50,7 +50,7 @@ export class UserController {
         await this.transactionService.removeMany(el._id.toString());
       });
       await this.cardService.removeMany(id); // delete all users cards
-      await this.imageService.removeOne(user.imageId); // delete image(avatar)
+      if(user.imageId) await this.imageService.removeOne(user.imageId); // delete image(avatar)
       const response = await this.userService.removeOne(id);
       return ({
         message: response,
