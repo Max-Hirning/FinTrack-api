@@ -5,9 +5,9 @@ import {UpdateCardDto} from './dto/update-card.dto';
 import {AuthGuard} from '../auth/guards/auth.guard';
 import {CommonService} from '../common/common.service';
 import {IResponse, ICustomRequest} from '../../types/app.types';
+import {CardSuccessMessages} from '../../configs/messages/card';
 import {TransactionService} from '../transaction/transaction.service';
 import {ICardResponse, ICardsList, IUpdateCard} from './types/card.types';
-import {CardErrorMessages, CardSuccessMessages} from '../../configs/messages/card';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, UseGuards, HttpException, Request} from '@nestjs/common';
 
 @Controller('card')
@@ -26,7 +26,6 @@ export class CardController {
   ): Promise<IResponse<ICardsList>> {
     if(cards) {
       const response = await this.cardService.findMany({_id: {$in: JSON.parse(cards).map((el: string) => new Types.ObjectId(el))}});
-      if(response.cards.length <= 0 || response.currencies.length <= 0) throw new HttpException(CardErrorMessages.findMany, HttpStatus.NOT_FOUND);
       return ({
         data: response,
         statusCode: HttpStatus.OK,

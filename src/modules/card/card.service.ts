@@ -103,7 +103,7 @@ export class CardService {
         }
       }
     ]);
-    return response || {currencies: [], cards: []};
+    return {currencies: response?.currencies || [], cards: response?.cards || []};
   }
 
   async updateOne(id: string, updateCard: IUpdateCard): Promise<string> {

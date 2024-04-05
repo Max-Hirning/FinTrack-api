@@ -88,7 +88,7 @@ export class AuthController {
 
   @Post('email-request')
   async emailRequest(@Body() emailRequestDto: EmailRequestDto): Promise<IResponse<undefined>> {
-    if(emailRequestDto.email === 'test@gmail.com' || emailRequestDto.email === process.env.ADMIN_EMAI) throw new HttpException('No such email', HttpStatus.FORBIDDEN);
+    if(emailRequestDto.email === 'test@gmail.com' || emailRequestDto.email === process.env.ADMIN_EMAI) throw new HttpException('No such email', HttpStatus.NOT_FOUND);
     const user = await this.commonService.findOneUserAPI('email', emailRequestDto.email);
     const code = this.jwtService.sign({_id: user._id, version: user.version, role: 'User'}, {expiresIn: process.env.EMAIL_CODE_EXPIRES_IN});
     await this.mailerService.sendMail({

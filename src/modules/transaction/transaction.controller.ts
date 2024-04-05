@@ -7,8 +7,8 @@ import {IUpdateTransaction} from './types/transaction.types';
 import {ICustomRequest, IResponse} from '../../types/app.types';
 import {CreateTransactionDto} from './dto/create-transaction.dto';
 import {UpdateTransactionDto} from './dto/update-transaction.dto';
+import {TransactionSuccessMessages} from '../../configs/messages/transaction';
 import {IFilters, ITransactionList, ITransactionResponse} from './types/transaction.types';
-import {TransactionErrorMessages, TransactionSuccessMessages} from '../../configs/messages/transaction';
 import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, HttpException, Request, UseGuards} from '@nestjs/common';
 
 @UseGuards(AuthGuard)
@@ -54,7 +54,6 @@ export class TransactionController {
       filters.perPage = +perPage;
     }
     const response = await this.transactionService.findMany(filters);
-    if(response.data.currencies.length <= 0 || response.data.data.length <= 0) throw new HttpException(TransactionErrorMessages.findMany, HttpStatus.NOT_FOUND);
     return ({
       data: response,
       statusCode: HttpStatus.OK,

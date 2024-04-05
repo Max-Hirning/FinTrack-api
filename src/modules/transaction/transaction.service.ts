@@ -202,9 +202,9 @@ export class TransactionService {
     return ({
       page: page || null,
       totalPages: totalPages || null,
-      data: response || {data: [], currencies: []},
       previous: (page && page > 1) ? page - 1 : null,
       next: (page && page < totalPages) ? page + 1 : null,
+      data: {data: response?.data || [], currencies: response?.currencies || []},
     });
   }
 }

@@ -46,9 +46,7 @@ Clone the repository:
 
 The API server will start at `http://localhost:${PORT}`.
 
----
-#### **[API DOC](https://cliff-salto-b7b.notion.site/FinTrack-API-f787efe029454048a36df37ffe1a8eb3)**
----
+## **[Postman](https://www.postman.com/maxitco/workspace/max-s-api/collection/17033383-a163ca0a-3dc6-4147-a572-adddd170aa2d?action=share&source=copy-link&creator=17033383)**
 
 ## Support and Contributions
 For support, questions, or feedback, please contact maxhirning25@gmail.com.
