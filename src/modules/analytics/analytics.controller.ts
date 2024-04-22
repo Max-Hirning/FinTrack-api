@@ -56,9 +56,9 @@ export class AnalyticsController {
         const currencyRate = transactionsCurrenciesRates?.[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
         if(el.amount > 0) {
           if((currency !== el.card.currency) && currencyRate) {
-            res.incomes += +((res.incomes + (el.amount / currencyRate)).toFixed(2));
+            res.incomes = +((res.incomes + (el.amount / currencyRate)).toFixed(2));
           } else {
-            res.incomes += +((res.incomes + el.amount).toFixed(2));
+            res.incomes = +((res.incomes + el.amount).toFixed(2));
           }
         } else if(el.amount < 0) {
           if((currency !== el.card.currency) && currencyRate) {
