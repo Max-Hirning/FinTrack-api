@@ -124,7 +124,7 @@ export class UserController {
     if(updateUserProfileDto.email && req.role !== 'Test') updateUserProfile.email = updateUserProfileDto.email;
     await this.userService.updateProfile(id, updateUserProfile);
     if(updateUserProfile.email) {
-      const code = this.jwtService.sign({email: updateUserProfile.email, id, password: user.password}, {expiresIn: process.env.EMAIL_CODE_EXPIRES_IN});
+      const code = this.jwtService.sign({version: user.version + 0.1, _id: id}, {expiresIn: process.env.EMAIL_CODE_EXPIRES_IN});
       await this.mailerService.sendMail({
         html: `
           <div>
