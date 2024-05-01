@@ -92,6 +92,8 @@ export class TransactionController {
     if(createTransactionDto.amount === 0) throw new HttpException('Amount must not be equal 0', HttpStatus.BAD_REQUEST);
     const card = await this.commonService.findOneCardAPI('_id', createTransactionDto.cardId);
     if(req._id !== card.ownerId.toString()) throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    const category = await this.commonService.findOneCategoryAPI('_id', createTransactionDto.categoryId);
+    if(!createTransactionDto.description || createTransactionDto.description === '') createTransactionDto.description = category.title;
     await this.commonService.updateCardBalance(createTransactionDto.cardId, this.commonService.calculateBalance(createTransactionDto.amount, false, card.balance, createTransactionDto.amount));
     const response = await this.transactionService.createOne({
       cardId: createTransactionDto.cardId,
@@ -111,7 +113,7 @@ export class TransactionController {
     const transaction = await this.commonService.findOneTransactionAPI('_id', id);
     const card = await this.commonService.findOneCardAPI('_id', transaction.cardId);
     if(req._id !== card.ownerId.toString()) throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    if(updateTransactionDto.cardId) {
+    if(transaction.cardId.toString() !== updateTransactionDto.cardId) {
       const transaction = await this.commonService.findOneTransactionAPI('_id', id);
       const prevCard = await this.commonService.findOneCardAPI('_id', transaction.cardId);
       await this.commonService.updateCardBalance(prevCard._id.toString(), this.commonService.calculateBalance(transaction.amount, true, prevCard.balance, transaction.amount));
@@ -119,7 +121,7 @@ export class TransactionController {
       await this.commonService.updateCardBalance(newCard._id.toString(), this.commonService.calculateBalance(transaction.amount, false, newCard.balance, transaction.amount));
       await this.transactionService.updateOne(id, {cardId: updateTransactionDto.cardId});
     }
-    if(updateTransactionDto.amount) {
+    if(transaction.amount !== updateTransactionDto.amount) {
       if(updateTransactionDto.amount === 0) throw new HttpException('Amount must not be equal 0', HttpStatus.NOT_FOUND);
       const transaction = await this.commonService.findOneTransactionAPI('_id', id);
       const card = await this.commonService.findOneCardAPI('_id', transaction.cardId);
@@ -129,9 +131,9 @@ export class TransactionController {
       await this.transactionService.updateOne(id, {amount: updateTransactionDto.amount});
     }
     const updateTransaction: IUpdateTransaction = {};
-    if(updateTransactionDto.date) updateTransaction.date = updateTransactionDto.date;
-    if(updateTransactionDto.categoryId) updateTransaction.categoryId = updateTransactionDto.categoryId;
-    if(updateTransactionDto.description) updateTransaction.description = updateTransactionDto.description;
+    if(updateTransactionDto.date !== transaction.date) updateTransaction.date = updateTransactionDto.date;
+    if(updateTransactionDto.categoryId !== transaction.categoryId.toString()) updateTransaction.categoryId = updateTransactionDto.categoryId;
+    if(updateTransactionDto.description && updateTransactionDto.description !== '' && transaction.description !== updateTransactionDto.description) updateTransaction.description = updateTransactionDto.description;
     const response = await this.transactionService.updateOne(id, updateTransaction);
     return ({
       message: response,

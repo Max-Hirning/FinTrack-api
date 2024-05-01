@@ -1,4 +1,4 @@
-import {IsNotEmpty, IsString, IsNumber, MaxLength, MinLength, IsDateString, IsMongoId} from 'class-validator';
+import {IsNotEmpty, IsString, IsNumber, MaxLength, IsDateString, IsMongoId, IsOptional} from 'class-validator';
 
 export class CreateTransactionDto {
   @IsString()
@@ -20,8 +20,7 @@ export class CreateTransactionDto {
     categoryId: string;
 
   @IsString()
-  @IsNotEmpty()
-  @MinLength(1)
+  @IsOptional()
   @MaxLength(200)
     description: string;
 }
