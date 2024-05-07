@@ -8,12 +8,12 @@ import {Collections} from './configs/collections';
 import {MailerModule} from '@nestjs-modules/mailer';
 import {UserModule} from './modules/user/user.module';
 import {AuthModule} from './modules/auth/auth.module';
-import {CardModule} from './modules/card/card.module';
 import {CommonModule} from './modules/common/common.module';
 import {UserSchema} from './modules/user/schemas/user.schema';
+import {CardModule} from './modules/finance/card/card.module';
 import {CategoryModule} from './modules/category/category.module';
 import {AnalyticsModule} from './modules/analytics/analytics.module';
-import {TransactionModule} from './modules/transaction/transaction.module';
+import {TransactionModule} from './modules/finance/transaction/transaction.module';
 
 @Module({
   imports: [

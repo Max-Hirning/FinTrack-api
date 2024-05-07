@@ -1,6 +1,6 @@
 import {Card} from '../schemas/card.schema';
 import {Types, HydratedDocument} from 'mongoose';
-import {IUserResponse} from '../../../modules/user/types/user.types';
+import {IUserResponse} from '../../../../modules/user/types/user.types';
 
 export interface IFilters {
   _id: {

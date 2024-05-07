@@ -2,20 +2,20 @@ import mongoose from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
 import {UserService} from './user.service';
-import {CardService} from '../card/card.service';
 import {AuthGuard} from '../auth/guards/auth.guard';
 import {ImageService} from '../image/image.service';
 import {MailerService} from '@nestjs-modules/mailer';
 import {CommonService} from '../common/common.service';
-import {ICardResponse} from '../card/types/card.types';
+import {CardService} from '../finance/card/card.service';
 import {FileInterceptor} from '@nestjs/platform-express';
+import {ICardResponse} from '../finance/card/types/card.types';
 import {ICustomRequest, IResponse} from '../../types/app.types';
 import {AuthSuccessMessages} from '../../configs/messages/auth';
 import {UserSuccessMessages} from '../../configs/messages/user';
 import {UpdateUserProfileDto} from './dto/update-user-profile.dto';
 import {IUpdateUserProfile, IUserResponse} from './types/user.types';
 import {UpdateUserSecurityDto} from './dto/update-user-security.dto';
-import {TransactionService} from '../transaction/transaction.service';
+import {TransactionService} from '../finance/transaction/transaction.service';
 import {Controller, Get, Body, Put, Param, Delete, UseInterceptors, UploadedFile, HttpStatus, HttpException, UseGuards, Request} from '@nestjs/common';
 
 @Controller('user')

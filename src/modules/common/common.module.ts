@@ -3,9 +3,9 @@ import {CommonService} from './common.service';
 import {MongooseModule} from '@nestjs/mongoose';
 import {Collections} from '../../configs/collections';
 import {UserSchema} from '../user/schemas/user.schema';
-import {CardSchema} from '../card/schemas/card.schema';
+import {CardSchema} from '../finance/card/schemas/card.schema';
 import {CategorySchema} from '../category/schemas/category.schema';
-import {TransactionSchema} from '../transaction/schemas/transaction.schema';
+import {TransactionSchema} from '../finance/transaction/schemas/transaction.schema';
 
 @Module({
   imports: [

@@ -1,9 +1,9 @@
 import {Card} from './schemas/card.schema';
 import {InjectModel} from '@nestjs/mongoose';
-import {Collections} from '../../configs/collections';
+import {Collections} from '../../../configs/collections';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {CardSuccessMessages, CardErrorMessages} from '../../configs/messages/card';
+import {CardSuccessMessages, CardErrorMessages} from '../../../configs/messages/card';
 import {ICardResponse, ICardsList, ICreateCard, IFilters, IUpdateCard} from './types/card.types';
 
 const aggregationPipeLine: PipelineStage[] = [
