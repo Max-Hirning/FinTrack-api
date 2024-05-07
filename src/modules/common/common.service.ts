@@ -1,19 +1,19 @@
 import {Model} from 'mongoose';
 import {InjectModel} from '@nestjs/mongoose';
-import {ICard} from '../card/types/card.types';
 import {IUser} from '../user/types/user.types';
 import {User} from '../user/schemas/user.schema';
-import {Card} from '../card/schemas/card.schema';
 import {ICurrency} from '../../types/currency.types';
 import {Collections} from '../../configs/collections';
+import {ICard} from '../finance/card/types/card.types';
+import {Card} from '../finance/card/schemas/card.schema';
 import {ICategory} from '../category/types/category.types';
-import {UserErrorMessages} from '../../configs/messages/user';
 import {Category} from '../category/schemas/category.schema';
-import {ITransaction} from '../transaction/types/transaction.types';
+import {UserErrorMessages} from '../../configs/messages/user';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {CurrencyErrorMessages} from '../../configs/messages/currency';
-import {Transaction} from '../transaction/schemas/transaction.schema';
 import {TransactionErrorMessages} from '../../configs/messages/transaction';
+import {ITransaction} from '../finance/transaction/types/transaction.types';
+import {Transaction} from '../finance/transaction/schemas/transaction.schema';
 import {CardSuccessMessages, CardErrorMessages} from '../../configs/messages/card';
 
 @Injectable()
