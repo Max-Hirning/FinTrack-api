@@ -15,6 +15,7 @@ import {CategoryModule} from './modules/category/category.module';
 import {AnalyticsModule} from './modules/analytics/analytics.module';
 import {PortfolioModule} from './modules/crypto/portfolio/portfolio.module';
 import {TransactionModule} from './modules/finance/transaction/transaction.module';
+import {PortfolioTransactionModule} from './modules/crypto/portfolio-transaction/portfolio-transaction.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import {TransactionModule} from './modules/finance/transaction/transaction.modul
     AnalyticsModule,
     PortfolioModule,
     TransactionModule,
+    PortfolioTransactionModule,
     MailerModule.forRoot({
       transport: {
         auth: {

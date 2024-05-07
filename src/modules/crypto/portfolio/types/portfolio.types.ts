@@ -2,6 +2,11 @@ import {HydratedDocument, Types} from 'mongoose';
 import {Portfolio} from '../schemas/portfolio.schema';
 import {IUserResponse} from '../../../user/types/user.types';
 
+export interface IAsset {
+  asset: string;
+  amount: number;
+  avgBuyPrice: number;
+}
 export interface IFilters {
   _id: {
     $in: Types.ObjectId[];

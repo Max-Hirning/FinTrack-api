@@ -9,15 +9,17 @@ import {Card} from '../finance/card/schemas/card.schema';
 import {ICategory} from '../category/types/category.types';
 import {Category} from '../category/schemas/category.schema';
 import {UserErrorMessages} from '../../configs/messages/user';
-import {IPortfolio} from '../crypto/portfolio/types/portfolio.types';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {CurrencyErrorMessages} from '../../configs/messages/currency';
 import {Portfolio} from '../crypto/portfolio/schemas/portfolio.schema';
 import {PortfolioErrorMessages} from '../../configs/messages/portfolio';
 import {TransactionErrorMessages} from '../../configs/messages/transaction';
 import {ITransaction} from '../finance/transaction/types/transaction.types';
+import {IAsset, IPortfolio} from '../crypto/portfolio/types/portfolio.types';
 import {Transaction} from '../finance/transaction/schemas/transaction.schema';
 import {CardSuccessMessages, CardErrorMessages} from '../../configs/messages/card';
+import {IPortfolioTransaction} from '../crypto/portfolio-transaction/types/portfolio-transaction.types';
+import {PortfolioTransaction} from '../crypto/portfolio-transaction/schemas/portfolio-transaction.schema';
 
 @Injectable()
 export class CommonService {
@@ -27,6 +29,7 @@ export class CommonService {
     @InjectModel(Collections.categories) private readonly categoryModel: Model<Category>,
     @InjectModel(Collections.portfolios) private readonly portfolioModel: Model<Portfolio>,
     @InjectModel(Collections.transactions) private readonly transactionModel: Model<Transaction>,
+    @InjectModel(Collections.portfolioTransactions) private readonly portfolioTransactionModel: Model<PortfolioTransaction>,
   ) {}
 
   async findOneCurrency(id: string): Promise<ICurrency> {
@@ -39,6 +42,18 @@ export class CommonService {
 
   async updateCardBalance(id: string, balance: number): Promise<string> {
     await this.cardModel.updateOne({_id: id}, {balance});
+    return CardSuccessMessages.updateOne;
+  }
+
+  async updatePortfolioAssets(id: string, assetKey: string, asset: IAsset): Promise<string> {
+    const portfolio = await this.findOnePortfolioAPI('_id', id);
+    if(asset.amount <= 0) {
+      delete portfolio.assets[assetKey];
+    } else {
+      portfolio.assets[assetKey] = asset;
+    }
+    portfolio.markModified('assets');
+    await portfolio.save();
     return CardSuccessMessages.updateOne;
   }
 
@@ -80,6 +95,14 @@ export class CommonService {
       if(!portfolio) throw new HttpException(PortfolioErrorMessages.findOne, HttpStatus.NOT_FOUND);
     }
     return portfolio;
+  }
+
+  async findOnePortfolioTransactionAPI(key: '_id', value: string, noCheck?: boolean): Promise<IPortfolioTransaction> {
+    const portfolioTransaction = await this.portfolioTransactionModel.findOne({[key]: value});
+    if(!noCheck) {
+      if(!portfolioTransaction) throw new HttpException(TransactionErrorMessages.findOne, HttpStatus.NOT_FOUND);
+    }
+    return portfolioTransaction;
   }
 
   calculateBalance(transactionType: number, isActionReverse: boolean, cardBalance: number, transactionAmmount: number): number {

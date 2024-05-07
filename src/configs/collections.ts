@@ -5,4 +5,5 @@ export enum Collections {
   portfolios = 'Portfolios',
   categories = 'Categories',
   transactions = 'Transactions',
+  portfolioTransactions = 'Portfolio-transactions',
 }
