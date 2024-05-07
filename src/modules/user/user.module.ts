@@ -8,6 +8,7 @@ import {ImageModule} from '../image/image.module';
 import {CommonModule} from '../common/common.module';
 import {Collections} from '../../configs/collections';
 import {CardModule} from '../finance/card/card.module';
+import {PortfolioModule} from '../crypto/portfolio/portfolio.module';
 import {TransactionModule} from '../finance/transaction/transaction.module';
 
 @Module({
@@ -16,6 +17,7 @@ import {TransactionModule} from '../finance/transaction/transaction.module';
     CardModule,
     ImageModule,
     CommonModule,
+    PortfolioModule,
     TransactionModule,
     MongooseModule.forFeature([{name: Collections.users, schema: UserSchema}]),
   ],

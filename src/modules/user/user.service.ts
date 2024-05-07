@@ -16,7 +16,7 @@ export class UserService {
   }
 
   async findOne(id: string, role?: string): Promise<IUserResponse> {
-    let cardsLookupStage: PipelineStage;
+    let cardsLookupStage: PipelineStage, portfoliosLookupStage: PipelineStage;
     if(role === 'Test') {
       cardsLookupStage = {
         $lookup: {
@@ -25,11 +25,26 @@ export class UserService {
           from: 'cards',
         }
       };
+      portfoliosLookupStage = {
+        $lookup: {
+          pipeline: [],
+          as: 'portfolios',
+          from: 'portfolios',
+        }
+      };
     } else {
       cardsLookupStage = {
         $lookup: {
           as: 'cards',
           from: 'cards',
+          localField: '_id',
+          foreignField: 'ownerId',
+        }
+      };
+      portfoliosLookupStage = {
+        $lookup: {
+          as: 'portfolios',
+          from: 'portfolios',
           localField: '_id',
           foreignField: 'ownerId',
         }
@@ -51,6 +66,7 @@ export class UserService {
         },
       },
       cardsLookupStage,
+      portfoliosLookupStage,
       {
         $addFields: {
           avatar: {
@@ -66,7 +82,8 @@ export class UserService {
           currency: 1,
           lastName: 1,
           firstName: 1,
-          cardIds: '$cards._id'
+          cardIds: '$cards._id',
+          portfolioIds: '$portfolios._id'
         },
       }
     ]);  

@@ -9,8 +9,11 @@ import {Card} from '../finance/card/schemas/card.schema';
 import {ICategory} from '../category/types/category.types';
 import {Category} from '../category/schemas/category.schema';
 import {UserErrorMessages} from '../../configs/messages/user';
+import {IPortfolio} from '../crypto/portfolio/types/portfolio.types';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {CurrencyErrorMessages} from '../../configs/messages/currency';
+import {Portfolio} from '../crypto/portfolio/schemas/portfolio.schema';
+import {PortfolioErrorMessages} from '../../configs/messages/portfolio';
 import {TransactionErrorMessages} from '../../configs/messages/transaction';
 import {ITransaction} from '../finance/transaction/types/transaction.types';
 import {Transaction} from '../finance/transaction/schemas/transaction.schema';
@@ -22,6 +25,7 @@ export class CommonService {
     @InjectModel(Collections.users) private readonly userModel: Model<User>,
     @InjectModel(Collections.cards) private readonly cardModel: Model<Card>,
     @InjectModel(Collections.categories) private readonly categoryModel: Model<Category>,
+    @InjectModel(Collections.portfolios) private readonly portfolioModel: Model<Portfolio>,
     @InjectModel(Collections.transactions) private readonly transactionModel: Model<Transaction>,
   ) {}
 
@@ -68,6 +72,14 @@ export class CommonService {
       if(!transaction) throw new HttpException(TransactionErrorMessages.findOne, HttpStatus.NOT_FOUND);
     }
     return transaction;
+  }
+
+  async findOnePortfolioAPI(key: '_id', value: string, noCheck?: boolean): Promise<IPortfolio> {
+    const portfolio = await this.portfolioModel.findOne({[key]: value});
+    if(!noCheck) {
+      if(!portfolio) throw new HttpException(PortfolioErrorMessages.findOne, HttpStatus.NOT_FOUND);
+    }
+    return portfolio;
   }
 
   calculateBalance(transactionType: number, isActionReverse: boolean, cardBalance: number, transactionAmmount: number): number {

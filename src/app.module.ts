@@ -13,6 +13,7 @@ import {UserSchema} from './modules/user/schemas/user.schema';
 import {CardModule} from './modules/finance/card/card.module';
 import {CategoryModule} from './modules/category/category.module';
 import {AnalyticsModule} from './modules/analytics/analytics.module';
+import {PortfolioModule} from './modules/crypto/portfolio/portfolio.module';
 import {TransactionModule} from './modules/finance/transaction/transaction.module';
 
 @Module({
@@ -24,6 +25,7 @@ import {TransactionModule} from './modules/finance/transaction/transaction.modul
     CommonModule,
     CategoryModule,
     AnalyticsModule,
+    PortfolioModule,
     TransactionModule,
     MailerModule.forRoot({
       transport: {
