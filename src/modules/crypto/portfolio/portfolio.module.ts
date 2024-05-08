@@ -6,11 +6,13 @@ import {CommonModule} from '../../common/common.module';
 import {Collections} from '../../../configs/collections';
 import {PortfolioController} from './portfolio.controller';
 import {PortfolioSchema} from './schemas/portfolio.schema';
+import {PortfolioTransactionModule} from '../portfolio-transaction/portfolio-transaction.module';
 
 @Module({
   imports: [
     JwtModule,
     CommonModule,
+    PortfolioTransactionModule,
     MongooseModule.forFeature([{name: Collections.portfolios, schema: PortfolioSchema}]),
   ],
   exports: [PortfolioService],

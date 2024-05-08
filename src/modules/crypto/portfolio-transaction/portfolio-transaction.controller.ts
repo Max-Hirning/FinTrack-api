@@ -71,20 +71,27 @@ export class PortfolioTransactionController {
     });
   }
 
-  // @Delete(':id')
-  // async removeOne(@Request() req: ICustomRequest, @Param('id') id: string): Promise<IResponse<undefined>> {
-  //   const portfolioTransaction = await this.commonService.findOnePortfolioTransactionAPI('_id', id);
-  //   const card = await this.commonService.findOnePortfolioAPI('_id', portfolioTransaction.portfolioId);
-  //   if(req._id === card.ownerId.toString() || req.role === 'Admin') {
-  //     await this.commonService.updateCardBalance(portfolioTransaction.portfolioId, this.commonService.calculateBalance(transaction.amount, true, card.balance, transaction.amount));
-  //     const response = await this.portfolioTransactionService.removeOne(id);
-  //     return ({
-  //       message: response,
-  //       statusCode: HttpStatus.OK,
-  //     });
-  //   }
-  //   throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-  // }
+  @Delete(':id')
+  async removeOne(@Request() req: ICustomRequest, @Param('id') id: string): Promise<IResponse<undefined>> {
+    const portfolioTransaction = await this.commonService.findOnePortfolioTransactionAPI('_id', id);
+    const portfolio = await this.commonService.findOnePortfolioAPI('_id', portfolioTransaction.portfolioId);
+    if(req._id === portfolio.ownerId.toString() || req.role === 'Admin') {
+      const asset = portfolio.assets[portfolioTransaction.asset];
+      const newAmount = asset.amount - portfolioTransaction.amount;
+      const newAvgBuyPrice = ((asset.avgBuyPrice * asset.amount) - (portfolioTransaction.price * portfolioTransaction.amount)) / newAmount;
+      await this.commonService.updatePortfolioAssets(portfolio._id.toString(), asset.asset, {
+        amount: newAmount,
+        asset: asset.asset,
+        avgBuyPrice: +newAvgBuyPrice.toFixed(2),
+      });
+      const response = await this.portfolioTransactionService.removeOne(id);
+      return ({
+        message: response,
+        statusCode: HttpStatus.OK,
+      });
+    }
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+  }
 
   @Post()
   async createOne(@Request() req: ICustomRequest, @Body() createPortfolioTransactionDto: CreatePortfolioTransactionDto): Promise<IResponse<undefined>> {

@@ -15,6 +15,7 @@ import {PortfolioTransactionSchema} from './schemas/portfolio-transaction.schema
     TransactionModule,
     MongooseModule.forFeature([{name: Collections.portfolioTransactions, schema: PortfolioTransactionSchema}]),
   ],
+  exports: [PortfolioTransactionService],
   providers: [PortfolioTransactionService],
   controllers: [PortfolioTransactionController],
 })

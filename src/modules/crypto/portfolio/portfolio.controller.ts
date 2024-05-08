@@ -7,6 +7,7 @@ import {UpdatePortfolioDto} from './dto/update-portfolio.dto';
 import {ICustomRequest, IResponse} from '../../../types/app.types';
 import {PortfolioSuccessMessages} from '../../../configs/messages/portfolio';
 import {IPortfolioResponse, IUpdatePortfolio} from './types/portfolio.types';
+import {PortfolioTransactionService} from '../portfolio-transaction/portfolio-transaction.service';
 import {Controller, Get, Post, Body, Param, Delete, Request, UseGuards, HttpException, HttpStatus, Put, Query} from '@nestjs/common';
 
 @UseGuards(AuthGuard)
@@ -15,6 +16,7 @@ export class PortfolioController {
   constructor(
     private readonly commonService: CommonService,
     private readonly portfolioService: PortfolioService,
+    private readonly portfolioTransactionService: PortfolioTransactionService,
   ) {}
 
   @Get()
@@ -57,7 +59,7 @@ export class PortfolioController {
   async removeOne(@Request() req: ICustomRequest, @Param('id') id: string): Promise<IResponse<undefined>> {
     const portfolio = await this.commonService.findOnePortfolioAPI('_id', id);
     if(req._id === portfolio.ownerId.toString() || req.role === 'Admin') {
-      // await this.portfolioTransactionService.removeMany(id); // delete all portfolio transactions
+      await this.portfolioTransactionService.removeMany(id); // delete all portfolio transactions
       const response = await this.portfolioService.removeOne(id);
       return ({
         message: response,

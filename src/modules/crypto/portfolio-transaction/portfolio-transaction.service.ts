@@ -100,8 +100,8 @@ export class PortfolioTransactionService {
     return TransactionSuccessMessages.removeOne;
   }
 
-  async removeMany(cardId: string): Promise<string> {
-    await this.portfolioTransactionModel.deleteMany({cardId});
+  async removeMany(portfolioId: string): Promise<string> {
+    await this.portfolioTransactionModel.deleteMany({portfolioId});
     return TransactionSuccessMessages.removeMany;
   }
 
