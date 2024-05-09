@@ -31,6 +31,17 @@ export class AppController {
     });
   }
 
+  @Get('crypto-currencies')
+  async getCryptoCurrencies(): Promise<IResponse<ICurrency[]>> {
+    const response = await fetch('https://api.binance.com/sapi/v1/convert/exchangeInfo');
+    const currencies = await response.json();
+    return ({
+      data: currencies,
+      statusCode: HttpStatus.OK,
+      message: CurrencySuccessMessages.findMany,
+    });
+  }
+
   @Get('confirm-email')
   async confirmEmail(@Res() res: Response, @Query('code') code: string): Promise<void> {
     res.redirect(`${process.env.ORIGIN_URL}/auth/sign-in`);
