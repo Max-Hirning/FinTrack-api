@@ -8,7 +8,7 @@ import {IResponse, ICustomRequest} from '../../../types/app.types';
 import {CardSuccessMessages} from '../../../configs/messages/card';
 import {TransactionService} from '../transaction/transaction.service';
 import {ICardResponse, ICardsList, IUpdateCard} from './types/card.types';
-import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, Query, UseGuards, HttpException, Request} from '@nestjs/common';
+import {Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, UseGuards, HttpException, Request} from '@nestjs/common';
 
 @Controller('card')
 @UseGuards(AuthGuard)
@@ -19,30 +19,14 @@ export class CardController {
     private readonly transactionService: TransactionService,
   ) {}
 
-  @Get()
-  async findMany(
-    @Query('cards') cards?: string,
-    @Query('ownerId') ownerId?: string,
-  ): Promise<IResponse<ICardsList>> {
-    if(cards) {
-      const response = await this.cardService.findMany({_id: {$in: JSON.parse(cards).map((el: string) => new Types.ObjectId(el))}});
-      return ({
-        data: response,
-        statusCode: HttpStatus.OK,
-        message: CardSuccessMessages.findMany,
-      });
-    }
-
-    if(ownerId) {
-      const response = await this.cardService.findMany({ownerId: new Types.ObjectId(ownerId)});
-      return ({
-        data: response,
-        statusCode: HttpStatus.OK,
-        message: CardSuccessMessages.findMany,
-      });
-    }
-
-    throw new HttpException('Either "cards" or "ownerId" is required', HttpStatus.BAD_REQUEST);
+  @Get('owner/:id')
+  async findMany(@Param('id') id: string): Promise<IResponse<ICardsList>> {
+    const response = await this.cardService.findMany({ownerId: new Types.ObjectId(id)});
+    return ({
+      data: response,
+      statusCode: HttpStatus.OK,
+      message: CardSuccessMessages.findMany,
+    });
   }
 
   @Get(':id')

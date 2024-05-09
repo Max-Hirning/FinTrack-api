@@ -1,20 +1,14 @@
 import {Types} from 'mongoose';
 import {IResponse} from 'types/app.types';
 import {toFixedWithoutRounding} from 'utils/math';
-import {CommonService} from 'modules/common/common.service';
 import {PortfolioService} from '../portfolio/portfolio.service';
 import {AnalyticsSuccessMessages} from 'configs/messages/analytics';
 import {IAsset, IPortfolioResponse} from '../portfolio/types/portfolio.types';
 import {Controller, Get, Query, HttpStatus, HttpException} from '@nestjs/common';
-import {PortfolioTransactionService} from '../portfolio-transaction/portfolio-transaction.service';
 
 @Controller('portfolio-analytics')
 export class PortfolioAnalyticsController {
-  constructor(
-    private readonly commonService: CommonService,
-    private readonly portfolioService: PortfolioService,
-    private readonly portfolioTransactionService: PortfolioTransactionService,
-  ) {}
+  constructor(private readonly portfolioService: PortfolioService) {}
 
   @Get('assets')
   async findPortfolioAssets(

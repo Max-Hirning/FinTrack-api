@@ -8,7 +8,7 @@ import {ICustomRequest, IResponse} from '../../../types/app.types';
 import {PortfolioSuccessMessages} from '../../../configs/messages/portfolio';
 import {IPortfolioResponse, IUpdatePortfolio} from './types/portfolio.types';
 import {PortfolioTransactionService} from '../portfolio-transaction/portfolio-transaction.service';
-import {Controller, Get, Post, Body, Param, Delete, Request, UseGuards, HttpException, HttpStatus, Put, Query} from '@nestjs/common';
+import {Controller, Get, Post, Body, Param, Delete, Request, UseGuards, HttpException, HttpStatus, Put} from '@nestjs/common';
 
 @UseGuards(AuthGuard)
 @Controller('portfolio')
@@ -19,32 +19,6 @@ export class PortfolioController {
     private readonly portfolioTransactionService: PortfolioTransactionService,
   ) {}
 
-  @Get()
-  async findMany(
-    @Query('ownerId') ownerId?: string,
-    @Query('portfolios') portfolios?: string,
-  ): Promise<IResponse<IPortfolioResponse[]>> {
-    if(portfolios) {
-      const response = await this.portfolioService.findMany({_id: {$in: JSON.parse(portfolios).map((el: string) => new Types.ObjectId(el))}});
-      return ({
-        data: response,
-        statusCode: HttpStatus.OK,
-        message: PortfolioSuccessMessages.findMany,
-      });
-    }
-
-    if(ownerId) {
-      const response = await this.portfolioService.findMany({ownerId: new Types.ObjectId(ownerId)});
-      return ({
-        data: response,
-        statusCode: HttpStatus.OK,
-        message: PortfolioSuccessMessages.findMany,
-      });
-    }
-
-    throw new HttpException('Either "portfolios" or "ownerId" is required', HttpStatus.BAD_REQUEST);
-  }
-
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<IResponse<IPortfolioResponse>> {
     const response = await this.portfolioService.findOne(id);
@@ -52,6 +26,16 @@ export class PortfolioController {
       data: response,
       statusCode: HttpStatus.OK,
       message: PortfolioSuccessMessages.findOne,
+    });
+  }
+
+  @Get('owner/:id')
+  async findMany(@Param('id') id: string): Promise<IResponse<IPortfolioResponse[]>> {
+    const response = await this.portfolioService.findMany({ownerId: new Types.ObjectId(id)});
+    return ({
+      data: response,
+      statusCode: HttpStatus.OK,
+      message: PortfolioSuccessMessages.findMany,
     });
   }
 
