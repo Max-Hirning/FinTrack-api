@@ -1,20 +1,20 @@
 import {Types} from 'mongoose';
-import {IResponse} from '../../types/app.types';
 import {IAccountResponse} from './types/account';
 import {toFixedWithoutRounding} from 'utils/math';
-import {AuthGuard} from '../auth/guards/auth.guard';
-import {CommonService} from '../common/common.service';
-import {CardService} from '../finance/card/card.service';
-import {ICurrencyRate} from '../../types/currency.types';
+import {IResponse} from '../../../types/app.types';
+import {AuthGuard} from '../../auth/guards/auth.guard';
+import {CommonService} from '../../common/common.service';
+import {CardService} from '../../finance/card/card.service';
+import {ICurrencyRate} from '../../../types/currency.types';
 import {ICardsExpensesResponse} from './types/cardsExpenses';
-import {ICardResponse} from '../finance/card/types/card.types';
+import {ICardResponse} from '../../finance/card/types/card.types';
 import {IMonthlyExpensesResponse} from './types/monthlyExpenses';
 import {ITransactionsStatistics} from './types/transactionsStatistics';
 import {ICategoriesExpensesResponse} from './types/categoriesExpenses';
-import {TransactionService} from '../finance/transaction/transaction.service';
+import {TransactionService} from '../../finance/transaction/transaction.service';
 import {Controller, Get, HttpException, HttpStatus, Query, UseGuards} from '@nestjs/common';
-import {IFilters, ITransactionResponse} from '../finance/transaction/types/transaction.types';
-import {AnalyticsErrorMessages, AnalyticsSuccessMessages} from '../../configs/messages/analytics';
+import {IFilters, ITransactionResponse} from '../../finance/transaction/types/transaction.types';
+import {AnalyticsErrorMessages, AnalyticsSuccessMessages} from '../../../configs/messages/analytics';
 
 @UseGuards(AuthGuard)
 @Controller('analytics')

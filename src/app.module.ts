@@ -12,9 +12,10 @@ import {CommonModule} from './modules/common/common.module';
 import {UserSchema} from './modules/user/schemas/user.schema';
 import {CardModule} from './modules/finance/card/card.module';
 import {CategoryModule} from './modules/category/category.module';
-import {AnalyticsModule} from './modules/analytics/analytics.module';
 import {PortfolioModule} from './modules/crypto/portfolio/portfolio.module';
+import {AnalyticsModule} from './modules/finance/analytics/analytics.module';
 import {TransactionModule} from './modules/finance/transaction/transaction.module';
+import {PortfolioAnalyticsModule} from 'modules/crypto/portfolio-analytics/portfolio-analytics.module';
 import {PortfolioTransactionModule} from './modules/crypto/portfolio-transaction/portfolio-transaction.module';
 
 @Module({
@@ -28,6 +29,7 @@ import {PortfolioTransactionModule} from './modules/crypto/portfolio-transaction
     AnalyticsModule,
     PortfolioModule,
     TransactionModule,
+    PortfolioAnalyticsModule,
     PortfolioTransactionModule,
     MailerModule.forRoot({
       transport: {
