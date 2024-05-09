@@ -1,5 +1,6 @@
 import {Card} from './schemas/card.schema';
 import {InjectModel} from '@nestjs/mongoose';
+import {toFixedWithoutRounding} from 'utils/math';
 import {Collections} from '../../../configs/collections';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
@@ -78,7 +79,7 @@ export class CardService {
   }
 
   async createOne(createCard: ICreateCard): Promise<string> {
-    await this.cardModel.create({...createCard, balance: +createCard.balance.toFixed(2), startBalance: +createCard.startBalance.toFixed(2)});
+    await this.cardModel.create({...createCard, balance: toFixedWithoutRounding(createCard.balance, 2), startBalance: toFixedWithoutRounding(createCard.startBalance, 2)});
     return CardSuccessMessages.createOne;
   }
 

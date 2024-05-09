@@ -1,4 +1,5 @@
 import {InjectModel} from '@nestjs/mongoose';
+import {toFixedWithoutRounding} from 'utils/math';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {Collections} from '../../../configs/collections';
 import {Transaction} from './schemas/transaction.schema';
@@ -151,12 +152,12 @@ export class TransactionService {
   }
 
   async createOne(createTransaction: ICreateTransaction): Promise<string> {
-    await this.transactionModel.create({...createTransaction, amount: +createTransaction.amount.toFixed(2)});
+    await this.transactionModel.create({...createTransaction, amount: toFixedWithoutRounding(createTransaction.amount, 2)});
     return TransactionSuccessMessages.createOne;
   }
 
   async updateOne(id: string, updateTransaction: IUpdateTransaction): Promise<string> {
-    if(updateTransaction.amount) updateTransaction.amount = +updateTransaction.amount.toFixed(2);
+    if(updateTransaction.amount) updateTransaction.amount = toFixedWithoutRounding(updateTransaction.amount, 2);
     await this.transactionModel.updateOne({_id: id}, updateTransaction);
     return TransactionSuccessMessages.updateOne;
   }

@@ -20,7 +20,7 @@ export interface ICreatePortfolioTransaction {
   portfolioId: string;
   description: string;
 }
-export interface IUpdatePortfolioTransaction extends Partial<IPortfolioTransaction> {}
+export interface IUpdatePortfolioTransaction extends Partial<Omit<ICreatePortfolioTransaction, 'asset'|'portfolioId'>> {}
 export interface IPortfolioTransactionResponse extends Pick<IPortfolioTransaction, 'asset'|'price'|'_id'|'date'|'amount'|'description'> {
   portfolio: IPortfolioResponse;
 }

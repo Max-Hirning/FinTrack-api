@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {Types} from 'mongoose';
+import {toFixedWithoutRounding} from 'utils/math';
 import {IPagintaion} from 'types/pagination.types';
 import {AuthGuard} from 'modules/auth/guards/auth.guard';
 import {IResponse, ICustomRequest} from 'types/app.types';
@@ -8,7 +8,7 @@ import {TransactionSuccessMessages} from 'configs/messages/transaction';
 import {PortfolioTransactionService} from './portfolio-transaction.service';
 import {CreatePortfolioTransactionDto} from './dto/create-portfolio-transaction.dto';
 import {UpdatePortfolioTransactionDto} from './dto/update-portfolio-transaction.dto';
-import {IPortfolioTransactionResponse, IFilters} from './types/portfolio-transaction.types';
+import {IPortfolioTransactionResponse, IFilters, IUpdatePortfolioTransaction} from './types/portfolio-transaction.types';
 import {Controller, Get, Post, Body, Put, Param, Request, Delete, HttpException, HttpStatus, Query, UseGuards} from '@nestjs/common';
 
 @UseGuards(AuthGuard)
@@ -82,7 +82,7 @@ export class PortfolioTransactionController {
       await this.commonService.updatePortfolioAssets(portfolio._id.toString(), asset.asset, {
         amount: newAmount,
         asset: asset.asset,
-        avgBuyPrice: +newAvgBuyPrice.toFixed(2),
+        avgBuyPrice: toFixedWithoutRounding(newAvgBuyPrice, 2),
       });
       const response = await this.portfolioTransactionService.removeOne(id);
       return ({
@@ -121,14 +121,14 @@ export class PortfolioTransactionController {
       await this.commonService.updatePortfolioAssets(portfolio._id.toString(), asset.asset, {
         amount: newAmount,
         asset: asset.asset,
-        avgBuyPrice: +newAvgBuyPrice.toFixed(2),
+        avgBuyPrice: toFixedWithoutRounding(newAvgBuyPrice, 2),
       });
     } else {
       if(createPortfolioTransactionDto.amount > 0) {
         await this.commonService.updatePortfolioAssets(portfolio._id.toString(), createPortfolioTransactionDto.asset, {
           asset: createPortfolioTransactionDto.asset,
           amount: createPortfolioTransactionDto.amount,
-          avgBuyPrice: +createPortfolioTransactionDto.price.toFixed(2)
+          avgBuyPrice: toFixedWithoutRounding(createPortfolioTransactionDto.price, 2)
         });
       } else {
         // eslint-disable-next-line quotes
@@ -149,36 +149,62 @@ export class PortfolioTransactionController {
     });
   }
 
-  // @Put(':id')
-  // async updateOne(@Request() req: ICustomRequest, @Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto): Promise<IResponse<undefined>> {
-  //   const transaction = await this.commonService.findOneTransactionAPI('_id', id);
-  //   const card = await this.commonService.findOneCardAPI('_id', transaction.cardId);
-  //   if(req._id !== card.ownerId.toString()) throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-  //   if(transaction.cardId.toString() !== updateTransactionDto.cardId) {
-  //     const transaction = await this.commonService.findOneTransactionAPI('_id', id);
-  //     const prevCard = await this.commonService.findOneCardAPI('_id', transaction.cardId);
-  //     await this.commonService.updateCardBalance(prevCard._id.toString(), this.commonService.calculateBalance(transaction.amount, true, prevCard.balance, transaction.amount));
-  //     const newCard = await this.commonService.findOneCardAPI('_id', updateTransactionDto.cardId);
-  //     await this.commonService.updateCardBalance(newCard._id.toString(), this.commonService.calculateBalance(transaction.amount, false, newCard.balance, transaction.amount));
-  //     await this.portfolioTransactionService.updateOne(id, {cardId: updateTransactionDto.cardId});
-  //   }
-  //   if(transaction.amount !== updateTransactionDto.amount) {
-  //     if(updateTransactionDto.amount === 0) throw new HttpException('Amount must not be equal 0', HttpStatus.NOT_FOUND);
-  //     const transaction = await this.commonService.findOneTransactionAPI('_id', id);
-  //     const card = await this.commonService.findOneCardAPI('_id', transaction.cardId);
-  //     const prevCardAmount = this.commonService.calculateBalance(transaction.amount, true, card.balance, transaction.amount);
-  //     await this.commonService.updateCardBalance(card._id.toString(), prevCardAmount);
-  //     await this.commonService.updateCardBalance(card._id.toString(), this.commonService.calculateBalance(updateTransactionDto.amount, false, prevCardAmount, updateTransactionDto.amount));
-  //     await this.portfolioTransactionService.updateOne(id, {amount: updateTransactionDto.amount});
-  //   }
-  //   const updateTransaction: IUpdateTransaction = {};
-  //   if(updateTransactionDto.date !== transaction.date) updateTransaction.date = updateTransactionDto.date;
-  //   if(updateTransactionDto.categoryId !== transaction.categoryId.toString()) updateTransaction.categoryId = updateTransactionDto.categoryId;
-  //   if(updateTransactionDto.description && updateTransactionDto.description !== '' && transaction.description !== updateTransactionDto.description) updateTransaction.description = updateTransactionDto.description;
-  //   const response = await this.portfolioTransactionService.updateOne(id, updateTransaction);
-  //   return ({
-  //     message: response,
-  //     statusCode: HttpStatus.OK,
-  //   });
-  // }
+  @Put(':id')
+  async updateOne(@Request() req: ICustomRequest, @Param('id') id: string, @Body() updatePortfolioTransactionDto: UpdatePortfolioTransactionDto): Promise<IResponse<undefined>> {
+    const portfolioTransaction = await this.commonService.findOnePortfolioTransactionAPI('_id', id);
+    const portfolio = await this.commonService.findOnePortfolioAPI('_id', portfolioTransaction.portfolioId);
+    if(req._id !== portfolio.ownerId.toString()) throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    if(updatePortfolioTransactionDto.price && portfolioTransaction.price !== updatePortfolioTransactionDto.price) {
+      const portfolioTransaction = await this.commonService.findOnePortfolioTransactionAPI('_id', id);
+      const portfolio = await this.commonService.findOnePortfolioAPI('_id', portfolioTransaction.portfolioId);
+      const asset = portfolio.assets[portfolioTransaction.asset];
+      let newAmount = 0, newAvgBuyPrice = 0;
+      const oldAmount = asset.amount - portfolioTransaction.amount;
+      const oldAvgBuyPrice = toFixedWithoutRounding((((asset.avgBuyPrice * asset.amount) - (portfolioTransaction.price * portfolioTransaction.amount)) / oldAmount), 2);
+      if(portfolioTransaction.amount > 0) {
+        newAmount = oldAmount + portfolioTransaction.amount;
+        newAvgBuyPrice = ((oldAmount * oldAvgBuyPrice) + (Math.abs(portfolioTransaction.amount) * updatePortfolioTransactionDto.price)) / newAmount;
+      } else {
+        if(Math.abs(portfolioTransaction.amount) > asset.amount) throw new HttpException(`You don't have enough ${asset.asset} to sell`, HttpStatus.BAD_REQUEST);
+        newAmount = oldAmount + portfolioTransaction.amount;
+        newAvgBuyPrice = ((oldAmount * oldAvgBuyPrice) - (Math.abs(portfolioTransaction.amount) * updatePortfolioTransactionDto.price)) / newAmount;
+      }
+      await this.commonService.updatePortfolioAssets(portfolio._id.toString(), asset.asset, {
+        amount: newAmount,
+        asset: asset.asset,
+        avgBuyPrice: toFixedWithoutRounding(newAvgBuyPrice, 2),
+      });
+      await this.portfolioTransactionService.updateOne(id, {price: updatePortfolioTransactionDto.price});
+    }
+    if(updatePortfolioTransactionDto.amount && portfolioTransaction.amount !== updatePortfolioTransactionDto.amount) {
+      const portfolioTransaction = await this.commonService.findOnePortfolioTransactionAPI('_id', id);
+      const portfolio = await this.commonService.findOnePortfolioAPI('_id', portfolioTransaction.portfolioId);
+      const asset = portfolio.assets[portfolioTransaction.asset];
+      let newAmount = 0, newAvgBuyPrice = 0;
+      const oldAmount = asset.amount - portfolioTransaction.amount;
+      const oldAvgBuyPrice = toFixedWithoutRounding((((asset.avgBuyPrice * asset.amount) - (portfolioTransaction.price * portfolioTransaction.amount)) / oldAmount), 2);
+      if(updatePortfolioTransactionDto.amount > 0) {
+        newAmount = oldAmount + updatePortfolioTransactionDto.amount;
+        newAvgBuyPrice = ((oldAmount * oldAvgBuyPrice) + (Math.abs(updatePortfolioTransactionDto.amount) * portfolioTransaction.price)) / newAmount;
+      } else {
+        if(Math.abs(updatePortfolioTransactionDto.amount) > asset.amount) throw new HttpException(`You don't have enough ${asset.asset} to sell`, HttpStatus.BAD_REQUEST);
+        newAmount = oldAmount + updatePortfolioTransactionDto.amount;
+        newAvgBuyPrice = ((oldAmount * oldAvgBuyPrice) - (Math.abs(updatePortfolioTransactionDto.amount) * portfolioTransaction.price)) / newAmount;
+      }
+      await this.commonService.updatePortfolioAssets(portfolio._id.toString(), asset.asset, {
+        amount: newAmount,
+        asset: asset.asset,
+        avgBuyPrice: toFixedWithoutRounding(newAvgBuyPrice, 2),
+      });
+      await this.portfolioTransactionService.updateOne(id, {amount: updatePortfolioTransactionDto.amount});
+    }
+    const updatePortfolioTransaction: IUpdatePortfolioTransaction = {};
+    if(updatePortfolioTransactionDto.date !== portfolioTransaction.date) updatePortfolioTransaction.date = updatePortfolioTransactionDto.date;
+    if(updatePortfolioTransactionDto.description && updatePortfolioTransactionDto.description !== '' && portfolioTransaction.description !== updatePortfolioTransactionDto.description) updatePortfolioTransaction.description = updatePortfolioTransactionDto.description;
+    const response = await this.portfolioTransactionService.updateOne(id, updatePortfolioTransaction);
+    return ({
+      message: response,
+      statusCode: HttpStatus.OK,
+    });
+  }
 }

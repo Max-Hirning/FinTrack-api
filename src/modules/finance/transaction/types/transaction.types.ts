@@ -24,7 +24,7 @@ export interface ICreateTransaction {
   categoryId: string;
   description: string;
 }
-export interface IUpdateTransaction extends Partial<ITransaction> {}
+export interface IUpdateTransaction extends Partial<ICreateTransaction> {}
 export interface ITransactionResponse extends Pick<ITransaction, '_id'|'date'|'amount'|'description'> {
   card: ICardResponse;
   category: ICategoryResponse;

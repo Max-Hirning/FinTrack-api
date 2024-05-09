@@ -20,7 +20,7 @@ export class PortfolioTransaction {
     required: true,
     type: String,
   })
-    asset: number;
+    asset: string;
 
   @Prop({
     required: true,

@@ -1,6 +1,7 @@
 import {Types} from 'mongoose';
 import {IResponse} from '../../types/app.types';
 import {IAccountResponse} from './types/account';
+import {toFixedWithoutRounding} from 'utils/math';
 import {AuthGuard} from '../auth/guards/auth.guard';
 import {CommonService} from '../common/common.service';
 import {CardService} from '../finance/card/card.service';
@@ -56,15 +57,15 @@ export class AnalyticsController {
         const currencyRate = transactionsCurrenciesRates?.[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
         if(el.amount > 0) {
           if((currency !== el.card.currency) && currencyRate) {
-            res.incomes = +((res.incomes + (el.amount / currencyRate)).toFixed(2));
+            res.incomes = toFixedWithoutRounding((res.incomes + (el.amount / currencyRate)), 2);
           } else {
-            res.incomes = +((res.incomes + el.amount).toFixed(2));
+            res.incomes = toFixedWithoutRounding((res.incomes + el.amount), 2);
           }
         } else if(el.amount < 0) {
           if((currency !== el.card.currency) && currencyRate) {
-            res.expenses = +((res.expenses + (el.amount / currencyRate)).toFixed(2));
+            res.expenses = toFixedWithoutRounding((res.expenses + (el.amount / currencyRate)), 2);
           } else {
-            res.expenses = +((res.expenses + el.amount).toFixed(2));
+            res.expenses = toFixedWithoutRounding((res.expenses + el.amount), 2);
           }
         }
         return res;
@@ -72,9 +73,9 @@ export class AnalyticsController {
       const totalBalance: number = (cardsResponse.cards || []).reduce((res: number, el: ICardResponse): number => {
         const currencyRate = cardsCurrenciesRates?.[el.currency];
         if((currency !== el.currency) && currencyRate) {
-          res = +((res + (el.balance / currencyRate)).toFixed(2));
+          res = toFixedWithoutRounding((res + (el.balance / currencyRate)), 2);
         } else {
-          res = +((res + el.balance).toFixed(2));
+          res = toFixedWithoutRounding((res + el.balance), 2);
         }
         return res;
       }, 0);
@@ -111,22 +112,22 @@ export class AnalyticsController {
           const currencyRate = currenciesRates?.[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
             if(res[el.card._id.toString()]) {
-              res[el.card._id.toString()].amount = +((res[el.card._id.toString()].amount + (el.amount / currencyRate)).toFixed(2));
+              res[el.card._id.toString()].amount = toFixedWithoutRounding((res[el.card._id.toString()].amount + (el.amount / currencyRate)), 2);
             } else {
               res[el.card._id.toString()] = {
                 color: el.card.color,
                 label: el.card.title,
-                amount: +((el.amount / currencyRate).toFixed(2)),
+                amount: toFixedWithoutRounding((el.amount / currencyRate), 2),
               };
             }
           } else {
             if(res[el.card._id.toString()]) {
-              res[el.card._id.toString()].amount = +((res[el.card._id.toString()].amount + el.amount).toFixed(2));
+              res[el.card._id.toString()].amount = toFixedWithoutRounding((res[el.card._id.toString()].amount + el.amount), 2);
             } else {
               res[el.card._id.toString()] = {
                 color: el.card.color,
                 label: el.card.title,
-                amount: +((el.amount).toFixed(2)),
+                amount: toFixedWithoutRounding((el.amount), 2),
               };
             }
           }
@@ -170,9 +171,9 @@ export class AnalyticsController {
         if(responseObj[dateString] !== undefined) {
           const currencyRate = currenciesRates?.[`${date.toISOString().split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
-            responseObj[dateString] = +((responseObj[dateString] + (Math.abs(el.amount)/currencyRate)).toFixed(2));
+            responseObj[dateString] = toFixedWithoutRounding((responseObj[dateString] + (Math.abs(el.amount)/currencyRate)), 2);
           } else {
-            responseObj[dateString] = +((responseObj[dateString] + Math.abs(el.amount)).toFixed(2));
+            responseObj[dateString] = toFixedWithoutRounding((responseObj[dateString] + Math.abs(el.amount)), 2);
           }
         }
       });
@@ -210,22 +211,22 @@ export class AnalyticsController {
           const currencyRate = currenciesRates?.[`${el.date.split('T')[0]}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
             if(res[el.category._id]) {
-              res[el.category._id].amount = +((res[el.category._id].amount + (el.amount / currencyRate)).toFixed(2));
+              res[el.category._id].amount = toFixedWithoutRounding((res[el.category._id].amount + (el.amount / currencyRate)), 2);
             } else {
               res[el.category._id] = {
                 color: el.category.color,
                 label: el.category.title,
-                amount: +((el.amount / currencyRate).toFixed(2)),
+                amount: toFixedWithoutRounding((el.amount / currencyRate), 2)
               };
             }
           } else {
             if(res[el.category._id]) {
-              res[el.category._id].amount = +((res[el.category._id].amount + el.amount).toFixed(2));
+              res[el.category._id].amount = toFixedWithoutRounding((res[el.category._id].amount + el.amount), 2);
             } else {
               res[el.category._id] = {
                 color: el.category.color,
                 label: el.category.title,
-                amount: +((el.amount).toFixed(2)),
+                amount: toFixedWithoutRounding(el.amount, 2)
               };
             }
           }
@@ -275,15 +276,15 @@ export class AnalyticsController {
           const currencyRate = currenciesRates[`${dateString}T23:59:00.000Z`]?.[el.card.currency];
           if(currencyRate) {
             if(el.amount < 0) {
-              (responseObj[dateString] as ITransactionsStatistics).expenses = +(((responseObj[dateString] as ITransactionsStatistics).expenses + (Math.abs(el.amount) / currencyRate)).toFixed(2));
+              (responseObj[dateString] as ITransactionsStatistics).expenses = toFixedWithoutRounding(((responseObj[dateString] as ITransactionsStatistics).expenses + (Math.abs(el.amount) / currencyRate)), 2);
             } else if(el.amount > 0) {
-              (responseObj[dateString] as ITransactionsStatistics).incomes = +(((responseObj[dateString] as ITransactionsStatistics).incomes + (Math.abs(el.amount) / currencyRate)).toFixed(2));
+              (responseObj[dateString] as ITransactionsStatistics).incomes = toFixedWithoutRounding(((responseObj[dateString] as ITransactionsStatistics).incomes + (Math.abs(el.amount) / currencyRate)), 2);
             }
           } else {
             if(el.amount < 0) {
-              (responseObj[dateString] as ITransactionsStatistics).expenses = +(((responseObj[dateString] as ITransactionsStatistics).expenses + Math.abs(el.amount)).toFixed(2));
+              (responseObj[dateString] as ITransactionsStatistics).expenses = toFixedWithoutRounding(((responseObj[dateString] as ITransactionsStatistics).expenses + Math.abs(el.amount)), 2);
             } else if(el.amount > 0) {
-              (responseObj[dateString] as ITransactionsStatistics).incomes = +(((responseObj[dateString] as ITransactionsStatistics).incomes + Math.abs(el.amount)).toFixed(2));
+              (responseObj[dateString] as ITransactionsStatistics).incomes = toFixedWithoutRounding(((responseObj[dateString] as ITransactionsStatistics).incomes + Math.abs(el.amount)), 2);
             }
           }
         }

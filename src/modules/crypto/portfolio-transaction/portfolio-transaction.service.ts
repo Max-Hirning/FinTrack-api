@@ -1,5 +1,6 @@
 import {InjectModel} from '@nestjs/mongoose';
 import {Collections} from 'configs/collections';
+import {toFixedWithoutRounding} from 'utils/math';
 import {IPagintaion} from 'types/pagination.types';
 import mongoose, {PipelineStage, Model} from 'mongoose';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
@@ -119,12 +120,12 @@ export class PortfolioTransactionService {
   }
 
   async createOne(createTransaction: ICreatePortfolioTransaction): Promise<string> {
-    await this.portfolioTransactionModel.create({...createTransaction, price: +createTransaction.price.toFixed(2)});
+    await this.portfolioTransactionModel.create({...createTransaction, price: toFixedWithoutRounding(createTransaction.price, 2)});
     return TransactionSuccessMessages.createOne;
   }
 
   async updateOne(id: string, updateTransaction: IUpdatePortfolioTransaction): Promise<string> {
-    if(updateTransaction.price) updateTransaction.price = +updateTransaction.price.toFixed(2);
+    if(updateTransaction.price) updateTransaction.price = toFixedWithoutRounding(updateTransaction.price, 2);
     await this.portfolioTransactionModel.updateOne({_id: id}, updateTransaction);
     return TransactionSuccessMessages.updateOne;
   }
