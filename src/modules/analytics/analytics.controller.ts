@@ -327,7 +327,8 @@ export class AnalyticsController {
   protected async getCurrencies(start: string, end: string, currency: string, currencies: Set<string>): Promise<{[key: string]: ICurrencyRate}> {
     currencies.delete(currency);
     if(currencies.size > 0) {
-      const url = `https://api.fxratesapi.com/timeseries?start_date=${new Date(start).toISOString()}&end_date=${(new Date(end) < new Date()) ? new Date(end).toISOString() : new Date().toISOString()}&api_key=${process.env.ACCESS_TOKEN_CURRENCY}&base=${currency}&currencies=${Array.from(currencies).join(',')}&format=json`;
+      const url = `https://api.fxratesapi.com/timeseries?start_date=${new Date(start).toISOString()}&end_date=${(new Date(end) < new Date()) ? new Date(end).toISOString() : new Date().toISOString()}&base=${currency}&currencies=${Array.from(currencies).join(',')}&format=json`;
+      // const url = `https://api.fxratesapi.com/timeseries?start_date=${new Date(start).toISOString()}&end_date=${(new Date(end) < new Date()) ? new Date(end).toISOString() : new Date().toISOString()}&api_key=${process.env.ACCESS_TOKEN_CURRENCY}&base=${currency}&currencies=${Array.from(currencies).join(',')}&format=json`;
       const response = await fetch(url);
       const result = await response.json();
       return result.rates;
