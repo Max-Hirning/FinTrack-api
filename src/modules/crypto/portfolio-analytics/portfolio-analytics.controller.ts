@@ -18,7 +18,7 @@ export class PortfolioAnalyticsController {
     if(ownerId) {
       const portfolios = await this.portfolioService.findMany({ownerId: new Types.ObjectId(ownerId)});
       const response = {};
-      portfolios.map(({assets}: IPortfolioResponse) => {
+      portfolios.portfolios.map(({assets}: IPortfolioResponse) => {
         Object.values(assets).map((el: IAsset) => {
           const asset = response[el.asset];
           if(asset) {
@@ -41,8 +41,8 @@ export class PortfolioAnalyticsController {
       const response = await this.portfolioService.findOne(portfolioId);
       return ({
         statusCode: HttpStatus.OK,
-        data: Object.values(response.assets),
         message: AnalyticsSuccessMessages.calculate,
+        data: Object.values(response.portfolio.assets),
       });
     }
     throw new HttpException('OwnerId or portfolioId is required', HttpStatus.BAD_REQUEST);

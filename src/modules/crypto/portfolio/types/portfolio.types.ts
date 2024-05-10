@@ -18,6 +18,18 @@ export interface ICreatePortfolio {
   color: string;
   ownerId: string;
 }
+export interface IPortfolioResponseWithCurrencies<T> {
+  portfolio: T;
+  currencies: string[];
+}
+export interface IPortfolioResponseListWithCurrencies<T> {
+  portfolios: T[];
+  currencies: string[];
+}
+export interface IPortfolioResponseWithBalance extends IPortfolioResponse {
+  balance: number;
+  currency: string;
+}
 export interface IUpdatePortfolio extends Partial<Omit<ICreatePortfolio, 'ownerId'>> {}
 export interface IPortfolioResponse extends Pick<IPortfolio, '_id'|'title'|'color'|'assets'> {
   owner: Omit<IUserResponse, 'cardIds'>;

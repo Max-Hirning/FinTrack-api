@@ -4,7 +4,7 @@ import mongoose, {Model, PipelineStage} from 'mongoose';
 import {Collections} from '../../../configs/collections';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {PortfolioErrorMessages, PortfolioSuccessMessages} from '../../../configs/messages/portfolio';
-import {ICreatePortfolio, IFilters, IPortfolioResponse, IUpdatePortfolio} from './types/portfolio.types';
+import {ICreatePortfolio, IFilters, IPortfolioResponse, IPortfolioResponseListWithCurrencies, IPortfolioResponseWithCurrencies, IUpdatePortfolio} from './types/portfolio.types';
 
 const aggregationPipeLine: PipelineStage[] = [
   {
@@ -63,7 +63,17 @@ export class PortfolioService {
     return PortfolioSuccessMessages.removeMany;
   }
 
-  async findOne(id: string): Promise<IPortfolioResponse> {
+  async createOne(createPortfolio: ICreatePortfolio): Promise<string> {
+    await this.portfolioModel.create(createPortfolio);
+    return PortfolioSuccessMessages.createOne;
+  }
+
+  async updateOne(id: string, updatePortfolio: IUpdatePortfolio): Promise<string> {
+    await this.portfolioModel.updateOne({_id: id}, updatePortfolio);
+    return PortfolioSuccessMessages.updateOne;
+  }
+
+  async findOne(id: string): Promise<IPortfolioResponseWithCurrencies<IPortfolioResponse>> {
     const [portfolio] = await this.portfolioModel.aggregate([
       {
         $match: {
@@ -71,28 +81,63 @@ export class PortfolioService {
         }
       },
       ...aggregationPipeLine,
+      {
+        $addFields: {
+          portfolio: '$$ROOT'
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          portfolio: 1,
+          currencies: {
+            $map: {
+              input: {$objectToArray: '$portfolio.assets'},
+              as: 'asset',
+              in: '$$asset.k'
+            }
+          }
+        }
+      }
     ]);
     if(!portfolio) throw new HttpException(PortfolioErrorMessages.findOne, HttpStatus.NOT_FOUND);
     return portfolio;
   }
 
-  async createOne(createPortfolio: ICreatePortfolio): Promise<string> {
-    await this.portfolioModel.create(createPortfolio);
-    return PortfolioSuccessMessages.createOne;
-  }
-
-  async findMany(filters: Partial<IFilters>): Promise<IPortfolioResponse[]> {
-    const response = await this.portfolioModel.aggregate([
+  async findMany(filters: Partial<IFilters>): Promise<IPortfolioResponseListWithCurrencies<IPortfolioResponse>> {
+    const [response] = await this.portfolioModel.aggregate([
       {
         $match: filters
       },
       ...aggregationPipeLine,
+      {
+        $group: {
+          _id: null,
+          portfolios: {$push: '$$ROOT'},
+          currencies: {$addToSet: {$objectToArray: '$assets'}}
+        }
+      },
+      {
+        $unwind: '$currencies'
+      },
+      {
+        $unwind: '$currencies'
+      },
+      {
+        $group: {
+          _id: null,
+          portfolios: {$first: '$portfolios'},
+          currencies: {$addToSet: '$currencies.k'}
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          portfolios: 1,
+          currencies: 1
+        }
+      }
     ]);
     return response;
-  }
-
-  async updateOne(id: string, updatePortfolio: IUpdatePortfolio): Promise<string> {
-    await this.portfolioModel.updateOne({_id: id}, updatePortfolio);
-    return PortfolioSuccessMessages.updateOne;
   }
 }
