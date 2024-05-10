@@ -1,11 +1,11 @@
 import {Types} from 'mongoose';
-import {toFixedWithoutRounding} from 'utils/math';
-import {IPagintaion} from 'types/pagination.types';
-import {AuthGuard} from 'modules/auth/guards/auth.guard';
-import {IResponse, ICustomRequest} from 'types/app.types';
-import {CommonService} from 'modules/common/common.service';
-import {TransactionSuccessMessages} from 'configs/messages/transaction';
+import {AuthGuard} from '../../auth/guards/auth.guard';
+import {CommonService} from '../../common/common.service';
+import {toFixedWithoutRounding} from '../../../utils/math';
+import {IPagintaion} from '../../../types/pagination.types';
+import {IResponse, ICustomRequest} from '../../../types/app.types';
 import {PortfolioTransactionService} from './portfolio-transaction.service';
+import {TransactionSuccessMessages} from '../../../configs/messages/transaction';
 import {CreatePortfolioTransactionDto} from './dto/create-portfolio-transaction.dto';
 import {UpdatePortfolioTransactionDto} from './dto/update-portfolio-transaction.dto';
 import {IPortfolioTransactionResponse, IFilters, IUpdatePortfolioTransaction} from './types/portfolio-transaction.types';

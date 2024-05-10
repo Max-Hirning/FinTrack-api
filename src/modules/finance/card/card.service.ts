@@ -1,8 +1,8 @@
 import {Card} from './schemas/card.schema';
 import {InjectModel} from '@nestjs/mongoose';
-import {toFixedWithoutRounding} from 'utils/math';
 import {Collections} from '../../../configs/collections';
 import mongoose, {Model, PipelineStage} from 'mongoose';
+import {toFixedWithoutRounding} from '../../../utils/math';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {CardSuccessMessages, CardErrorMessages} from '../../../configs/messages/card';
 import {ICardResponse, ICardsList, ICreateCard, IFilters, IUpdateCard} from './types/card.types';

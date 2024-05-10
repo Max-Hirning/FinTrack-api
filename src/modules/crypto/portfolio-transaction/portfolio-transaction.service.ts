@@ -1,12 +1,12 @@
 import {InjectModel} from '@nestjs/mongoose';
-import {Collections} from 'configs/collections';
-import {toFixedWithoutRounding} from 'utils/math';
-import {IPagintaion} from 'types/pagination.types';
 import mongoose, {PipelineStage, Model} from 'mongoose';
+import {Collections} from '../../../configs/collections';
+import {toFixedWithoutRounding} from '../../../utils/math';
+import {IPagintaion} from '../../../types/pagination.types';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {PortfolioTransaction} from './schemas/portfolio-transaction.schema';
 import {IPortfolioTransactionResponse} from './types/portfolio-transaction.types';
-import {TransactionErrorMessages, TransactionSuccessMessages} from 'configs/messages/transaction';
+import {TransactionErrorMessages, TransactionSuccessMessages} from '../../../configs/messages/transaction';
 import {ICreatePortfolioTransaction, IFilters, IUpdatePortfolioTransaction} from './types/portfolio-transaction.types';
 
 const aggregationPipeLine: PipelineStage[] = [

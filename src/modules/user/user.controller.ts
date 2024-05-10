@@ -16,8 +16,9 @@ import {UpdateUserProfileDto} from './dto/update-user-profile.dto';
 import {IUpdateUserProfile, IUserResponse} from './types/user.types';
 import {UpdateUserSecurityDto} from './dto/update-user-security.dto';
 import {PortfolioService} from '../crypto/portfolio/portfolio.service';
+import {IPortfolioResponse} from '../crypto/portfolio/types/portfolio.types';
 import {TransactionService} from '../finance/transaction/transaction.service';
-// import {IPortfolioResponse} from '../crypto/portfolio/types/portfolio.types';
+import {PortfolioTransactionService} from '../crypto/portfolio-transaction/portfolio-transaction.service';
 import {Controller, Get, Body, Put, Param, Delete, UseInterceptors, UploadedFile, HttpStatus, HttpException, UseGuards, Request} from '@nestjs/common';
 
 @Controller('user')
@@ -32,6 +33,7 @@ export class UserController {
     private readonly mailerService: MailerService,
     private readonly portfolioService: PortfolioService,
     private readonly transactionService: TransactionService,
+    private readonly portfolioTransactionService: PortfolioTransactionService,
   ) {}
 
   @Get(':id')
@@ -49,10 +51,10 @@ export class UserController {
     if(req.role === 'Admin' || (req._id === id && req.role !== 'Test')) {
       const user = await this.commonService.findOneUserAPI('_id', id);
       const cards = await this.cardService.findMany({ownerId: new mongoose.Types.ObjectId(id)});
-      // const portfolios = await this.portfolioService.findMany({ownerId: new mongoose.Types.ObjectId(id)});
-      // portfolios.map(async (el: IPortfolioResponse) => { // delete all portfolios transactions
-      //   await this.portfolioTransactionService.removeMany(el._id.toString());
-      // });
+      const portfolios = await this.portfolioService.findMany({ownerId: new mongoose.Types.ObjectId(id)});
+      portfolios.portfolios.map(async (el: IPortfolioResponse) => { // delete all portfolios transactions
+        await this.portfolioTransactionService.removeMany(el._id.toString());
+      });
       await this.portfolioService.removeMany(id); // delete all users portfolios
       cards.cards.map(async (el: ICardResponse) => { // delete all cards transactions
         await this.transactionService.removeMany(el._id.toString());

@@ -1,11 +1,13 @@
 import {Types} from 'mongoose';
-import {IResponse} from 'types/app.types';
-import {toFixedWithoutRounding} from 'utils/math';
+import {IResponse} from '../../../types/app.types';
+import {AuthGuard} from '../../auth/guards/auth.guard';
+import {toFixedWithoutRounding} from '../../../utils/math';
 import {PortfolioService} from '../portfolio/portfolio.service';
-import {AnalyticsSuccessMessages} from 'configs/messages/analytics';
+import {AnalyticsSuccessMessages} from '../../../configs/messages/analytics';
 import {IAsset, IPortfolioResponse} from '../portfolio/types/portfolio.types';
-import {Controller, Get, Query, HttpStatus, HttpException} from '@nestjs/common';
+import {Controller, Get, Query, HttpStatus, HttpException, UseGuards} from '@nestjs/common';
 
+@UseGuards(AuthGuard)
 @Controller('portfolio-analytics')
 export class PortfolioAnalyticsController {
   constructor(private readonly portfolioService: PortfolioService) {}

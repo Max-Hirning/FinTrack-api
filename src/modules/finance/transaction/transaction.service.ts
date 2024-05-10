@@ -1,8 +1,8 @@
 import {InjectModel} from '@nestjs/mongoose';
-import {toFixedWithoutRounding} from 'utils/math';
 import mongoose, {Model, PipelineStage} from 'mongoose';
 import {Collections} from '../../../configs/collections';
 import {Transaction} from './schemas/transaction.schema';
+import {toFixedWithoutRounding} from '../../../utils/math';
 import {IPagintaion} from '../../../types/pagination.types';
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {ICreateTransaction, IUpdateTransaction} from './types/transaction.types';
