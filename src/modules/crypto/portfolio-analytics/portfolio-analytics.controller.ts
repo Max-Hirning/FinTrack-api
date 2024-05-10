@@ -14,7 +14,7 @@ export class PortfolioAnalyticsController {
   async findPortfolioAssets(
     @Query('ownerId') ownerId?: string,
     @Query('portfolioId') portfolioId?: string,
-  ): Promise<IResponse<IAsset[]>> {
+  ): Promise<IResponse<{[key: string]: IAsset}>> {
     if(ownerId) {
       const portfolios = await this.portfolioService.findMany({ownerId: new Types.ObjectId(ownerId)});
       const response = {};
@@ -32,8 +32,8 @@ export class PortfolioAnalyticsController {
         });
       });
       return ({
+        data: response,
         statusCode: HttpStatus.OK,
-        data: Object.values(response),
         message: AnalyticsSuccessMessages.calculate,
       });
     }
@@ -41,8 +41,8 @@ export class PortfolioAnalyticsController {
       const response = await this.portfolioService.findOne(portfolioId);
       return ({
         statusCode: HttpStatus.OK,
+        data: response.portfolio.assets,
         message: AnalyticsSuccessMessages.calculate,
-        data: Object.values(response.portfolio.assets),
       });
     }
     throw new HttpException('OwnerId or portfolioId is required', HttpStatus.BAD_REQUEST);
