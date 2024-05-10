@@ -21,7 +21,7 @@ export class PortfolioAnalyticsController {
       const portfolios = await this.portfolioService.findMany({ownerId: new Types.ObjectId(ownerId)});
       const response = {};
       portfolios.portfolios.map(({assets}: IPortfolioResponse) => {
-        Object.values(assets).map((el: IAsset) => {
+        Object.values(assets || {}).map((el: IAsset) => {
           const asset = response[el.asset];
           if(asset) {
             const newAmount = asset.amount + el.amount;

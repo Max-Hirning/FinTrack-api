@@ -80,7 +80,7 @@ export class PortfolioController {
     const response = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${JSON.stringify(currencies.map((el: string) => `${el}USDT`))}&type=MINI`);
     const result = await response.json();
     const portfoliosWithBalances = portfolios.map((portfolio: IPortfolioResponse) => {
-      const balance = Object.values(portfolio.assets).reduce((res: number, el: IAsset): number => {
+      const balance = Object.values(portfolio.assets || {}).reduce((res: number, el: IAsset): number => {
         const currency: {symbol: string, lastPrice: string} = result.find(({symbol}: {symbol: string, lastPrice: string}) => symbol === `${el.asset}USDT`);
         res += +(currency.lastPrice) * el.amount;
         return res;
@@ -89,8 +89,8 @@ export class PortfolioController {
     });
     return ({
       data: {
-        currencies,
-        portfolios: portfoliosWithBalances, 
+        currencies: [],
+        portfolios: portfoliosWithBalances,
       },
       statusCode: HttpStatus.OK,
       message: PortfolioSuccessMessages.findMany,
