@@ -1,0 +1,86 @@
+{
+    "private": true,
+    "license": "MIT",
+    "version": "1.0.0",
+    "name": "fintrack-api",
+    "author": {
+        "name": "Max-Hirning",
+        "url": "https://github.com/Max-Hirning"
+    },
+    "config": {
+        "commitizen": {
+            "path": "./node_modules/cz-conventional-changelog"
+        }
+    },
+    "scripts": {
+        "commit": "cz",
+        "start": "node build/index.js",
+        "commitlint": "commitlint --edit",
+        "start:dev": "nodemon src/index.ts",
+        "ts": "tsc --project tsconfig.json",
+        "lint": "eslint src/**/*.{js,ts,tsx}",
+        "prebuild": "npm run prisma:generate",
+        "lint:fix": "eslint --fix src/**/*.{js,ts,tsx}",
+        "pre:start": "npm run prisma:push && npm run prisma:generate",
+        "prisma:seed": "prisma db seed --schema src/database/prisma/schema.prisma",
+        "prisma:format": "prisma format --schema src/database/prisma/schema.prisma",
+        "prisma:deploy": "prisma migrate deploy --schema src/database/prisma/schema.prisma",
+        "prisma:generate": "npx prisma generate --schema src/database/prisma/schema.prisma",
+        "prisma:migrate:apply": "prisma migrate dev --schema src/database/prisma/schema.prisma",
+        "prisma:push": "npx prisma db push --schema src/database/prisma/schema.prisma --accept-data-loss",
+        "prisma:migrate:create": "prisma migrate dev --schema src/database/prisma/schema.prisma --create-only",
+        "build": "npm run pre:start && rimraf build && tsc --project tsconfig.json && tsc-alias -p tsconfig.json && rimraf tsconfig.tsbuildinfo"
+    },
+    "engines": {
+        "node": ">=20.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Max-Hirning/FinTrack-web"
+    },
+    "lint-staged": {
+        "**/*.{js,jsx,ts,tsx}": [
+            "npx prettier --write",
+            "npx eslint --fix"
+        ],
+        "**/*.prisma": [
+            "npm run prisma:format"
+        ]
+    },
+    "dependencies": {
+        "@fastify/basic-auth": "^5.1.1",
+        "@fastify/cors": "^9.0.1",
+        "@fastify/error": "^4.0.0",
+        "@fastify/swagger": "^8.15.0",
+        "@fastify/swagger-ui": "^4.0.1",
+        "@prisma/client": "^5.17.0",
+        "bcrypt": "^5.1.1",
+        "dotenv": "^16.4.5",
+        "fastify": "^4.28.1",
+        "fastify-type-provider-zod": "^2.0.0",
+        "pino-pretty": "^11.2.2",
+        "prisma": "^5.17.0",
+        "tsc-alias": "^1.8.10",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^19.3.0",
+        "@commitlint/config-conventional": "^19.2.2",
+        "@types/bcrypt": "^5.0.2",
+        "@types/node": "^22.1.0",
+        "@types/pino": "^7.0.5",
+        "@typescript-eslint/eslint-plugin": "^8.0.0",
+        "@typescript-eslint/parser": "^8.0.0",
+        "commitizen": "^4.3.0",
+        "cz-conventional-changelog": "^3.3.0",
+        "eslint": "^8.57.0",
+        "eslint-plugin-pretty-imports": "^1.3.0",
+        "husky": "^9.1.4",
+        "lint-staged": "^15.2.8",
+        "nodemon": "^3.1.4",
+        "prettier": "^3.3.3",
+        "ts-node": "^10.9.2",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "^5.5.4"
+    }
+}
