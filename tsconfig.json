@@ -26,7 +26,11 @@
             "@/*": ["src/*"]
         },
         "outDir": "build",
-        "incremental": true
+        "incremental": true,
+        "noEmit": false,
+        "rootDir": "src",
+        "noImplicitAny": true,
+        "allowImportingTsExtensions": false,
     },
-    "include": ["src/**/*", "**/*.json"]
+    "include": ["src/**/*", "**/*.json"],
 }

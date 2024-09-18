@@ -16,7 +16,7 @@ const envToLogger = {
             },
         },
     },
-    production: true,
+    production: false,
     test: false,
 };
 

@@ -14,8 +14,8 @@ export async function configureSwagger(fastify: FastifyInstance) {
         openapi: {
             openapi: "3.1.0",
             info: {
-                title: "Fastify template API",
                 version: "0.1.0",
+                title: "Fastify template API",
             },
         },
         transform: fastifyTypeProviderZod.jsonSchemaTransform,
@@ -37,10 +37,10 @@ export async function configureSwagger(fastify: FastifyInstance) {
     });
 
     await fastify.register(fastifySwaggerUi, {
-        routePrefix: "/api/docs",
         uiHooks: {
             onRequest: fastify.basicAuth,
         },
+        routePrefix: "/api/docs",
     });
 
     return {

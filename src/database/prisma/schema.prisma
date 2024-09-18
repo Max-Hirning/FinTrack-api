@@ -7,8 +7,60 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Roles {
+  admin
+  user
+  guest
+}
+
+model Otp {
+  id  String @id @default(uuid())
+  otp String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RefreshToken {
+  id    String @id @default(uuid())
+  token String
+  uuid  String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Image {
+  id     String @id @default(uuid())
+  url    String
+  fileId String
+
+  userId String
+  users  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model User {
-  id    String @id @db.Uuid
-  email String @unique
-  name  String
+  id          String   @id @default(uuid())
+  email       String   @unique
+  lastName    String
+  firstName   String
+  password    String
+  dateOfBirth DateTime @default(now()) @db.Date
+  role        Roles    @default(guest)
+
+  avatar       Image[]
+  otp          Otp[]
+  refreshToken RefreshToken[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
