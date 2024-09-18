@@ -9,7 +9,7 @@ const InternalServerError = createError("500", "%s", 500);
 const DefaultInternalServerError = createError(
     "500",
     "Internal Server Error",
-    500
+    500,
 );
 
 export {

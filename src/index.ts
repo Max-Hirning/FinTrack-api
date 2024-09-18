@@ -1,30 +1,15 @@
 import * as fastifyTypeProviderZod from "fastify-type-provider-zod";
-import Fastify from "fastify";
+import fastifyJwt from "@fastify/jwt";
 import fastifyCors from "@fastify/cors";
 import { configureRoutes } from "@/routes";
 import { environmentVariables } from "@/config";
-import { prisma } from "./database/prisma/prisma";
-import { configureSwagger } from "./bootstrap/swagger";
-
-const envToLogger = {
-    development: {
-        transport: {
-            target: "pino-pretty",
-            options: {
-                translateTime: "HH:MM:ss Z",
-                ignore: "pid,hostname",
-            },
-        },
-    },
-    production: false,
-    test: false,
-};
+import { prisma } from "@/database/prisma/prisma";
+import { configureSwagger, fastify } from "@/bootstrap/swagger";
 
 async function main() {
-    const fastify = Fastify({
-        logger: envToLogger[environmentVariables.NODE_ENV] ?? true,
+    await fastify.register(fastifyJwt, {
+        secret: environmentVariables.APPLICATION_SECRET,
     });
-
     await fastify.register(fastifyCors, {
         origin: true,
         credentials: true,
@@ -53,7 +38,7 @@ async function main() {
 
         fastify.log.info(`Documentation available at ${address}/api/docs/`);
         fastify.log.info(
-            `Docs login: ${credentials.username} | password: ${credentials.password}`
+            `Docs login: ${credentials.username} | password: ${credentials.password}`,
         );
         fastify.log.info("Please update in production");
     } catch (err) {

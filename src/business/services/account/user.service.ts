@@ -20,15 +20,12 @@ const get = async (query: Prisma.UserWhereInput) => {
 const updatePassword = async (
     userId: string,
     password: string,
-    olPassword?: string
+    olPassword?: string,
 ) => {
     if (olPassword) {
         const user = await get({ id: userId });
 
-        const comparedPasses = hashing.comparePassword(
-            olPassword,
-            user.password
-        );
+        const comparedPasses = hashing.comparePassword(olPassword, user.password);
         if (!comparedPasses) throw new ForbiddenError("Invalid old password");
     }
 

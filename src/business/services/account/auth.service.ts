@@ -23,7 +23,7 @@ const signIn = async (payload: SignInBody) => {
 
     const comparedPasses = hashing.comparePassword(
         payload.password,
-        user.password
+        user.password,
     );
     if (!comparedPasses) throw new ForbiddenError("Invalid password");
 
