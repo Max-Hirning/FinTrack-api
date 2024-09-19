@@ -1,12 +1,6 @@
 import { z } from "zod";
 import { Roles } from "@prisma/client";
 
-// export const resetPasswordParamSchema = z.object({
-//     userId: z.string(),
-// });
-
-// type ResetPasswordParam = z.infer<typeof resetPasswordParamSchema>;
-
 export const signInBodySchema = z.object({
     email: z.string().email(),
     password: z.string().min(8).max(15),

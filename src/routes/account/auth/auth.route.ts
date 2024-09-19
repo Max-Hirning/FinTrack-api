@@ -16,7 +16,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
         {
             schema: {
                 tags: ["auth"],
-                querystring: resetPasswordBodySchema,
+                body: resetPasswordBodySchema,
             },
         },
         authHandler.resetPassword,
@@ -39,7 +39,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
         {
             schema: {
                 tags: ["auth"],
-                querystring: signUpBodySchema,
+                body: signUpBodySchema,
             },
         },
         authHandler.signUp,
@@ -49,7 +49,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
         {
             schema: {
                 tags: ["auth"],
-                querystring: requestOtpBodySchema,
+                body: requestOtpBodySchema,
             },
         },
         authHandler.requestOtp,
@@ -59,7 +59,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
         {
             schema: {
                 tags: ["auth"],
-                querystring: checkOtpBodySchema,
+                body: checkOtpBodySchema,
             },
         },
         authHandler.checkOtp,
@@ -69,7 +69,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
         {
             schema: {
                 tags: ["auth"],
-                querystring: refreshTokensBodySchema,
+                body: refreshTokensBodySchema,
             },
         },
         authHandler.refreshTokens,

@@ -1,12 +1,18 @@
+import { tokenService } from "./token.service";
 import { hashing } from "@/business/lib/hashing";
+import { emailService } from "../inform/email.service";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import {
     ForbiddenError,
     InternalServerError,
     NotFoundError,
 } from "@/business/lib/errors";
+import {
+    updateUserBody,
+    updateUserPasswordBody,
+} from "@/business/lib/validation/account/user";
 
-const get = async (query: Prisma.UserWhereInput) => {
+const find = async (query: Prisma.UserWhereInput) => {
     try {
         const user = await prisma.user.findFirstOrThrow({
             where: query,
@@ -16,10 +22,9 @@ const get = async (query: Prisma.UserWhereInput) => {
         throw new NotFoundError((error as Error).message);
     }
 };
-
-const findOne = async (query: Prisma.UserWhereInput) => {
+const getUser = async (query: Prisma.UserWhereUniqueInput) => {
     try {
-        const user = await prisma.user.findFirstOrThrow({
+        const user = await prisma.user.findUniqueOrThrow({
             where: query,
         });
         return user;
@@ -27,23 +32,64 @@ const findOne = async (query: Prisma.UserWhereInput) => {
         throw new NotFoundError((error as Error).message);
     }
 };
+const deleteUser = async (query: Prisma.UserWhereUniqueInput) => {
+    try {
+        const user = await prisma.user.delete({
+            where: query,
+        });
 
-const updatePassword = async (
+        await tokenService.deleteTokens({
+            userId: user.id,
+        });
+
+        await emailService.sendDeleteUserEmail(user.email);
+    } catch (error) {
+        throw new NotFoundError((error as Error).message);
+    }
+};
+const updateUser = async (userId: string, payload: updateUserBody) => {
+    try {
+        const user = await prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: payload,
+        });
+
+        if (payload.email) {
+            await tokenService.deleteTokens({
+                userId: user.id,
+            });
+
+            await emailService.sendUpdateUserEmailEmail(user.email);
+        }
+
+        return "User was updated";
+    } catch (error) {
+        throw new InternalServerError((error as Error).message);
+    }
+};
+const updateUserPassword = async (
     userId: string,
-    password: string,
-    olPassword?: string,
+    payload: Omit<updateUserPasswordBody, "oldPassword"> &
+    Partial<Pick<updateUserPasswordBody, "oldPassword">>,
 ) => {
-    if (olPassword) {
-        const user = await get({ id: userId });
+    let user;
 
-        const comparedPasses = hashing.comparePassword(olPassword, user.password);
+    if (payload.oldPassword) {
+        const user = await find({ id: userId });
+
+        const comparedPasses = hashing.comparePassword(
+            payload.oldPassword,
+            user.password,
+        );
         if (!comparedPasses) throw new ForbiddenError("Invalid old password");
     }
 
-    const cryptedPass = hashing.hashPassword(password);
+    const cryptedPass = hashing.hashPassword(payload.password);
 
     try {
-        await prisma.user.update({
+        user = await prisma.user.update({
             where: {
                 id: userId,
             },
@@ -51,7 +97,13 @@ const updatePassword = async (
                 password: cryptedPass,
             },
         });
-        // send email
+
+        await tokenService.deleteTokens({
+            userId: user.id,
+        });
+
+        await emailService.sendUpdateUserPasswordEmail(user.email);
+
         return "Password was updated";
     } catch (error) {
         throw new InternalServerError((error as Error).message);
@@ -59,7 +111,9 @@ const updatePassword = async (
 };
 
 export const userService = {
-    get,
-    findOne,
-    updatePassword,
+    find,
+    getUser,
+    updateUser,
+    deleteUser,
+    updateUserPassword,
 };

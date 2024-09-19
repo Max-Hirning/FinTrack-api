@@ -17,7 +17,7 @@ const envToLogger = {
             },
         },
     },
-    production: false,
+    production: true,
     test: false,
 };
 const basicAuthUsername = "admin";
@@ -34,6 +34,16 @@ export async function configureSwagger(fastify: FastifyInstance) {
             info: {
                 version: "0.1.0",
                 title: "Fastify template API",
+            },
+            components: {
+                securitySchemes: {
+                    bearerAuth: {
+                        // Name of the security scheme
+                        type: "http",
+                        scheme: "bearer",
+                        bearerFormat: "JWT", // Optional, specify if using JWT format
+                    },
+                },
             },
         },
         transform: fastifyTypeProviderZod.jsonSchemaTransform,

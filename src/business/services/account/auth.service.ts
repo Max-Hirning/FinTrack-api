@@ -101,11 +101,13 @@ const refreshTokens = async (payload: RefreshTokensBody) => {
     return tokens;
 };
 const resetPassword = async (payload: ResetPasswordBody) => {
-    const user = await userService.findOne({ email: payload.email });
+    const user = await userService.find({ email: payload.email });
 
-    await emailService.sendUpdatePasswordEmail(payload.email);
+    await emailService.sendUpdateUserPasswordEmail(payload.email);
 
-    return userService.updatePassword(user.id, payload.password);
+    return userService.updateUserPassword(user.id, {
+        password: payload.password,
+    });
 };
 
 export const authService = {

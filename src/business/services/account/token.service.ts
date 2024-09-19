@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { fastify } from "@/bootstrap/swagger";
 import { environmentVariables } from "@/config";
-import { prisma } from "@/database/prisma/prisma";
+import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError } from "@/business/lib/errors";
 
 const createTokens = async (userId: string) => {
@@ -38,7 +38,17 @@ const createTokens = async (userId: string) => {
         throw new InternalServerError((error as Error).message);
     }
 };
+const deleteTokens = async (query: Prisma.RefreshTokenWhereInput) => {
+    try {
+        await prisma.refreshToken.deleteMany({
+            where: query,
+        });
+    } catch (error) {
+        throw new InternalServerError((error as Error).message);
+    }
+};
 
 export const tokenService = {
     createTokens,
+    deleteTokens,
 };

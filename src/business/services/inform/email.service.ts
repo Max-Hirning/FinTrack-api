@@ -6,8 +6,60 @@ import { transporter } from "@/business/lib/mailer";
 import { InternalServerError } from "@/business/lib/errors";
 import { userService } from "@/business/services/account/user.service";
 
+const sendDeleteUserEmail = async (email: string) => {
+    const user = await userService.find({ email });
+
+    try {
+        const templatePath = path.resolve(
+            __dirname,
+            "../../../../",
+            "templates",
+            "deleteAccount.html",
+        );
+        const template = fs.readFileSync(templatePath, "utf-8");
+        const htmlContent = ejs.render(template, {
+            recipientName: user.firstName,
+            currentYear: new Date().getFullYear(),
+        });
+
+        await transporter.sendMail({
+            to: user.email,
+            html: htmlContent,
+            subject: "Account Deleted",
+            from: `"FinTrack" <${environmentVariables.EMAIL}>`,
+        });
+    } catch {
+        throw new InternalServerError("Couldn't send email");
+    }
+};
+const sendUpdateUserEmailEmail = async (email: string) => {
+    const user = await userService.find({ email });
+
+    try {
+        const templatePath = path.resolve(
+            __dirname,
+            "../../../../",
+            "templates",
+            "updateEmail.html",
+        );
+        const template = fs.readFileSync(templatePath, "utf-8");
+        const htmlContent = ejs.render(template, {
+            recipientName: user.firstName,
+            currentYear: new Date().getFullYear(),
+        });
+
+        await transporter.sendMail({
+            to: user.email,
+            html: htmlContent,
+            subject: "Email Address Updated",
+            from: `"FinTrack" <${environmentVariables.EMAIL}>`,
+        });
+    } catch {
+        throw new InternalServerError("Couldn't send email");
+    }
+};
 const sendOtpEmail = async (email: string, otp: string) => {
-    const user = await userService.findOne({ email });
+    const user = await userService.find({ email });
 
     try {
         const templatePath = path.resolve(
@@ -33,15 +85,15 @@ const sendOtpEmail = async (email: string, otp: string) => {
         throw new InternalServerError("Couldn't send email");
     }
 };
-const sendUpdatePasswordEmail = async (email: string) => {
-    const user = await userService.findOne({ email });
+const sendUpdateUserPasswordEmail = async (email: string) => {
+    const user = await userService.find({ email });
 
     try {
         const templatePath = path.resolve(
             __dirname,
             "../../../../",
             "templates",
-            "deleteAccount.html",
+            "updatePassword.html",
         );
         const template = fs.readFileSync(templatePath, "utf-8");
         const htmlContent = ejs.render(template, {
@@ -52,7 +104,7 @@ const sendUpdatePasswordEmail = async (email: string) => {
         await transporter.sendMail({
             to: user.email,
             html: htmlContent,
-            subject: "Account Deleted",
+            subject: "Password Updated",
             from: `"FinTrack" <${environmentVariables.EMAIL}>`,
         });
     } catch {
@@ -62,5 +114,7 @@ const sendUpdatePasswordEmail = async (email: string) => {
 
 export const emailService = {
     sendOtpEmail,
-    sendUpdatePasswordEmail,
+    sendDeleteUserEmail,
+    sendUpdateUserEmailEmail,
+    sendUpdateUserPasswordEmail,
 };
