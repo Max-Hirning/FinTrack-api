@@ -3,6 +3,8 @@ import "dotenv/config";
 type EnvironmentVariables = {
   HOST: string;
   PORT: number;
+  EMAIL: string;
+  EMAIL_PASS: string;
   ACCESS_TOKEN_EXP: string;
   REFRESH_TOKEN_EXP: string;
   DOCS_PASSWORD: string;
@@ -11,6 +13,8 @@ type EnvironmentVariables = {
 };
 const environmentVariables: EnvironmentVariables = {
     HOST: process.env.HOST || "0.0.0.0",
+    EMAIL: process.env.EMAIL || "",
+    EMAIL_PASS: process.env.EMAIL_PASS || "",
     ACCESS_TOKEN_EXP: process.env.ACCESS_TOKEN_EXP || "",
     REFRESH_TOKEN_EXP: process.env.REFRESH_TOKEN_EXP || "",
     PORT: process.env.PORT ? Number(process.env.PORT) : 3001,

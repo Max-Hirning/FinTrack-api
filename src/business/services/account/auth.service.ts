@@ -1,7 +1,9 @@
 import { otpService } from "./otp.service";
 import { userService } from "./user.service";
+import { tokenService } from "./token.service";
 import { hashing } from "@/business/lib/hashing";
 import { prisma } from "@/database/prisma/prisma";
+import { emailService } from "../inform/email.service";
 import { ForbiddenError, InternalServerError } from "@/business/lib/errors";
 import {
     CheckOtpBody,
@@ -27,10 +29,11 @@ const signIn = async (payload: SignInBody) => {
     );
     if (!comparedPasses) throw new ForbiddenError("Invalid password");
 
+    const tokens = await tokenService.createTokens(user.id);
+
     return {
+        ...tokens,
         user: user,
-        accessToken: "",
-        refreshToken: "",
     };
 };
 const signUp = async (payload: SignUpBody) => {
@@ -49,7 +52,6 @@ const signUp = async (payload: SignUpBody) => {
             data: {
                 email: payload.email,
                 password: cryptedPass,
-                dateOfBirth: new Date(),
                 lastName: payload.lastName,
                 firstName: payload.firstName,
             },
@@ -64,16 +66,16 @@ const checkOtp = async (payload: CheckOtpBody) => {
 };
 const requestOtp = async (payload: RequestOtpBody) => {
     const code = await otpService.createOtp(payload);
-    console.log(code);
-    // send to email
+    await emailService.sendOtpEmail(payload.email, code);
     return "Otp was sent";
 };
 const refreshTokens = async (payload: RefreshTokensBody) => {
     console.log(payload);
     return "Exempli gratia";
 };
-const resetPassword = async (userId: string, payload: ResetPasswordBody) => {
-    return userService.updatePassword(userId, payload.password);
+const resetPassword = async (payload: ResetPasswordBody) => {
+    const user = await userService.get({ email: payload.email });
+    return userService.updatePassword(user.id, payload.password);
 };
 
 export const authService = {

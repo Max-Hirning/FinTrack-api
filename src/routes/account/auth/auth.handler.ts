@@ -12,7 +12,7 @@ import {
 
 const signIn = async (
     request: FastifyRequest<{ Body: SignInBody }>,
-    reply: FastifyReply
+    reply: FastifyReply,
 ) => {
     const { body } = request;
 
@@ -22,7 +22,7 @@ const signIn = async (
 };
 const signUp = async (
     request: FastifyRequest<{ Body: SignUpBody }>,
-    reply: FastifyReply
+    reply: FastifyReply,
 ) => {
     const { body } = request;
 
@@ -32,7 +32,7 @@ const signUp = async (
 };
 const checkOtp = async (
     request: FastifyRequest<{ Body: CheckOtpBody }>,
-    reply: FastifyReply
+    reply: FastifyReply,
 ) => {
     const { body } = request;
 
@@ -42,7 +42,7 @@ const checkOtp = async (
 };
 const requestOtp = async (
     request: FastifyRequest<{ Body: RequestOtpBody }>,
-    reply: FastifyReply
+    reply: FastifyReply,
 ) => {
     const { body } = request;
 
@@ -52,7 +52,7 @@ const requestOtp = async (
 };
 const refreshTokens = async (
     request: FastifyRequest<{ Body: RefreshTokensBody }>,
-    reply: FastifyReply
+    reply: FastifyReply,
 ) => {
     const { body } = request;
 
@@ -61,15 +61,12 @@ const refreshTokens = async (
     return reply.send(message).code(200);
 };
 const resetPassword = async (
-    request: FastifyRequest<{
-        Params: ResetPasswordParam;
-        Body: ResetPasswordBody;
-    }>,
-    reply: FastifyReply
+    request: FastifyRequest<{ Body: ResetPasswordBody }>,
+    reply: FastifyReply,
 ) => {
-    const { params, body } = request;
+    const { body } = request;
 
-    const message = authService.resetPassword(params.userId, body);
+    const message = authService.resetPassword(body);
 
     return reply.send(message).code(200);
 };
