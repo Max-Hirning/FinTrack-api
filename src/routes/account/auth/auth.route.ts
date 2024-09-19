@@ -8,7 +8,6 @@ import {
     signInResponseSchema,
     refreshTokensBodySchema,
     resetPasswordBodySchema,
-    resetPasswordParamSchema,
 } from "@/business/lib/validation/account";
 
 export const authRoutes = async (fastify: FastifyInstance) => {
@@ -20,7 +19,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
                 querystring: resetPasswordBodySchema,
             },
         },
-        authHandler.resetPassword
+        authHandler.resetPassword,
     );
     fastify.post(
         "/sign-in",
@@ -31,10 +30,9 @@ export const authRoutes = async (fastify: FastifyInstance) => {
                 },
                 tags: ["auth"],
                 body: signInBodySchema,
-                params: resetPasswordParamSchema,
             },
         },
-        authHandler.signIn
+        authHandler.signIn,
     );
     fastify.post(
         "/sign-up",
@@ -44,7 +42,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
                 querystring: signUpBodySchema,
             },
         },
-        authHandler.signUp
+        authHandler.signUp,
     );
     fastify.post(
         "/request-otp",
@@ -54,7 +52,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
                 querystring: requestOtpBodySchema,
             },
         },
-        authHandler.requestOtp
+        authHandler.requestOtp,
     );
     fastify.post(
         "/check-otp",
@@ -64,7 +62,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
                 querystring: checkOtpBodySchema,
             },
         },
-        authHandler.checkOtp
+        authHandler.checkOtp,
     );
     fastify.post(
         "/refresh-tokens",
@@ -74,6 +72,6 @@ export const authRoutes = async (fastify: FastifyInstance) => {
                 querystring: refreshTokensBodySchema,
             },
         },
-        authHandler.refreshTokens
+        authHandler.refreshTokens,
     );
 };

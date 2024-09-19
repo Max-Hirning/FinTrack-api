@@ -5,7 +5,6 @@ import {
     RefreshTokensBody,
     RequestOtpBody,
     ResetPasswordBody,
-    ResetPasswordParam,
     SignInBody,
     SignUpBody,
 } from "@/business/lib/validation/account";

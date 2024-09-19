@@ -27,7 +27,10 @@ const generateOTP = (length: number = 6) => {
 
     return otp;
 };
-const createOtp = async (userQuery: Prisma.UserWhereUniqueInput) => {
+const createOtp = async (
+    userQuery: Prisma.UserWhereUniqueInput,
+    count: number = 0,
+) => {
     const code = generateOTP();
 
     const usedOtp = await prisma.otp.findFirst({
@@ -36,7 +39,8 @@ const createOtp = async (userQuery: Prisma.UserWhereUniqueInput) => {
         },
     });
 
-    if (!usedOtp) createOtp(userQuery);
+    if (count === 10) throw new InternalServerError("Can't send otp");
+    if (!usedOtp) createOtp(userQuery, count++);
 
     try {
         const user = await prisma.user.findUniqueOrThrow({
@@ -65,7 +69,7 @@ const checkOtp = async (
                 user: userQuery,
             },
         });
-        await prisma.otp.delete({
+        await prisma.otp.deleteMany({
             where: {
                 id: otp.id,
             },

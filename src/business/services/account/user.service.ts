@@ -17,6 +17,17 @@ const get = async (query: Prisma.UserWhereInput) => {
     }
 };
 
+const findOne = async (query: Prisma.UserWhereInput) => {
+    try {
+        const user = await prisma.user.findFirstOrThrow({
+            where: query,
+        });
+        return user;
+    } catch (error) {
+        throw new NotFoundError((error as Error).message);
+    }
+};
+
 const updatePassword = async (
     userId: string,
     password: string,
@@ -49,5 +60,6 @@ const updatePassword = async (
 
 export const userService = {
     get,
+    findOne,
     updatePassword,
 };

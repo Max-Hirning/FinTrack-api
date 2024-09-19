@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { Roles } from "@prisma/client";
 
-export const resetPasswordParamSchema = z.object({
-    userId: z.string(),
-});
+// export const resetPasswordParamSchema = z.object({
+//     userId: z.string(),
+// });
 
-type ResetPasswordParam = z.infer<typeof resetPasswordParamSchema>;
+// type ResetPasswordParam = z.infer<typeof resetPasswordParamSchema>;
 
 export const signInBodySchema = z.object({
     email: z.string().email(),
@@ -52,7 +52,7 @@ type ResetPasswordBody = z.infer<typeof resetPasswordBodySchema>;
 type RefreshTokensBody = z.infer<typeof refreshTokensBodySchema>;
 
 export type {
-    ResetPasswordParam,
+    // ResetPasswordParam,
     SignInBody,
     SignUpBody,
     CheckOtpBody,
