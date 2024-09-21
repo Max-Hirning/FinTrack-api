@@ -118,11 +118,14 @@ const deleteCard = async (cardId: string) => {
 const updateCard = async (cardId: string, payload: updateCardBody) => {
     let updatePayload = {};
     if (payload.startBalance) {
+        const card = await find({ id: cardId });
+        const incrementValue = -1 * (card.startBalance - payload.startBalance);
+        // TODO also increment all transactions balances
         updatePayload = {
-            startBalance: +payload.startBalance.toFixed(2),
             balance: {
-                increment: +payload.startBalance.toFixed(2),
+                increment: incrementValue,
             },
+            startBalance: +payload.startBalance.toFixed(2),
         };
     }
     try {
