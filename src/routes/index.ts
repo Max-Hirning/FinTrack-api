@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+import { cardRoutes } from "./wallet/card";
 import { authRoutes } from "./account/auth";
 import { userRoutes } from "./account/user";
 import { currencyRoutes } from "./currency";
@@ -16,6 +17,9 @@ const configureRoutes = async (fastify: FastifyInstance) => {
     });
     await fastify.register(currencyRoutes, {
         prefix: "api/currency",
+    });
+    await fastify.register(cardRoutes, {
+        prefix: "api/card",
     });
 };
 

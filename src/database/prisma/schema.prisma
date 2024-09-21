@@ -94,7 +94,7 @@ model Budget {
   startDate DateTime
   endDate   DateTime
   userId    String
-  users     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   cards     Card[]     @relation("BudgetCard")
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -107,7 +107,7 @@ model Card {
   currency     Currencies
   startBalance Float
   userId       String
-  users        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   budgets      Budget[]   @relation("BudgetCard")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -122,7 +122,7 @@ model Goal {
   deadline    DateTime
   description String
   userId      String
-  users       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
@@ -136,7 +136,7 @@ model Loan {
   date        DateTime
   description String
   userId      String
-  users       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
