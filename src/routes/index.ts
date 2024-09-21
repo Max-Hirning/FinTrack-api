@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { authRoutes } from "./account/auth";
 import { userRoutes } from "./account/user";
+import { currencyRoutes } from "./currency";
 import { applicationRoutes } from "./application";
 
 const configureRoutes = async (fastify: FastifyInstance) => {
@@ -12,6 +13,9 @@ const configureRoutes = async (fastify: FastifyInstance) => {
     });
     await fastify.register(userRoutes, {
         prefix: "api/user",
+    });
+    await fastify.register(currencyRoutes, {
+        prefix: "api/currency",
     });
 };
 
