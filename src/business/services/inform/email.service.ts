@@ -1,14 +1,14 @@
 import fs from "fs";
 import ejs from "ejs";
 import path from "path";
+import { User } from "@prisma/client";
 import { environmentVariables } from "@/config";
 import { transporter } from "@/business/lib/mailer";
 import { InternalServerError } from "@/business/lib/errors";
-import { userService } from "@/business/services/account/user.service";
 
-const sendDeleteUserEmail = async (email: string) => {
-    const user = await userService.find({ email });
-
+const sendDeleteUserEmail = async (
+    payload: Pick<User, "email" | "lastName" | "firstName">,
+) => {
     try {
         const templatePath = path.resolve(
             __dirname,
@@ -18,12 +18,12 @@ const sendDeleteUserEmail = async (email: string) => {
         );
         const template = fs.readFileSync(templatePath, "utf-8");
         const htmlContent = ejs.render(template, {
-            recipientName: `${user.firstName} ${user.lastName}`,
+            recipientName: `${payload.firstName} ${payload.lastName}`,
             currentYear: new Date().getFullYear(),
         });
 
         await transporter.sendMail({
-            to: user.email,
+            to: payload.email,
             html: htmlContent,
             subject: "Account Deleted",
             from: `"FinTrack" <${environmentVariables.EMAIL}>`,
@@ -34,9 +34,9 @@ const sendDeleteUserEmail = async (email: string) => {
         throw new InternalServerError("Couldn't send email");
     }
 };
-const sendUpdateUserEmailEmail = async (email: string) => {
-    const user = await userService.find({ email });
-
+const sendUpdateUserEmailEmail = async (
+    payload: Pick<User, "email" | "lastName" | "firstName">,
+) => {
     try {
         const templatePath = path.resolve(
             __dirname,
@@ -46,12 +46,12 @@ const sendUpdateUserEmailEmail = async (email: string) => {
         );
         const template = fs.readFileSync(templatePath, "utf-8");
         const htmlContent = ejs.render(template, {
-            recipientName: `${user.firstName} ${user.lastName}`,
+            recipientName: `${payload.firstName} ${payload.lastName}`,
             currentYear: new Date().getFullYear(),
         });
 
         await transporter.sendMail({
-            to: user.email,
+            to: payload.email,
             html: htmlContent,
             subject: "Email Address Updated",
             from: `"FinTrack" <${environmentVariables.EMAIL}>`,
@@ -62,9 +62,10 @@ const sendUpdateUserEmailEmail = async (email: string) => {
         throw new InternalServerError("Couldn't send email");
     }
 };
-const sendOtpEmail = async (email: string, otp: string) => {
-    const user = await userService.find({ email });
-
+const sendOtpEmail = async (
+    payload: Pick<User, "email" | "lastName" | "firstName">,
+    otp: string,
+) => {
     try {
         const templatePath = path.resolve(
             __dirname,
@@ -75,12 +76,12 @@ const sendOtpEmail = async (email: string, otp: string) => {
         const template = fs.readFileSync(templatePath, "utf-8");
         const htmlContent = ejs.render(template, {
             otp: otp,
-            recipientName: `${user.firstName} ${user.lastName}`,
+            recipientName: `${payload.firstName} ${payload.lastName}`,
             currentYear: new Date().getFullYear(),
         });
 
         await transporter.sendMail({
-            to: user.email,
+            to: payload.email,
             html: htmlContent,
             subject: "OTP Verification",
             from: `"FinTrack" <${environmentVariables.EMAIL}>`,
@@ -91,9 +92,9 @@ const sendOtpEmail = async (email: string, otp: string) => {
         throw new InternalServerError("Couldn't send email");
     }
 };
-const sendUpdateUserPasswordEmail = async (email: string) => {
-    const user = await userService.find({ email });
-
+const sendUpdateUserPasswordEmail = async (
+    payload: Pick<User, "email" | "lastName" | "firstName">,
+) => {
     try {
         const templatePath = path.resolve(
             __dirname,
@@ -103,12 +104,12 @@ const sendUpdateUserPasswordEmail = async (email: string) => {
         );
         const template = fs.readFileSync(templatePath, "utf-8");
         const htmlContent = ejs.render(template, {
-            recipientName: `${user.firstName} ${user.lastName}`,
+            recipientName: `${payload.firstName} ${payload.lastName}`,
             currentYear: new Date().getFullYear(),
         });
 
         await transporter.sendMail({
-            to: user.email,
+            to: payload.email,
             html: htmlContent,
             subject: "Password Updated",
             from: `"FinTrack" <${environmentVariables.EMAIL}>`,

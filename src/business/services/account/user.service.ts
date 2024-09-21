@@ -1,6 +1,5 @@
 import { tokenService } from "./token.service";
 import { hashing } from "@/business/lib/hashing";
-import { emailService } from "../inform/email.service";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import {
     ForbiddenError,
@@ -55,9 +54,7 @@ const deleteUser = async (query: Prisma.UserWhereUniqueInput) => {
         userId: user.id,
     });
 
-    await emailService.sendDeleteUserEmail(user.email);
-
-    return "Account was removed";
+    return user;
 };
 const updateUser = async (userId: string, payload: updateUserBody) => {
     let user;
@@ -86,11 +83,9 @@ const updateUser = async (userId: string, payload: updateUserBody) => {
         await tokenService.deleteTokens({
             userId: user.id,
         });
-
-        await emailService.sendUpdateUserEmailEmail(user.email);
     }
 
-    return "Account info was updated";
+    return user;
 };
 const updateUserPassword = async (
     userId: string,
@@ -128,9 +123,7 @@ const updateUserPassword = async (
         userId: user.id,
     });
 
-    await emailService.sendUpdateUserPasswordEmail(user.email);
-
-    return "Password was updated";
+    return user;
 };
 
 export const userService = {
