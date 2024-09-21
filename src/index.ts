@@ -35,8 +35,8 @@ declare module "@fastify/jwt" {
 async function main() {
     fastify
         .register(fastifyAmqp, {
-            port: 5672,
-            url: "amqps://szdbwpsj:W9ojZNU5UYVwWCGB9TNnF1tZ77aDOKAG@kangaroo.rmq.cloudamqp.com/szdbwpsj",
+            url: environmentVariables.RABBITMQ_URL,
+            port: +environmentVariables.RABBITMQ_PORT,
         })
         .after((err) => {
             if (err) throw err;

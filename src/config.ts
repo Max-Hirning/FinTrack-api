@@ -6,7 +6,9 @@ type EnvironmentVariables = {
   EMAIL: string;
   API_URL: string;
   EMAIL_PASS: string;
+  RABBITMQ_URL: string;
   DOCS_PASSWORD: string;
+  RABBITMQ_PORT: string;
   CURRENCY_API_KEY: string;
   ACCESS_TOKEN_EXP: string;
   REFRESH_TOKEN_EXP: string;
@@ -18,6 +20,8 @@ const environmentVariables: EnvironmentVariables = {
     API_URL: process.env.API_URL || "",
     HOST: process.env.HOST || "0.0.0.0",
     EMAIL_PASS: process.env.EMAIL_PASS || "",
+    RABBITMQ_URL: process.env.RABBITMQ_URL || "",
+    RABBITMQ_PORT: process.env.RABBITMQ_PORT || "",
     APPLICATION_SECRET: process.env.APPLICATION_SECRET!,
     ACCESS_TOKEN_EXP: process.env.ACCESS_TOKEN_EXP || "",
     CURRENCY_API_KEY: process.env.CURRENCY_API_KEY || "",
