@@ -36,11 +36,8 @@ const signIn = async (payload: SignInBody) => {
     const tokens = await tokenService.createTokens(user.id);
 
     return {
-        user: {
-            ...user,
-            dateOfBirth: user.dateOfBirth.toISOString(),
-        },
         ...tokens,
+        user: user,
     };
 };
 const signUp = async (payload: SignUpBody) => {
@@ -86,7 +83,7 @@ const refreshTokens = async (payload: RefreshTokensBody) => {
         payload.refreshToken,
     );
 
-    if (!refreshToken) throw new UnauthorizedError("Unauthorized", true);
+    if (!refreshToken) throw new UnauthorizedError(true);
 
     try {
         await prisma.refreshToken.findFirstOrThrow({
@@ -96,7 +93,7 @@ const refreshTokens = async (payload: RefreshTokensBody) => {
             },
         });
     } catch {
-        throw new UnauthorizedError("Unauthorized", true);
+        throw new UnauthorizedError(true);
     }
 
     const tokens = await tokenService.createTokens(refreshToken.userId);

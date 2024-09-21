@@ -1,10 +1,30 @@
+import "fastify";
 import * as fastifyTypeProviderZod from "fastify-type-provider-zod";
 import fastifyJwt from "@fastify/jwt";
 import fastifyCors from "@fastify/cors";
 import { configureRoutes } from "@/routes";
+import { Roles, User } from "@prisma/client";
+import { IAccessToken } from "./types/token";
 import { environmentVariables } from "@/config";
 import { prisma } from "@/database/prisma/prisma";
+import { FastifyReply, FastifyRequest } from "fastify";
+import { ForbiddenError } from "./business/lib/errors";
 import { configureSwagger, fastify } from "@/bootstrap/swagger";
+
+declare module "fastify" {
+  export interface FastifyInstance {
+    authorization: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    checkRole: (
+      options?: Roles[],
+    ) => (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
+  }
+}
+
+declare module "@fastify/jwt" {
+  interface FastifyJWT {
+    user: Pick<User, "role" | "id">;
+  }
+}
 
 async function main() {
     await fastify.register(fastifyJwt, {
@@ -17,6 +37,44 @@ async function main() {
 
     fastify.setValidatorCompiler(fastifyTypeProviderZod.validatorCompiler);
     fastify.setSerializerCompiler(fastifyTypeProviderZod.serializerCompiler);
+    fastify.decorate(
+        "authorization",
+        async (req: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const headerToken = req.headers.authorization?.split(" ")[1];
+
+                if (!headerToken) return reply.status(401).send("Unauthorized");
+                const { userId, role } = fastify.jwt.verify<IAccessToken>(headerToken);
+
+                req.user = {
+                    role,
+                    id: userId,
+                };
+            } catch (e) {
+                console.log(e);
+                return reply.status(401).send("Unauthorized");
+            }
+        },
+    );
+    fastify.decorate(
+        "checkRole",
+        (
+            allowedRoles: Roles[] = Object.values(Roles),
+        ): ((req: FastifyRequest, reply: FastifyReply) => Promise<void>) => {
+            return async (req: FastifyRequest) => {
+                const { id, role } = req.user;
+
+                if (![...allowedRoles].includes(role)) {
+                    throw new ForbiddenError("You are not allowed");
+                }
+
+                req.user = {
+                    id,
+                    role,
+                };
+            };
+        },
+    );
 
     const credentials = await configureSwagger(fastify);
 

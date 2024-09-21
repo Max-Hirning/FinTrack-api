@@ -17,6 +17,7 @@ const find = async (query: Prisma.UserWhereInput) => {
         const user = await prisma.user.findFirstOrThrow({
             where: query,
         });
+
         return user;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -30,31 +31,38 @@ const getUser = async (query: Prisma.UserWhereUniqueInput) => {
                 images: true,
             },
         });
-        return user;
+
+        return {
+            ...user,
+            dateOfBirth: user.dateOfBirth.toISOString(),
+        };
     } catch (error) {
         throw new NotFoundError((error as Error).message);
     }
 };
 const deleteUser = async (query: Prisma.UserWhereUniqueInput) => {
+    let user;
+
     try {
-        const user = await prisma.user.delete({
+        user = await prisma.user.delete({
             where: query,
         });
-
-        await tokenService.deleteTokens({
-            userId: user.id,
-        });
-
-        await emailService.sendDeleteUserEmail(user.email);
-
-        return "Account was removed";
     } catch (error) {
         throw new NotFoundError((error as Error).message);
     }
+
+    await tokenService.deleteTokens({
+        userId: user.id,
+    });
+
+    await emailService.sendDeleteUserEmail(user.email);
+
+    return "Account was removed";
 };
 const updateUser = async (userId: string, payload: updateUserBody) => {
+    let user;
     try {
-        const user = await prisma.user.update({
+        user = await prisma.user.update({
             where: {
                 id: userId,
             },
@@ -70,19 +78,19 @@ const updateUser = async (userId: string, payload: updateUserBody) => {
                 budgetNotification: payload.budgetNotification,
             },
         });
-
-        if (payload.email) {
-            await tokenService.deleteTokens({
-                userId: user.id,
-            });
-
-            await emailService.sendUpdateUserEmailEmail(user.email);
-        }
-
-        return "Account info was updated";
     } catch (error) {
         throw new InternalServerError((error as Error).message);
     }
+
+    if (payload.email) {
+        await tokenService.deleteTokens({
+            userId: user.id,
+        });
+
+        await emailService.sendUpdateUserEmailEmail(user.email);
+    }
+
+    return "Account info was updated";
 };
 const updateUserPassword = async (
     userId: string,
@@ -112,17 +120,17 @@ const updateUserPassword = async (
                 password: cryptedPass,
             },
         });
-
-        await tokenService.deleteTokens({
-            userId: user.id,
-        });
-
-        await emailService.sendUpdateUserPasswordEmail(user.email);
-
-        return "Password was updated";
     } catch (error) {
         throw new InternalServerError((error as Error).message);
     }
+
+    await tokenService.deleteTokens({
+        userId: user.id,
+    });
+
+    await emailService.sendUpdateUserPasswordEmail(user.email);
+
+    return "Password was updated";
 };
 
 export const userService = {

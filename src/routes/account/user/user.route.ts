@@ -22,6 +22,7 @@ export const userRoutes = async (fastify: FastifyInstance) => {
                 params: getUserParamSchema,
                 security: [{ bearerAuth: [] }],
             },
+            preHandler: [fastify.authorization],
         },
         userHandler.getUser,
     );
@@ -34,6 +35,7 @@ export const userRoutes = async (fastify: FastifyInstance) => {
                 params: updateUserParamSchema,
                 security: [{ bearerAuth: [] }],
             },
+            preHandler: [fastify.authorization],
         },
         userHandler.updateUser,
     );
@@ -46,6 +48,7 @@ export const userRoutes = async (fastify: FastifyInstance) => {
                 body: updateUserPasswordBodySchema,
                 params: updateUserPasswordParamSchema,
             },
+            preHandler: [fastify.authorization],
         },
         userHandler.updateUserPassword,
     );
@@ -57,6 +60,7 @@ export const userRoutes = async (fastify: FastifyInstance) => {
                 params: deleteUserParamSchema,
                 security: [{ bearerAuth: [] }],
             },
+            preHandler: [fastify.authorization],
         },
         userHandler.deleteUser,
     );

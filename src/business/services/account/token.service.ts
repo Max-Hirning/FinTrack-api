@@ -1,17 +1,16 @@
 import { v4 as uuidv4 } from "uuid";
+import { userService } from "./user.service";
 import { fastify } from "@/bootstrap/swagger";
 import { environmentVariables } from "@/config";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError } from "@/business/lib/errors";
 
 const createTokens = async (userId: string) => {
-    try {
-        const user = await prisma.user.findUniqueOrThrow({
-            where: {
-                id: userId,
-            },
-        });
+    const user = await userService.find({
+        id: userId,
+    });
 
+    try {
         const uuid = uuidv4();
         const accessToken = fastify.jwt.sign(
             { userId: user.id, role: user.role },

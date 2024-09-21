@@ -10,42 +10,36 @@ import {
     updateUserPasswordParam,
 } from "@/business/lib/validation/account/user";
 
-const getUser = async (
-    request: FastifyRequest<{ Params: getUserParam }>,
-    reply: FastifyReply,
-) => {
+const getUser = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
-        const { params } = request;
+        const { params } = request as FastifyRequest<{ Params: getUserParam }>;
         return userService.getUser({ id: params.userId });
     });
 };
-const deleteUser = async (
-    request: FastifyRequest<{ Params: deleteUserParam }>,
-    reply: FastifyReply,
-) => {
+const deleteUser = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
-        const { params } = request;
+        const { params } = request as FastifyRequest<{ Params: deleteUserParam }>;
         return userService.deleteUser({ id: params.userId });
     });
 };
-const updateUser = async (
-    request: FastifyRequest<{ Params: updateUserParam; Body: updateUserBody }>,
-    reply: FastifyReply,
-) => {
+const updateUser = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
-        const { params, body } = request;
+        const { params, body } = request as FastifyRequest<{
+      Params: updateUserParam;
+      Body: updateUserBody;
+    }>;
         return userService.updateUser(params.userId, body);
     });
 };
 const updateUserPassword = async (
-    request: FastifyRequest<{
-    Params: updateUserPasswordParam;
-    Body: updateUserPasswordBody;
-  }>,
+    request: FastifyRequest,
     reply: FastifyReply,
 ) => {
     return tryCatchApiMiddleware(reply, async () => {
-        const { params, body } = request;
+        const { params, body } = request as FastifyRequest<{
+      Params: updateUserPasswordParam;
+      Body: updateUserPasswordBody;
+    }>;
         return userService.updateUserPassword(params.userId, body);
     });
 };
