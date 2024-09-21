@@ -103,15 +103,13 @@ const refreshTokens = async (payload: RefreshTokensBody) => {
     return tokens;
 };
 const resetPassword = async (payload: ResetPasswordBody) => {
-    const user = await userService.find({ email: payload.email });
+    const { id } = await userService.find({ email: payload.email });
 
-    const response = await userService.updateUserPassword(user.id, {
+    const user = await userService.updateUserPassword(id, {
         password: payload.password,
     });
 
-    await emailService.sendUpdateUserPasswordEmail(user);
-
-    return response;
+    return user;
 };
 
 export const authService = {

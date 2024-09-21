@@ -1,5 +1,7 @@
+import fastifyAmqp from "fastify-amqp";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { authService } from "@/business/services/account";
+import { EmailType, RabbitMqQueues } from "@/types/rabbitmq";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     CheckOtpBody,
@@ -58,10 +60,24 @@ const refreshTokens = async (
 const resetPassword = async (
     request: FastifyRequest<{ Body: ResetPasswordBody }>,
     reply: FastifyReply,
+    channel: fastifyAmqp.FastifyAmqpChannelObject,
 ) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { body } = request;
-        return authService.resetPassword(body);
+        const user = await authService.resetPassword(body);
+
+        const msg = JSON.stringify({
+            user: {
+                email: user.email,
+                lastName: user.lastName,
+                firstName: user.firstName,
+            },
+            emailType: EmailType.updateUserPassword,
+        });
+        channel.assertQueue(RabbitMqQueues.email, { durable: false });
+        channel.sendToQueue(RabbitMqQueues.email, Buffer.from(msg));
+
+        return "Password was updated";
     });
 };
 
