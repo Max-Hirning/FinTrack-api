@@ -13,6 +13,18 @@ enum Roles {
   guest
 }
 
+enum Currencies {
+  AUD
+  CAD
+  CHF
+  EUR
+  GBP
+  JPY
+  PLN
+  UAH
+  USD
+}
+
 model Otp {
   id        String   @id @default(uuid())
   otp       String   @unique
@@ -35,7 +47,7 @@ model RefreshToken {
 model Image {
   id        String   @id @default(uuid())
   url       String
-  fileId    String   @unique
+  fileId    String
   userId    String
   users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
@@ -43,16 +55,20 @@ model Image {
 }
 
 model User {
-  id           String         @id @default(uuid())
-  email        String         @unique
-  lastName     String
-  firstName    String
-  password     String
-  dateOfBirth  DateTime       @default(now()) @db.Date
-  role         Roles          @default(guest)
-  avatar       Image[]
-  otp          Otp[]
-  refreshToken RefreshToken[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id                 String         @id @default(uuid())
+  email              String         @unique
+  lastName           String
+  firstName          String
+  password           String
+  loanNotification   Boolean        @default(true)
+  budgetNotification Boolean        @default(true)
+  goalNotification   Boolean        @default(true)
+  dateOfBirth        DateTime       @default(now()) @db.Date
+  role               Roles          @default(guest)
+  currency           Currencies     @default(USD)
+  images             Image[]
+  otp                Otp[]
+  refreshToken       RefreshToken[]
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 }

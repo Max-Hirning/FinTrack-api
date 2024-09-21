@@ -26,6 +26,9 @@ const getUser = async (query: Prisma.UserWhereUniqueInput) => {
     try {
         const user = await prisma.user.findUniqueOrThrow({
             where: query,
+            include: {
+                images: true,
+            },
         });
         return user;
     } catch (error) {
@@ -43,6 +46,8 @@ const deleteUser = async (query: Prisma.UserWhereUniqueInput) => {
         });
 
         await emailService.sendDeleteUserEmail(user.email);
+
+        return "Account was removed";
     } catch (error) {
         throw new NotFoundError((error as Error).message);
     }
@@ -53,7 +58,17 @@ const updateUser = async (userId: string, payload: updateUserBody) => {
             where: {
                 id: userId,
             },
-            data: payload,
+            data: {
+                role: payload.role,
+                email: payload.email,
+                lastName: payload.lastName,
+                currency: payload.currency,
+                firstName: payload.firstName,
+                dateOfBirth: payload.dateOfBirth,
+                goalNotification: payload.goalNotification,
+                loanNotification: payload.loanNotification,
+                budgetNotification: payload.budgetNotification,
+            },
         });
 
         if (payload.email) {
@@ -64,7 +79,7 @@ const updateUser = async (userId: string, payload: updateUserBody) => {
             await emailService.sendUpdateUserEmailEmail(user.email);
         }
 
-        return "User was updated";
+        return "Account info was updated";
     } catch (error) {
         throw new InternalServerError((error as Error).message);
     }

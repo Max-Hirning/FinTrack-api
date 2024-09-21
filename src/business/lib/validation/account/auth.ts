@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Roles } from "@prisma/client";
+import { userResponseSchema } from "./user";
 
 export const signInBodySchema = z.object({
     email: z.string().email(),
@@ -18,18 +18,6 @@ export const checkOtpBodySchema = z.object({
 export const requestOtpBodySchema = z.object({
     email: z.string().email(),
 });
-export const signInResponseSchema = z.object({
-    user: z.object({
-        id: z.string(),
-        lastName: z.string(),
-        firstName: z.string(),
-        email: z.string().email(),
-        dateOfBirth: z.string().datetime(),
-        role: z.enum(Object.values(Roles) as [Roles, ...Roles[]]),
-    }),
-    accessToken: z.string(),
-    refreshToken: z.string(),
-});
 export const resetPasswordBodySchema = z.object({
     email: z.string().email(),
     password: z.string().min(8).max(15),
@@ -45,12 +33,26 @@ type RequestOtpBody = z.infer<typeof requestOtpBodySchema>;
 type ResetPasswordBody = z.infer<typeof resetPasswordBodySchema>;
 type RefreshTokensBody = z.infer<typeof refreshTokensBodySchema>;
 
+export const signInResponseSchema = z.object({
+    accessToken: z.string(),
+    refreshToken: z.string(),
+    user: userResponseSchema,
+});
+export const refreshTokensResponseSchema = z.object({
+    accessToken: z.string(),
+    refreshToken: z.string(),
+});
+
+type signInResponse = z.infer<typeof signInResponseSchema>;
+type refreshTokensResponse = z.infer<typeof refreshTokensResponseSchema>;
+
 export type {
-    // ResetPasswordParam,
     SignInBody,
     SignUpBody,
     CheckOtpBody,
     RequestOtpBody,
     ResetPasswordBody,
     RefreshTokensBody,
+    signInResponse,
+    refreshTokensResponse,
 };

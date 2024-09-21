@@ -18,7 +18,7 @@ const sendDeleteUserEmail = async (email: string) => {
         );
         const template = fs.readFileSync(templatePath, "utf-8");
         const htmlContent = ejs.render(template, {
-            recipientName: user.firstName,
+            recipientName: `${user.firstName} ${user.lastName}`,
             currentYear: new Date().getFullYear(),
         });
 
@@ -28,6 +28,8 @@ const sendDeleteUserEmail = async (email: string) => {
             subject: "Account Deleted",
             from: `"FinTrack" <${environmentVariables.EMAIL}>`,
         });
+
+        return "Email was sent";
     } catch {
         throw new InternalServerError("Couldn't send email");
     }
@@ -44,7 +46,7 @@ const sendUpdateUserEmailEmail = async (email: string) => {
         );
         const template = fs.readFileSync(templatePath, "utf-8");
         const htmlContent = ejs.render(template, {
-            recipientName: user.firstName,
+            recipientName: `${user.firstName} ${user.lastName}`,
             currentYear: new Date().getFullYear(),
         });
 
@@ -54,6 +56,8 @@ const sendUpdateUserEmailEmail = async (email: string) => {
             subject: "Email Address Updated",
             from: `"FinTrack" <${environmentVariables.EMAIL}>`,
         });
+
+        return "Email was sent";
     } catch {
         throw new InternalServerError("Couldn't send email");
     }
@@ -71,7 +75,7 @@ const sendOtpEmail = async (email: string, otp: string) => {
         const template = fs.readFileSync(templatePath, "utf-8");
         const htmlContent = ejs.render(template, {
             otp: otp,
-            recipientName: user.firstName,
+            recipientName: `${user.firstName} ${user.lastName}`,
             currentYear: new Date().getFullYear(),
         });
 
@@ -81,6 +85,8 @@ const sendOtpEmail = async (email: string, otp: string) => {
             subject: "OTP Verification",
             from: `"FinTrack" <${environmentVariables.EMAIL}>`,
         });
+
+        return "Email was sent";
     } catch {
         throw new InternalServerError("Couldn't send email");
     }
@@ -97,7 +103,7 @@ const sendUpdateUserPasswordEmail = async (email: string) => {
         );
         const template = fs.readFileSync(templatePath, "utf-8");
         const htmlContent = ejs.render(template, {
-            recipientName: user.firstName,
+            recipientName: `${user.firstName} ${user.lastName}`,
             currentYear: new Date().getFullYear(),
         });
 
@@ -107,6 +113,8 @@ const sendUpdateUserPasswordEmail = async (email: string) => {
             subject: "Password Updated",
             from: `"FinTrack" <${environmentVariables.EMAIL}>`,
         });
+
+        return "Email was sent";
     } catch {
         throw new InternalServerError("Couldn't send email");
     }

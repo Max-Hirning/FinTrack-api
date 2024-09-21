@@ -7,6 +7,7 @@ import {
     updateUserParamSchema,
     updateUserPasswordBodySchema,
     updateUserPasswordParamSchema,
+    userResponseSchema,
 } from "@/business/lib/validation/account/user";
 
 export const userRoutes = async (fastify: FastifyInstance) => {
@@ -14,6 +15,9 @@ export const userRoutes = async (fastify: FastifyInstance) => {
         "/:userId",
         {
             schema: {
+                response: {
+                    200: userResponseSchema,
+                },
                 tags: ["user"],
                 params: getUserParamSchema,
                 security: [{ bearerAuth: [] }],

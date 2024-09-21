@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { imageResponseSchema } from "../image";
+import { Currencies, Roles } from "@prisma/client";
 
 export const getUserParamSchema = z.object({
     userId: z.string(),
@@ -23,7 +25,14 @@ export const updateUserBodySchema = z
         lastName: z.string(),
         firstName: z.string(),
         email: z.string().email(),
+        goalNotification: z.boolean(),
+        loanNotification: z.boolean(),
+        budgetNotification: z.boolean(),
         dateOfBirth: z.string().datetime(),
+        role: z.enum(Object.values(Roles) as [Roles, ...Roles[]]),
+        currency: z.enum(
+      Object.values(Currencies) as [Currencies, ...Currencies[]],
+        ),
     })
     .partial();
 export const updateUserPasswordBodySchema = z.object({
@@ -34,6 +43,22 @@ export const updateUserPasswordBodySchema = z.object({
 type updateUserBody = z.infer<typeof updateUserBodySchema>;
 type updateUserPasswordBody = z.infer<typeof updateUserPasswordBodySchema>;
 
+export const userResponseSchema = z.object({
+    id: z.string(),
+    email: z.string(),
+    lastName: z.string(),
+    firstName: z.string(),
+    dateOfBirth: z.string(),
+    goalNotification: z.boolean(),
+    loanNotification: z.boolean(),
+    budgetNotification: z.boolean(),
+    role: z.enum(Object.values(Roles) as [Roles, ...Roles[]]),
+    currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
+    images: z.array(imageResponseSchema),
+});
+
+type userResponse = z.infer<typeof userResponseSchema>;
+
 export type {
     getUserParam,
     deleteUserParam,
@@ -41,4 +66,5 @@ export type {
     updateUserPasswordParam,
     updateUserBody,
     updateUserPasswordBody,
+    userResponse,
 };

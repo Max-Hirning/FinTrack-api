@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { userService } from "@/business/services/account";
+import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     deleteUserParam,
     getUserParam,
@@ -13,31 +14,28 @@ const getUser = async (
     request: FastifyRequest<{ Params: getUserParam }>,
     reply: FastifyReply,
 ) => {
-    const { params } = request;
-
-    const data = userService.getUser({ id: params.userId });
-
-    return reply.send(data).code(200);
+    return tryCatchApiMiddleware(reply, async () => {
+        const { params } = request;
+        return userService.getUser({ id: params.userId });
+    });
 };
 const deleteUser = async (
     request: FastifyRequest<{ Params: deleteUserParam }>,
     reply: FastifyReply,
 ) => {
-    const { params } = request;
-
-    const data = userService.deleteUser({ id: params.userId });
-
-    return reply.send(data).code(200);
+    return tryCatchApiMiddleware(reply, async () => {
+        const { params } = request;
+        return userService.deleteUser({ id: params.userId });
+    });
 };
 const updateUser = async (
     request: FastifyRequest<{ Params: updateUserParam; Body: updateUserBody }>,
     reply: FastifyReply,
 ) => {
-    const { params, body } = request;
-
-    const message = userService.updateUser(params.userId, body);
-
-    return reply.send(message).code(200);
+    return tryCatchApiMiddleware(reply, async () => {
+        const { params, body } = request;
+        return userService.updateUser(params.userId, body);
+    });
 };
 const updateUserPassword = async (
     request: FastifyRequest<{
@@ -46,11 +44,10 @@ const updateUserPassword = async (
   }>,
     reply: FastifyReply,
 ) => {
-    const { params, body } = request;
-
-    const message = userService.updateUserPassword(params.userId, body);
-
-    return reply.send(message).code(200);
+    return tryCatchApiMiddleware(reply, async () => {
+        const { params, body } = request;
+        return userService.updateUserPassword(params.userId, body);
+    });
 };
 
 export const userHandler = {

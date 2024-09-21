@@ -21,10 +21,8 @@ import {
 } from "@/business/lib/validation/account";
 
 const signIn = async (payload: SignInBody) => {
-    const user = await prisma.user.findUnique({
-        where: {
-            email: payload.email,
-        },
+    const user = await userService.getUser({
+        email: payload.email,
     });
 
     if (!user) throw new ForbiddenError("Invalid email");
@@ -38,8 +36,11 @@ const signIn = async (payload: SignInBody) => {
     const tokens = await tokenService.createTokens(user.id);
 
     return {
+        user: {
+            ...user,
+            dateOfBirth: user.dateOfBirth.toISOString(),
+        },
         ...tokens,
-        user: user,
     };
 };
 const signUp = async (payload: SignUpBody) => {
@@ -62,6 +63,8 @@ const signUp = async (payload: SignUpBody) => {
                 firstName: payload.firstName,
             },
         });
+
+        return "Account was created";
     } catch (error) {
         throw new InternalServerError((error as Error).message);
     }
@@ -103,11 +106,13 @@ const refreshTokens = async (payload: RefreshTokensBody) => {
 const resetPassword = async (payload: ResetPasswordBody) => {
     const user = await userService.find({ email: payload.email });
 
-    await emailService.sendUpdateUserPasswordEmail(payload.email);
-
-    return userService.updateUserPassword(user.id, {
+    const response = await userService.updateUserPassword(user.id, {
         password: payload.password,
     });
+
+    await emailService.sendUpdateUserPasswordEmail(payload.email);
+
+    return response;
 };
 
 export const authService = {
