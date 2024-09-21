@@ -1,6 +1,7 @@
 import "fastify";
 import * as fastifyTypeProviderZod from "fastify-type-provider-zod";
 import fastifyJwt from "@fastify/jwt";
+import fastifyAmqp from "fastify-amqp";
 import fastifyCors from "@fastify/cors";
 import { configureRoutes } from "@/routes";
 import { Roles, User } from "@prisma/client";
@@ -10,6 +11,11 @@ import { prisma } from "@/database/prisma/prisma";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ForbiddenError } from "./business/lib/errors";
 import { configureSwagger, fastify } from "@/bootstrap/swagger";
+import {
+    setupEmailConsumer,
+    setupImageConsumer,
+    setupNotificationConsumer,
+} from "./business/lib/rabbitmq";
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -27,6 +33,17 @@ declare module "@fastify/jwt" {
 }
 
 async function main() {
+    fastify
+        .register(fastifyAmqp, {
+            port: 5672,
+            url: "amqps://szdbwpsj:W9ojZNU5UYVwWCGB9TNnF1tZ77aDOKAG@kangaroo.rmq.cloudamqp.com/szdbwpsj",
+        })
+        .after((err) => {
+            if (err) throw err;
+            setupEmailConsumer(fastify.amqp.channel);
+            setupImageConsumer(fastify.amqp.channel);
+            setupNotificationConsumer(fastify.amqp.channel);
+        });
     await fastify.register(fastifyJwt, {
         secret: environmentVariables.APPLICATION_SECRET,
     });

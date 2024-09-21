@@ -74,7 +74,9 @@ const checkOtp = async (payload: CheckOtpBody) => {
 const requestOtp = async (payload: RequestOtpBody) => {
     const code = await otpService.createOtp(payload);
 
-    await emailService.sendOtpEmail(payload.email, code);
+    const user = await userService.find({ email: payload.email });
+
+    await emailService.sendOtpEmail(user, code);
 
     return "Otp was sent";
 };
@@ -107,7 +109,7 @@ const resetPassword = async (payload: ResetPasswordBody) => {
         password: payload.password,
     });
 
-    await emailService.sendUpdateUserPasswordEmail(payload.email);
+    await emailService.sendUpdateUserPasswordEmail(user);
 
     return response;
 };

@@ -37,7 +37,9 @@ export const userRoutes = async (fastify: FastifyInstance) => {
             },
             preHandler: [fastify.authorization],
         },
-        userHandler.updateUser,
+        function (request, reply) {
+            return userHandler.updateUser(request, reply, this.amqp.channel);
+        },
     );
     fastify.put(
         "/password/:userId",
@@ -48,9 +50,11 @@ export const userRoutes = async (fastify: FastifyInstance) => {
                 body: updateUserPasswordBodySchema,
                 params: updateUserPasswordParamSchema,
             },
-            preHandler: [fastify.authorization],
+            // preHandler: [fastify.authorization],
         },
-        userHandler.updateUserPassword,
+        function (request, reply) {
+            return userHandler.updateUserPassword(request, reply, this.amqp.channel);
+        },
     );
     fastify.delete(
         "/:userId",
@@ -62,6 +66,8 @@ export const userRoutes = async (fastify: FastifyInstance) => {
             },
             preHandler: [fastify.authorization],
         },
-        userHandler.deleteUser,
+        function (request, reply) {
+            return userHandler.deleteUser(request, reply, this.amqp.channel);
+        },
     );
 };
