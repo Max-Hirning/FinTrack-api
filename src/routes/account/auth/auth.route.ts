@@ -1,5 +1,5 @@
-import { FastifyInstance } from "fastify";
 import { authHandler } from "./auth.handler";
+import { FastifyInstance, FastifyRequest } from "fastify";
 import {
     signInBodySchema,
     signUpBodySchema,
@@ -9,6 +9,7 @@ import {
     refreshTokensBodySchema,
     resetPasswordBodySchema,
     refreshTokensResponseSchema,
+    ResetPasswordBody,
 } from "@/business/lib/validation/account";
 
 export const authRoutes = async (fastify: FastifyInstance) => {
@@ -20,7 +21,9 @@ export const authRoutes = async (fastify: FastifyInstance) => {
                 body: resetPasswordBodySchema,
             },
         },
-        authHandler.resetPassword,
+        function (request: FastifyRequest<{ Body: ResetPasswordBody }>, reply) {
+            return authHandler.resetPassword(request, reply, this.amqp.channel);
+        },
     );
     fastify.post(
         "/sign-in",

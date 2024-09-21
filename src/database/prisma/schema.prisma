@@ -13,6 +13,13 @@ enum Roles {
   guest
 }
 
+enum Period {
+  oneTime
+  year
+  month
+  week
+}
+
 enum Currencies {
   AUD
   CAD
@@ -67,8 +74,69 @@ model User {
   role               Roles          @default(guest)
   currency           Currencies     @default(USD)
   images             Image[]
-  otp                Otp[]
-  refreshToken       RefreshToken[]
+  otps               Otp[]
+  refreshTokens      RefreshToken[]
+  cards              Card[]
+  budgets            Budget[]
+  goals              Goal[]
+  loans              Loan[]
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
+}
+
+model Budget {
+  id        String     @id @default(uuid())
+  title     String
+  balance   Float
+  currency  Currencies
+  period    Period
+  // categories
+  startDate DateTime
+  endDate   DateTime
+  userId    String
+  users     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cards     Card[]     @relation("BudgetCard")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Card {
+  id           String     @id @default(uuid())
+  title        String
+  balance      Float
+  currency     Currencies
+  startBalance Float
+  userId       String
+  users        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgets      Budget[]   @relation("BudgetCard")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Goal {
+  id          String     @id @default(uuid())
+  title       String
+  amount      Float
+  balance     Float
+  currency    Currencies
+  deadline    DateTime
+  description String
+  userId      String
+  users       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Loan {
+  id          String     @id @default(uuid())
+  title       String
+  amount      Float
+  deadline    DateTime
+  currency    Currencies
+  date        DateTime
+  description String
+  userId      String
+  users       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
