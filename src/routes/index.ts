@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { applicationRoutes } from "./application";
 import { cardRoutes } from "./wallet/card/card.route";
 import { loanRoutes } from "./wallet/loan/loan.route";
+import { goalRoutes } from "./wallet/goal/goal.route";
 import { authRoutes } from "./account/auth/auth.route";
 import { userRoutes } from "./account/user/user.route";
 import { currencyRoutes } from "./currency/currency.route";
@@ -28,6 +29,9 @@ const configureRoutes = async (fastify: FastifyInstance) => {
     });
     await fastify.register(loanRoutes, {
         prefix: "api/loan",
+    });
+    await fastify.register(goalRoutes, {
+        prefix: "api/goal",
     });
 };
 
