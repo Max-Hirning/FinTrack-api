@@ -32,6 +32,97 @@ enum Currencies {
   USD
 }
 
+enum Categories {
+  foodAndDrinks
+  restaurantAndCafe
+  groceries
+  fastFoodBar
+
+  shopping
+  pharmacy
+  electronicsAccessories
+  freetime
+  giftJoy
+  healthAndBeauty
+  homeGarden
+  jewelsAccessories
+  kids
+  petsAnimals
+  stationeryTools
+
+  housing
+  energyUtilities
+  maintenanceRepairs
+  mortage
+  propertyInsurance
+  rent
+  services
+
+  transportation
+  businessTrips
+  longDistance
+  publicTransport
+  taxi
+  delivery
+
+  vehicle
+  fuel
+  leasing
+  parking
+  rentals
+  vehicleInsurance
+  vehicleMaintenance
+
+  lifeAndEntertainment
+  activeSportFitness
+  alcoholTobaco
+  booksAudioSubscriptions
+  charityGifts
+  cultureSportEvents
+  educationDevelopment
+  healthCareDoctor
+  hobbies
+  holidayTripsHotels
+  lifeEvents
+  wellnessBeauty
+  lotteriesGambling
+
+  communicationPC
+  phoneCellPhone
+  softwareAppsGames
+
+  financialExpenses
+  advisory
+  chargesFees
+  childSupport
+  fines
+  insurance
+  loanInteresys
+  taxes
+
+  investemnts
+  financialInvestments
+  realty
+  savings
+  vehicleChattels
+
+  income
+  checksCoupons
+  childSupportIncome
+  duesAndGrants
+  gifts
+  interestsDividends
+  lendingRenting
+  bussiness
+  refunds
+  rentalIncome
+  wageInvoices
+
+  transfer
+
+  others
+}
+
 model Otp {
   id        String   @id @default(uuid())
   otp       String   @unique
@@ -85,59 +176,82 @@ model User {
 }
 
 model Budget {
-  id        String     @id @default(uuid())
-  title     String
-  balance   Float
-  currency  Currencies
-  period    Period
+  id         String       @id @default(uuid())
+  title      String
+  balance    Float
+  currency   Currencies
+  period     Period
   // categories
-  startDate DateTime
-  endDate   DateTime
-  userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cards     Card[]     @relation("BudgetCard")
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  startDate  DateTime
+  endDate    DateTime
+  userId     String
+  categories Categories[]
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cards      Card[]       @relation("BudgetCard")
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 }
 
 model Card {
-  id           String     @id @default(uuid())
+  id           String        @id @default(uuid())
   title        String
   balance      Float
   currency     Currencies
   startBalance Float
   userId       String
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  budgets      Budget[]   @relation("BudgetCard")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgets      Budget[]      @relation("BudgetCard")
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Goal {
-  id          String     @id @default(uuid())
-  title       String
-  amount      Float
-  balance     Float      @default(0)
-  currency    Currencies
-  deadline    DateTime
-  description String
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id           String        @id @default(uuid())
+  title        String
+  amount       Float
+  balance      Float         @default(0)
+  currency     Currencies
+  deadline     DateTime
+  description  String
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Loan {
+  id           String        @id @default(uuid())
+  title        String
+  amount       Float
+  balance      Float         @default(0)
+  deadline     DateTime
+  currency     Currencies
+  date         DateTime
+  description  String
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
   id          String     @id @default(uuid())
-  title       String
-  amount      Float
-  balance     Float      @default(0)
-  deadline    DateTime
-  currency    Currencies
   date        DateTime
+  amount      Float
   description String
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance     Float
+  goalBalance Float?
+  loanBalance Float?
+  category    Categories
+  cardId      String
+  card        Card       @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  goalId      String?
+  goal        Goal?      @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  loanId      String?
+  loan        Loan?      @relation(fields: [loanId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
