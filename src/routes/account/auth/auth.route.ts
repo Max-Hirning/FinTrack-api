@@ -10,7 +10,7 @@ import {
     resetPasswordBodySchema,
     refreshTokensResponseSchema,
     ResetPasswordBody,
-} from "@/business/lib/validation/account";
+} from "@/business/lib/validation";
 
 export const authRoutes = async (fastify: FastifyInstance) => {
     fastify.put(

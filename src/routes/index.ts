@@ -1,10 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { cardRoutes } from "./wallet/card";
-import { authRoutes } from "./account/auth";
-import { userRoutes } from "./account/user";
-import { currencyRoutes } from "./currency";
-import { budgetRoutes } from "./wallet/budget";
 import { applicationRoutes } from "./application";
+import { cardRoutes } from "./wallet/card/card.route";
+import { authRoutes } from "./account/auth/auth.route";
+import { userRoutes } from "./account/user/user.route";
+import { currencyRoutes } from "./currency/currency.route";
+import { budgetRoutes } from "./wallet/budget/budget.route";
 
 const configureRoutes = async (fastify: FastifyInstance) => {
     await fastify.register(applicationRoutes, {

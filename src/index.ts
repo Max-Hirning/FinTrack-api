@@ -5,17 +5,17 @@ import fastifyAmqp from "fastify-amqp";
 import fastifyCors from "@fastify/cors";
 import { configureRoutes } from "@/routes";
 import { Roles, User } from "@prisma/client";
-import { IAccessToken } from "./types/token";
+import { IAccessToken } from "@/types/token";
 import { environmentVariables } from "@/config";
 import { prisma } from "@/database/prisma/prisma";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { ForbiddenError } from "./business/lib/errors";
+import { ForbiddenError } from "@/business/lib/errors";
 import { configureSwagger, fastify } from "@/bootstrap/swagger";
 import {
     setupEmailConsumer,
     setupImageConsumer,
     setupNotificationConsumer,
-} from "./business/lib/rabbitmq";
+} from "@/business/lib/rabbitmq";
 
 declare module "fastify" {
   export interface FastifyInstance {

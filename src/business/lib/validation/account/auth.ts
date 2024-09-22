@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { userResponseSchema } from "./user";
+import { userResponseSchema } from "@/business/lib/validation";
 
 export const signInBodySchema = z.object({
     email: z.string().email(),

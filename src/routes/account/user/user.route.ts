@@ -8,7 +8,7 @@ import {
     updateUserPasswordBodySchema,
     updateUserPasswordParamSchema,
     userResponseSchema,
-} from "@/business/lib/validation/account/user";
+} from "@/business/lib/validation";
 
 export const userRoutes = async (fastify: FastifyInstance) => {
     fastify.get(

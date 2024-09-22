@@ -1,5 +1,5 @@
 import fastifyAmqp from "fastify-amqp";
-import { emailService } from "../services/inform/email.service";
+import { emailService } from "@/business/services";
 import {
     EmailType,
     RabbitMqEmailPayload,

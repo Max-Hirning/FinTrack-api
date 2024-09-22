@@ -1,5 +1,5 @@
+import { cardServcice } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { cardServcice } from "@/business/services/wallet";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     createCardBody,
@@ -7,7 +7,7 @@ import {
     getCardsQueries,
     updateCardBody,
     updateCardParam,
-} from "@/business/lib/validation/wallet";
+} from "@/business/lib/validation";
 
 const getCards = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {

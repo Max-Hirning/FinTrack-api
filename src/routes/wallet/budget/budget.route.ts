@@ -7,7 +7,7 @@ import {
     getBudgetsQueriesSchema,
     updateBudgetBodySchema,
     updateBudgetParamSchema,
-} from "@/business/lib/validation/wallet";
+} from "@/business/lib/validation";
 
 export const budgetRoutes = async (fastify: FastifyInstance) => {
     fastify.get(

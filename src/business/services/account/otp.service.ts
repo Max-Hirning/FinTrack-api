@@ -1,4 +1,4 @@
-import { userService } from "./user.service";
+import { userService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 

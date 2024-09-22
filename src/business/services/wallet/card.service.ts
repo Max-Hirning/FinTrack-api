@@ -1,11 +1,11 @@
-import { currencyService } from "../currency.service";
+import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import {
     createCardBody,
     getCardsQueries,
     updateCardBody,
-} from "@/business/lib/validation/wallet";
+} from "@/business/lib/validation";
 
 const find = async (query: Prisma.CardWhereInput) => {
     try {

@@ -1,5 +1,5 @@
+import { budgetServcice } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { budgetServcice } from "@/business/services/wallet";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     createBudgetBody,
@@ -7,7 +7,7 @@ import {
     getBudgetsQueries,
     updateBudgetBody,
     updateBudgetParam,
-} from "@/business/lib/validation/wallet";
+} from "@/business/lib/validation";
 
 const getBudgets = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {

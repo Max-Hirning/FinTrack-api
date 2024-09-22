@@ -1,5 +1,5 @@
 import { Period } from "@prisma/client";
-import { currencyService } from "../currency.service";
+import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { getMonthRange, getWeekRange, getYearRange } from "@/business/lib/date";
 import {
@@ -11,7 +11,7 @@ import {
     createBudgetBody,
     getBudgetsQueries,
     updateBudgetBody,
-} from "@/business/lib/validation/wallet";
+} from "@/business/lib/validation";
 
 const find = async (query: Prisma.BudgetWhereInput) => {
     try {

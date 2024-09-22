@@ -1,6 +1,6 @@
 import fastifyAmqp from "fastify-amqp";
+import { userService } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { userService } from "@/business/services/account";
 import { EmailType, RabbitMqQueues } from "@/types/rabbitmq";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
@@ -10,7 +10,7 @@ import {
     updateUserParam,
     updateUserPasswordBody,
     updateUserPasswordParam,
-} from "@/business/lib/validation/account/user";
+} from "@/business/lib/validation";
 
 const getUser = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {

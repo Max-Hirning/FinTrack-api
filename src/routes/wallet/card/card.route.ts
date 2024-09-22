@@ -7,7 +7,7 @@ import {
     getCardsQueriesSchema,
     updateCardBodySchema,
     updateCardParamSchema,
-} from "@/business/lib/validation/wallet";
+} from "@/business/lib/validation";
 
 export const cardRoutes = async (fastify: FastifyInstance) => {
     fastify.get(

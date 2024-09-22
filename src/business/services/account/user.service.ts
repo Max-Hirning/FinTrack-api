@@ -1,15 +1,15 @@
-import { tokenService } from "./token.service";
 import { hashing } from "@/business/lib/hashing";
+import { tokenService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
+import {
+    updateUserBody,
+    updateUserPasswordBody,
+} from "@/business/lib/validation";
 import {
     ForbiddenError,
     InternalServerError,
     NotFoundError,
 } from "@/business/lib/errors";
-import {
-    updateUserBody,
-    updateUserPasswordBody,
-} from "@/business/lib/validation/account/user";
 
 const find = async (query: Prisma.UserWhereInput) => {
     try {

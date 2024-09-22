@@ -1,12 +1,12 @@
 import axios from "axios";
 import { Currencies } from "@prisma/client";
 import { environmentVariables } from "@/config";
-import { currencies } from "../constants/currencies";
+import { currencies } from "@/business/constants";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import {
     currenciesRatesResponse,
     getCurrenciesRatesConfig,
-} from "../lib/validation/currency";
+} from "@/business/lib/validation";
 
 const getCurrencies = () => {
     return Object.values(currencies);

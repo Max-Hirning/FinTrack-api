@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { imageResponseSchema } from "../image";
 import { Currencies, Roles } from "@prisma/client";
+import { imageResponseSchema } from "@/business/lib/validation";
 
 export const getUserParamSchema = z.object({
     userId: z.string(),

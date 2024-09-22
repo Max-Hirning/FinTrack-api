@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Currencies } from "@prisma/client";
-import { userResponseSchema } from "../account";
+import { userResponseSchema } from "../account/user";
 
 export const getCardsQueriesSchema = z
     .object({
