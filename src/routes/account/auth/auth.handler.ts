@@ -1,6 +1,6 @@
 import fastifyAmqp from "fastify-amqp";
+import { authService } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { authService } from "@/business/services/account";
 import { EmailType, RabbitMqQueues } from "@/types/rabbitmq";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
@@ -10,7 +10,7 @@ import {
     ResetPasswordBody,
     SignInBody,
     SignUpBody,
-} from "@/business/lib/validation/account";
+} from "@/business/lib/validation";
 
 const signIn = async (
     request: FastifyRequest<{ Body: SignInBody }>,

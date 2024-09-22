@@ -1,5 +1,5 @@
 import { environmentVariables } from "@/config";
-import { currenciesResponse } from "../lib/validation/currency";
+import { currenciesResponse } from "@/business/lib/validation/currency";
 
 const currencies: currenciesResponse = {
     AUD: {

@@ -8,7 +8,7 @@ import {
     updateUserPasswordBodySchema,
     updateUserPasswordParamSchema,
     userResponseSchema,
-} from "@/business/lib/validation/account/user";
+} from "@/business/lib/validation";
 
 export const userRoutes = async (fastify: FastifyInstance) => {
     fastify.get(
@@ -50,7 +50,7 @@ export const userRoutes = async (fastify: FastifyInstance) => {
                 body: updateUserPasswordBodySchema,
                 params: updateUserPasswordParamSchema,
             },
-            // preHandler: [fastify.authorization],
+            preHandler: [fastify.authorization],
         },
         function (request, reply) {
             return userHandler.updateUserPassword(request, reply, this.amqp.channel);

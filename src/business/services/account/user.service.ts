@@ -1,15 +1,15 @@
-import { tokenService } from "./token.service";
 import { hashing } from "@/business/lib/hashing";
+import { tokenService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
+import {
+    updateUserBody,
+    updateUserPasswordBody,
+} from "@/business/lib/validation";
 import {
     ForbiddenError,
     InternalServerError,
     NotFoundError,
 } from "@/business/lib/errors";
-import {
-    updateUserBody,
-    updateUserPasswordBody,
-} from "@/business/lib/validation/account/user";
 
 const find = async (query: Prisma.UserWhereInput) => {
     try {
@@ -28,12 +28,20 @@ const getUser = async (query: Prisma.UserWhereUniqueInput) => {
             where: query,
             include: {
                 images: true,
+                cards: true,
+                budgets: true,
+                loans: true,
+                goals: true,
             },
         });
 
         return {
             ...user,
             dateOfBirth: user.dateOfBirth.toISOString(),
+            budgets: user.budgets.map((el) => el.id),
+            cards: user.cards.map((el) => el.id),
+            loans: user.loans.map((el) => el.id),
+            goals: user.goals.map((el) => el.id),
         };
     } catch (error) {
         throw new NotFoundError((error as Error).message);

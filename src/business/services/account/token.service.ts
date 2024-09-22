@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
-import { userService } from "./user.service";
 import { fastify } from "@/bootstrap/swagger";
 import { environmentVariables } from "@/config";
+import { userService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError } from "@/business/lib/errors";
 
