@@ -14,7 +14,7 @@ export const getLoansQueriesSchema = z
     .partial()
     .refine(
         (arg) => {
-            if (!arg.loanIds && !arg.currencies && !arg.userIds) return true;
+            if (!arg.loanIds && !arg.currencies && !arg.userIds) return false;
         },
         {
             message:

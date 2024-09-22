@@ -1,6 +1,6 @@
 import { z } from "zod";
+import { imageResponseSchema } from "../image";
 import { Currencies, Roles } from "@prisma/client";
-import { imageResponseSchema } from "@/business/lib/validation";
 
 export const getUserParamSchema = z.object({
     userId: z.string(),
@@ -52,10 +52,10 @@ export const userResponseSchema = z.object({
     goalNotification: z.boolean(),
     loanNotification: z.boolean(),
     budgetNotification: z.boolean(),
-    cards: z.array(z.string()),
-    loans: z.array(z.string()),
-    goals: z.array(z.string()),
-    budgets: z.array(z.string()),
+    // cards: z.array(z.string()),
+    // loans: z.array(z.string()),
+    // goals: z.array(z.string()),
+    // budgets: z.array(z.string()),
     role: z.enum(Object.values(Roles) as [Roles, ...Roles[]]),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     images: z.array(imageResponseSchema),

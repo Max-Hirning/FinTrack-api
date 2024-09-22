@@ -14,7 +14,7 @@ export const getCardsQueriesSchema = z
     .partial()
     .refine(
         (arg) => {
-            if (!arg.cardIds && !arg.currencies && !arg.userIds) return true;
+            if (!arg.cardIds && !arg.currencies && !arg.userIds) return false;
         },
         {
             message:

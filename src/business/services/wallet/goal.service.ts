@@ -117,6 +117,15 @@ const deleteGoal = async (goalId: string) => {
 };
 const updateGoal = async (goalId: string, payload: updateGoalBody) => {
     if (payload.currency) currencyService.getCurrency(payload.currency);
+    let updatePayload = {};
+    if (payload.startBalance) {
+        const goal = await find({ id: goalId });
+        const incrementValue = -1 * (goal.balance - payload.startBalance);
+        // TODO also increment all transactions balances
+        updatePayload = {
+            balance: goal.balance + incrementValue,
+        };
+    }
 
     try {
         const goal = await prisma.goal.update({
@@ -124,6 +133,7 @@ const updateGoal = async (goalId: string, payload: updateGoalBody) => {
                 id: goalId,
             },
             data: {
+                ...updatePayload,
                 title: payload.title,
                 amount: payload.amount,
                 currency: payload.currency,

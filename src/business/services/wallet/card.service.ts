@@ -117,18 +117,16 @@ const deleteCard = async (cardId: string) => {
 };
 const updateCard = async (cardId: string, payload: updateCardBody) => {
     let updatePayload = {};
+    if (payload.currency) currencyService.getCurrency(payload.currency);
     if (payload.startBalance) {
         const card = await find({ id: cardId });
         const incrementValue = -1 * (card.startBalance - payload.startBalance);
         // TODO also increment all transactions balances
         updatePayload = {
-            balance: {
-                increment: incrementValue,
-            },
+            balance: card.balance + incrementValue,
             startBalance: +payload.startBalance.toFixed(2),
         };
     }
-    if (payload.currency) currencyService.getCurrency(payload.currency);
     try {
         const card = await prisma.card.update({
             where: {

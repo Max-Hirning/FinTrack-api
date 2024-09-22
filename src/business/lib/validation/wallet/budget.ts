@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Currencies, Period } from "@prisma/client";
-import { userResponseSchema } from "@/business/lib/validation";
+import { userResponseSchema } from "../account/user";
 
 export const getBudgetsQueriesSchema = z
     .object({
@@ -14,7 +14,7 @@ export const getBudgetsQueriesSchema = z
     .partial()
     .refine(
         (arg) => {
-            if (!arg.budgetIds && !arg.currencies && !arg.userIds) return true;
+            if (!arg.budgetIds && !arg.currencies && !arg.userIds) return false;
         },
         {
             message:
@@ -53,9 +53,9 @@ export const createBudgetBodySchema = z
     .refine(
         (arg) => {
             if (arg.period === Period.oneTime) {
-                if (!arg.startDate || !arg.endDate) return true;
+                if (!arg.startDate || !arg.endDate) return false;
             }
-            return false;
+            return true;
         },
         {
             message: "Start date and end date is required",
@@ -77,9 +77,9 @@ export const updateBudgetBodySchema = z
     .refine(
         (arg) => {
             if (arg.period === Period.oneTime) {
-                if (!arg.startDate || !arg.endDate) return true;
+                if (!arg.startDate || !arg.endDate) return false;
             }
-            return false;
+            return true;
         },
         {
             message: "Start date and end date is required",

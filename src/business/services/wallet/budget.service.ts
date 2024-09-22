@@ -152,13 +152,19 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
             break;
         }
     }
+    const budget = await find({ id: budgetId });
     if (payload.endDate || payload.startDate) {
-        const budget = await find({ id: budgetId });
-        if (budget.period !== Period.oneTime)
+        if (budget.period !== Period.oneTime && payload.period !== Period.oneTime)
             throw new ForbiddenError(
-                "Onlu one time budget can update startDate and endDate",
+                "Only one time budget can update startDate and endDate",
             );
     }
+    if (
+        (startDate && endDate && startDate >= endDate) ||
+    (endDate && new Date(budget.startDate) >= endDate) ||
+    (startDate && new Date(budget.endDate) <= startDate)
+    )
+        throw new BadRequestError("startDate can't be less or equal than endDate");
 
     try {
         const budget = await prisma.budget.update({
@@ -169,6 +175,8 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
                 endDate,
                 startDate,
                 title: payload.title,
+                period: payload.period,
+                balance: payload.balance,
                 currency: payload.currency,
                 cards: {
                     connect: (payload.cardIds || []).map((cardId) => ({ id: cardId })),
@@ -184,8 +192,8 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
 const createBudget = async (userId: string, payload: createBudgetBody) => {
     currencyService.getCurrency(payload.currency);
 
-    let startDate = new Date(),
-        endDate = new Date();
+    let startDate = payload.startDate ? new Date(payload.startDate) : new Date(),
+        endDate = payload.endDate ? new Date(payload.endDate) : new Date();
     switch (payload.period) {
     case Period.month:
         {
@@ -211,6 +219,9 @@ const createBudget = async (userId: string, payload: createBudgetBody) => {
     default:
         throw new BadRequestError("Start date and end date is required");
     }
+
+    if (startDate >= endDate)
+        throw new BadRequestError("startDate can't be less or equal than endDate");
 
     try {
         const budget = await prisma.budget.create({

@@ -14,7 +14,7 @@ export const getGoalsQueriesSchema = z
     .partial()
     .refine(
         (arg) => {
-            if (!arg.goalIds && !arg.currencies && !arg.userIds) return true;
+            if (!arg.goalIds && !arg.currencies && !arg.userIds) return false;
         },
         {
             message:
@@ -53,6 +53,9 @@ export const updateGoalBodySchema = createGoalBodySchema
         deadline: true,
         currency: true,
         description: true,
+    })
+    .extend({
+        startBalance: z.number(),
     })
     .partial();
 
