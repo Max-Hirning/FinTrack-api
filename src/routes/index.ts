@@ -3,6 +3,7 @@ import { cardRoutes } from "./wallet/card";
 import { authRoutes } from "./account/auth";
 import { userRoutes } from "./account/user";
 import { currencyRoutes } from "./currency";
+import { budgetRoutes } from "./wallet/budget";
 import { applicationRoutes } from "./application";
 
 const configureRoutes = async (fastify: FastifyInstance) => {
@@ -20,6 +21,9 @@ const configureRoutes = async (fastify: FastifyInstance) => {
     });
     await fastify.register(cardRoutes, {
         prefix: "api/card",
+    });
+    await fastify.register(budgetRoutes, {
+        prefix: "api/budget",
     });
 };
 

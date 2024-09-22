@@ -11,7 +11,16 @@ export const getCardsQueriesSchema = z
             z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
         ),
     })
-    .partial();
+    .partial()
+    .refine(
+        (arg) => {
+            if (!arg.cardIds && !arg.currencies && !arg.userIds) return true;
+        },
+        {
+            message:
+        "At least one of fields: 'userIds', 'cardIds' or 'currencies' is required",
+        },
+    );
 
 type getCardsQueries = z.infer<typeof getCardsQueriesSchema>;
 

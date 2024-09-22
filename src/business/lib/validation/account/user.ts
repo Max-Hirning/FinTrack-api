@@ -33,6 +33,10 @@ export const updateUserBodySchema = z
         currency: z.enum(
       Object.values(Currencies) as [Currencies, ...Currencies[]],
         ),
+        cards: z.array(z.string()),
+        loans: z.array(z.string()),
+        goals: z.array(z.string()),
+        budgets: z.array(z.string()),
     })
     .partial();
 export const updateUserPasswordBodySchema = z.object({
