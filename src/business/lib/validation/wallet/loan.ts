@@ -42,14 +42,16 @@ export const createLoanBodySchema = z.object({
     title: z.string(),
     amount: z.number(),
     date: z.string().datetime(),
-    balance: z.number().optional(),
     deadline: z.string().datetime(),
     description: z.string().optional(),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
 });
 export const updateLoanBodySchema = createLoanBodySchema
     .pick({
+        date: true,
         title: true,
+        amount: true,
+        currency: true,
         deadline: true,
         description: true,
     })

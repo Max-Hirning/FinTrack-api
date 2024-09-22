@@ -116,6 +116,8 @@ const deleteGoal = async (goalId: string) => {
     }
 };
 const updateGoal = async (goalId: string, payload: updateGoalBody) => {
+    if (payload.currency) currencyService.getCurrency(payload.currency);
+
     try {
         const goal = await prisma.goal.update({
             where: {

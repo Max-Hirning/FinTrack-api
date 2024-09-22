@@ -116,6 +116,8 @@ const deleteLoan = async (loanId: string) => {
     }
 };
 const updateLoan = async (loanId: string, payload: updateLoanBody) => {
+    if (payload.currency) currencyService.getCurrency(payload.currency);
+
     try {
         const loan = await prisma.loan.update({
             where: {
@@ -123,7 +125,10 @@ const updateLoan = async (loanId: string, payload: updateLoanBody) => {
             },
             data: {
                 title: payload.title,
+                amount: payload.amount,
+                currency: payload.currency,
                 description: payload.description,
+                date: payload.date ? new Date(payload.date) : undefined,
                 deadline: payload.deadline ? new Date(payload.deadline) : undefined,
             },
         });
@@ -142,7 +147,6 @@ const createLoan = async (userId: string, payload: createLoanBody) => {
                 userId,
                 title: payload.title,
                 amount: payload.amount,
-                balance: payload.balance,
                 currency: payload.currency,
                 date: new Date(payload.date),
                 deadline: new Date(payload.deadline),

@@ -128,6 +128,7 @@ const updateCard = async (cardId: string, payload: updateCardBody) => {
             startBalance: +payload.startBalance.toFixed(2),
         };
     }
+    if (payload.currency) currencyService.getCurrency(payload.currency);
     try {
         const card = await prisma.card.update({
             where: {
