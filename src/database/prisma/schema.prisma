@@ -117,7 +117,7 @@ model Goal {
   id          String     @id @default(uuid())
   title       String
   amount      Float
-  balance     Float
+  balance     Float      @default(0)
   currency    Currencies
   deadline    DateTime
   description String
@@ -131,6 +131,7 @@ model Loan {
   id          String     @id @default(uuid())
   title       String
   amount      Float
+  balance     Float      @default(0)
   deadline    DateTime
   currency    Currencies
   date        DateTime

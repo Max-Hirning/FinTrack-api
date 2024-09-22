@@ -3,15 +3,16 @@ import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { getMonthRange, getWeekRange, getYearRange } from "@/business/lib/date";
 import {
-    BadRequestError,
-    InternalServerError,
-    NotFoundError,
-} from "@/business/lib/errors";
-import {
     createBudgetBody,
     getBudgetsQueries,
     updateBudgetBody,
 } from "@/business/lib/validation";
+import {
+    BadRequestError,
+    ForbiddenError,
+    InternalServerError,
+    NotFoundError,
+} from "@/business/lib/errors";
 
 const find = async (query: Prisma.BudgetWhereInput) => {
     try {
@@ -150,6 +151,13 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
         default:
             break;
         }
+    }
+    if (payload.endDate || payload.startDate) {
+        const budget = await find({ id: budgetId });
+        if (budget.period !== Period.oneTime)
+            throw new ForbiddenError(
+                "Onlu one time budget can update startDate and endDate",
+            );
     }
 
     try {
