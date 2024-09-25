@@ -1,3 +1,4 @@
+export * from "./category.service";
 export * from "./currency.service";
 export * from "./account/otp.service";
 export * from "./wallet/card.service";

@@ -181,7 +181,6 @@ model Budget {
   balance    Float
   currency   Currencies
   period     Period
-  // categories
   startDate  DateTime
   endDate    DateTime
   userId     String
