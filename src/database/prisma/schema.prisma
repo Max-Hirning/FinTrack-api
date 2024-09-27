@@ -18,6 +18,7 @@ enum Period {
   year
   month
   week
+  day
 }
 
 enum Currencies {
@@ -32,122 +33,11 @@ enum Currencies {
   USD
 }
 
-enum Categories {
-  foodAndDrinks
-  restaurantAndCafe
-  groceries
-  fastFoodBar
-
-  shopping
-  pharmacy
-  electronicsAccessories
-  freetime
-  giftJoy
-  healthAndBeauty
-  homeGarden
-  jewelsAccessories
-  kids
-  petsAnimals
-  stationeryTools
-
-  housing
-  energyUtilities
-  maintenanceRepairs
-  mortage
-  propertyInsurance
-  rent
-  services
-
-  transportation
-  businessTrips
-  longDistance
-  publicTransport
-  taxi
-  delivery
-
-  vehicle
-  fuel
-  leasing
-  parking
-  rentals
-  vehicleInsurance
-  vehicleMaintenance
-
-  lifeAndEntertainment
-  activeSportFitness
-  alcoholTobaco
-  booksAudioSubscriptions
-  charityGifts
-  cultureSportEvents
-  educationDevelopment
-  healthCareDoctor
-  hobbies
-  holidayTripsHotels
-  lifeEvents
-  wellnessBeauty
-  lotteriesGambling
-
-  communicationPC
-  phoneCellPhone
-  softwareAppsGames
-
-  financialExpenses
-  advisory
-  chargesFees
-  childSupport
-  fines
-  insurance
-  loanInteresys
-  taxes
-
-  investemnts
-  financialInvestments
-  realty
-  savings
-  vehicleChattels
-
-  income
-  checksCoupons
-  childSupportIncome
-  duesAndGrants
-  gifts
-  interestsDividends
-  lendingRenting
-  bussiness
-  refunds
-  rentalIncome
-  wageInvoices
-
-  transfer
-
-  others
-}
-
 model Otp {
   id        String   @id @default(uuid())
   otp       String   @unique
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  uuid      String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Image {
-  id        String   @id @default(uuid())
-  url       String
-  fileId    String
-  userId    String
-  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -168,27 +58,12 @@ model User {
   otps               Otp[]
   refreshTokens      RefreshToken[]
   cards              Card[]
+  categories         Category[]
   budgets            Budget[]
   goals              Goal[]
   loans              Loan[]
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
-}
-
-model Budget {
-  id         String       @id @default(uuid())
-  title      String
-  balance    Float
-  currency   Currencies
-  period     Period
-  startDate  DateTime
-  endDate    DateTime
-  userId     String
-  categories Categories[]
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cards      Card[]       @relation("BudgetCard")
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
 }
 
 model Card {
@@ -236,21 +111,71 @@ model Loan {
   updatedAt    DateTime      @updatedAt
 }
 
+model Image {
+  id        String   @id @default(uuid())
+  url       String
+  fileId    String
+  userId    String
+  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Budget {
+  id         String     @id @default(uuid())
+  title      String
+  balance    Float
+  currency   Currencies
+  period     Period
+  startDate  DateTime
+  endDate    DateTime
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories Category[] @relation("BudgetCategory")
+  cards      Card[]     @relation("BudgetCard")
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  title        String
+  image        String
+  color        String
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgets      Budget[]      @relation("BudgetCategory")
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
 model Transaction {
-  id          String     @id @default(uuid())
+  id          String   @id @default(uuid())
   date        DateTime
   amount      Float
   description String
   balance     Float
   goalBalance Float?
   loanBalance Float?
-  category    Categories
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   cardId      String
-  card        Card       @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  card        Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
   goalId      String?
-  goal        Goal?      @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goal        Goal?    @relation(fields: [goalId], references: [id], onDelete: Cascade)
   loanId      String?
-  loan        Loan?      @relation(fields: [loanId], references: [id], onDelete: Cascade)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  loan        Loan?    @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  uuid      String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

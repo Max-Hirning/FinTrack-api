@@ -1,55 +1,89 @@
-import { Currencies } from "@prisma/client";
-import { currencies } from "@/business/constants";
-import { NotFoundError } from "@/business/lib/errors";
-import { getCategoriesQueries } from "../lib/validation";
-import {
-    transactionCategories,
-    transactionCategoriesGroups,
-} from "../constants/categories";
+import { prisma } from "@/database/prisma/prisma";
+import { InternalServerError, NotFoundError } from "@/business/lib/errors";
+import { createCategoryBody, updateCategoryBody } from "../lib/validation";
 
-const getCategory = (currency: Currencies) => {
-    const currencyObj = currencies[currency];
-    if (!currencyObj) throw new NotFoundError("No category was found");
-    return currencies[currency];
-};
-const getCategories = (queries: getCategoriesQueries) => {
-    if (queries.grouped) {
-        const categoryGroups = transactionCategoriesGroups;
-        const categories = Object.values(transactionCategories);
-        const categoryGroupsKeys = Object.keys(transactionCategoriesGroups);
-
-        const response = categories.reduce((res, el) => {
-            if (el.group && categoryGroupsKeys.includes(el.group)) {
-                if (res[el.group]?.children) {
-                    res[el.group]?.children.push({
-                        ...el,
-                        color: categoryGroups[el.group]?.color || "gray",
-                        group: el.group ?? "",
-                    });
-                }
-            } else {
-                res[el.id] = {
-                    ...el,
-                    color: "gray",
-                    children: [],
-                };
-            }
-            return res;
-        }, categoryGroups);
-
-        return Object.values(response);
+const find = async (categoryId: string) => {
+    try {
+        const category = await prisma.category.findUnique({
+            where: {
+                id: categoryId,
+            },
+        });
+        return category;
+    } catch (error) {
+        throw new NotFoundError((error as Error).message);
     }
-
-    return Object.values(transactionCategories).map((el) => ({
-        ...el,
-        color: el.group
-            ? transactionCategoriesGroups[el.group]?.color || "gray"
-            : "gray",
-        group: el.group ?? "defaultGroup",
-    }));
+};
+const getCategories = async (userId?: string) => {
+    const categories = await prisma.category.findMany({
+        where: {
+            AND: [
+                {
+                    userId,
+                },
+                {
+                    userId: undefined,
+                },
+            ],
+        },
+    });
+    return categories;
+};
+const createCategory = async (payload: createCategoryBody) => {
+    let category;
+    try {
+        category = await prisma.category.create({
+            data: {
+                title: payload.title,
+                color: payload.color,
+                image: payload.image,
+                userId: payload.userId,
+            },
+        });
+    } catch (error) {
+        throw new InternalServerError((error as Error).message);
+    }
+    return category;
+};
+const updateCategory = async (
+    categoryId: string,
+    payload: updateCategoryBody,
+) => {
+    let category;
+    try {
+        category = await prisma.category.update({
+            where: {
+                id: categoryId,
+            },
+            data: {
+                title: payload.title,
+                color: payload.color,
+                image: payload.image,
+            },
+        });
+    } catch (error) {
+        throw new InternalServerError((error as Error).message);
+    }
+    return category;
+};
+const deleteCategory = async (categoryId: string) => {
+    let category;
+    try {
+        category = await prisma.category.delete({
+            where: {
+                id: categoryId,
+            },
+        });
+    } catch (error) {
+        throw new InternalServerError((error as Error).message);
+    }
+    return category;
 };
 
 export const categoryService = {
-    getCategory,
+    find,
     getCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory,
 };

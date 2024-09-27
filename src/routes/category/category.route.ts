@@ -1,8 +1,13 @@
+import { Roles } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { categoryHandler } from "./category.handler";
 import {
-    categoriesChildSchema,
-    categoriesGroupsSchema,
+    categoiesResponseSchema,
+    createCategoryBodySchema,
+    deleteCategoryParamSchema,
+    getCategoriesQueriesSchema,
+    updateCategoryBodySchema,
+    updateCategoryParamSchema,
 } from "@/business/lib/validation";
 
 export const categoryRoutes = async (fastify: FastifyInstance) => {
@@ -11,24 +16,59 @@ export const categoryRoutes = async (fastify: FastifyInstance) => {
         {
             schema: {
                 response: {
-                    200: categoriesChildSchema,
+                    200: categoiesResponseSchema,
                 },
                 tags: ["category"],
+                querystring: getCategoriesQueriesSchema,
             },
+            preHandler: [fastify.authorization],
         },
         categoryHandler.getCategories,
     );
-
-    fastify.get(
-        "/group",
+    fastify.post(
+        "/",
         {
             schema: {
-                response: {
-                    200: categoriesGroupsSchema,
-                },
                 tags: ["category"],
+                security: [{ bearerAuth: [] }],
+                body: createCategoryBodySchema,
             },
+            preHandler: [
+                fastify.authorization,
+                fastify.checkRole([Roles.guest, Roles.user]),
+            ],
         },
-        categoryHandler.getCategoryGroups,
+        categoryHandler.createCategory,
+    );
+    fastify.put(
+        "/:categoryId",
+        {
+            schema: {
+                tags: ["category"],
+                security: [{ bearerAuth: [] }],
+                body: updateCategoryBodySchema,
+                params: updateCategoryParamSchema,
+            },
+            preHandler: [
+                fastify.authorization,
+                fastify.checkRole([Roles.guest, Roles.user]),
+            ],
+        },
+        categoryHandler.updateCategory,
+    );
+    fastify.delete(
+        "/:categoryId",
+        {
+            schema: {
+                tags: ["category"],
+                security: [{ bearerAuth: [] }],
+                params: deleteCategoryParamSchema,
+            },
+            preHandler: [
+                fastify.authorization,
+                fastify.checkRole([Roles.guest, Roles.user]),
+            ],
+        },
+        categoryHandler.deleteCategory,
     );
 };
