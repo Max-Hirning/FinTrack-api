@@ -10,17 +10,17 @@ const createTokens = async (userId: string) => {
         id: userId,
     });
 
-    try {
-        const uuid = uuidv4();
-        const accessToken = fastify.jwt.sign(
-            { userId: user.id, role: user.role },
-            { expiresIn: environmentVariables.ACCESS_TOKEN_EXP },
-        );
-        const refreshToken = fastify.jwt.sign(
-            { userId: user.id, uuid },
-            { expiresIn: environmentVariables.REFRESH_TOKEN_EXP },
-        );
+    const uuid = uuidv4();
+    const accessToken = fastify.jwt.sign(
+        { userId: user.id, role: user.role },
+        { expiresIn: environmentVariables.ACCESS_TOKEN_EXP },
+    );
+    const refreshToken = fastify.jwt.sign(
+        { userId: user.id, uuid },
+        { expiresIn: environmentVariables.REFRESH_TOKEN_EXP },
+    );
 
+    try {
         await prisma.refreshToken.create({
             data: {
                 uuid,
@@ -28,7 +28,6 @@ const createTokens = async (userId: string) => {
                 token: refreshToken,
             },
         });
-
         return {
             accessToken,
             refreshToken,

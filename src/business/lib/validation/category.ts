@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const getCategoriesQueriesSchema = z.object({
-    userId: z.string().optional(),
+    userIds: z.array(z.string()).optional(),
 });
 
 type getCategoriesQueries = z.infer<typeof getCategoriesQueriesSchema>;
@@ -37,14 +37,14 @@ export const categoryResponseSchema = z.object({
     color: z.string(),
     image: z.string().url(),
 });
-export const categoiesResponseSchema = z.array(categoryResponseSchema);
+export const categoriesResponseSchema = z.array(categoryResponseSchema);
 
 type categoryResponse = z.infer<typeof categoryResponseSchema>;
-type categoiesResponse = z.infer<typeof categoiesResponseSchema>;
+type categoriesResponse = z.infer<typeof categoriesResponseSchema>;
 
 export type {
     categoryResponse,
-    categoiesResponse,
+    categoriesResponse,
     createCategoryBody,
     updateCategoryBody,
     deleteCategoryParam,

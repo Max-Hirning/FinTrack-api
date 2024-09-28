@@ -22,7 +22,7 @@ const getCategories = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getCategoriesQueries;
     }>;
-        const data = await categoryService.getCategories(query.userId);
+        const data = await categoryService.getCategories(query.userIds);
 
         return data;
     });

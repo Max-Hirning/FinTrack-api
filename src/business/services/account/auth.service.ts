@@ -62,7 +62,6 @@ const signUp = async (payload: SignUpBody) => {
                 firstName: payload.firstName,
             },
         });
-
         return "Account was created";
     } catch (error) {
         throw new InternalServerError((error as Error).message);

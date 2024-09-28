@@ -14,12 +14,14 @@ const find = async (categoryId: string) => {
         throw new NotFoundError((error as Error).message);
     }
 };
-const getCategories = async (userId?: string) => {
+const getCategories = async (userId?: string[]) => {
     const categories = await prisma.category.findMany({
         where: {
             AND: [
                 {
-                    userId,
+                    userId: {
+                        in: userId || [],
+                    },
                 },
                 {
                     userId: undefined,

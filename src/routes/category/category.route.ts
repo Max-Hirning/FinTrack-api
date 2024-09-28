@@ -2,7 +2,7 @@ import { Roles } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { categoryHandler } from "./category.handler";
 import {
-    categoiesResponseSchema,
+    categoriesResponseSchema,
     createCategoryBodySchema,
     deleteCategoryParamSchema,
     getCategoriesQueriesSchema,
@@ -16,12 +16,11 @@ export const categoryRoutes = async (fastify: FastifyInstance) => {
         {
             schema: {
                 response: {
-                    200: categoiesResponseSchema,
+                    200: categoriesResponseSchema,
                 },
                 tags: ["category"],
                 querystring: getCategoriesQueriesSchema,
             },
-            preHandler: [fastify.authorization],
         },
         categoryHandler.getCategories,
     );

@@ -4,6 +4,7 @@ export * from "./category";
 export * from "./wallet/card";
 export * from "./wallet/loan";
 export * from "./wallet/goal";
+export * from "./transaction";
 export * from "./account/auth";
 export * from "./account/user";
 export * from "./wallet/budget";

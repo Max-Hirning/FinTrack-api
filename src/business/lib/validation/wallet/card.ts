@@ -17,8 +17,7 @@ export const getCardsQueriesSchema = z
             if (!arg.cardIds && !arg.currencies && !arg.userIds) return false;
         },
         {
-            message:
-        "At least one of fields: 'userIds', 'cardIds' or 'currencies' is required",
+            message: "At least one query is required",
         },
     );
 

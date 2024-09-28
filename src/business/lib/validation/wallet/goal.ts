@@ -17,8 +17,7 @@ export const getGoalsQueriesSchema = z
             if (!arg.goalIds && !arg.currencies && !arg.userIds) return false;
         },
         {
-            message:
-        "At least one of fields: 'userIds', 'goalIds' or 'currencies' is required",
+            message: "At least one query is required",
         },
     );
 
