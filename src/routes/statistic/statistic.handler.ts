@@ -1,7 +1,10 @@
 import { statisticService } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { getStatisticsQueries } from "@/business/lib/validation";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
+import {
+    accountStatisticParam,
+    getStatisticsQueries,
+} from "@/business/lib/validation";
 
 const getStatistic = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
@@ -19,7 +22,7 @@ const getCardsStatistic = async (
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        return statisticService.getCardsStatistic(query);
+        return statisticService.getCardsStatistic(query, request.user.id);
     });
 };
 const getCategoriesStatistic = async (
@@ -30,12 +33,24 @@ const getCategoriesStatistic = async (
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        return statisticService.getCategoriesStatistic(query);
+        return statisticService.getCategoriesStatistic(query, request.user.id);
+    });
+};
+const getAccountStatistic = async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+) => {
+    return tryCatchApiMiddleware(reply, async () => {
+        const { params } = request as FastifyRequest<{
+      Params: accountStatisticParam;
+    }>;
+        return statisticService.getAccountStatistic(params);
     });
 };
 
 export const statisticHandler = {
     getStatistic,
     getCardsStatistic,
+    getAccountStatistic,
     getCategoriesStatistic,
 };

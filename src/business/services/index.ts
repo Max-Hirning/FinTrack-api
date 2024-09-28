@@ -1,5 +1,6 @@
 export * from "./category.service";
 export * from "./currency.service";
+export * from "./statistic.service";
 export * from "./account/otp.service";
 export * from "./wallet/card.service";
 export * from "./wallet/loan.service";
