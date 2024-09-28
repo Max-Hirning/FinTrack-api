@@ -17,8 +17,7 @@ export const getBudgetsQueriesSchema = z
             if (!arg.budgetIds && !arg.currencies && !arg.userIds) return false;
         },
         {
-            message:
-        "At least one of fields: 'userIds', 'budgetIds' or 'currencies' is required",
+            message: "At least one query is required",
         },
     );
 

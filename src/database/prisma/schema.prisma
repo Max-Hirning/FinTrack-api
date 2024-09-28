@@ -18,6 +18,7 @@ enum Period {
   year
   month
   week
+  day
 }
 
 enum Currencies {
@@ -41,26 +42,6 @@ model Otp {
   updatedAt DateTime @updatedAt
 }
 
-model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  uuid      String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Image {
-  id        String   @id @default(uuid())
-  url       String
-  fileId    String
-  userId    String
-  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model User {
   id                 String         @id @default(uuid())
   email              String         @unique
@@ -77,6 +58,7 @@ model User {
   otps               Otp[]
   refreshTokens      RefreshToken[]
   cards              Card[]
+  categories         Category[]
   budgets            Budget[]
   goals              Goal[]
   loans              Loan[]
@@ -84,60 +66,113 @@ model User {
   updatedAt          DateTime       @updatedAt
 }
 
-model Budget {
-  id        String     @id @default(uuid())
-  title     String
-  balance   Float
-  currency  Currencies
-  period    Period
-  // categories
-  startDate DateTime
-  endDate   DateTime
-  userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cards     Card[]     @relation("BudgetCard")
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-}
-
 model Card {
-  id           String     @id @default(uuid())
+  id           String        @id @default(uuid())
   title        String
   balance      Float
   currency     Currencies
   startBalance Float
   userId       String
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  budgets      Budget[]   @relation("BudgetCard")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgets      Budget[]      @relation("BudgetCard")
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Goal {
-  id          String     @id @default(uuid())
-  title       String
-  amount      Float
-  balance     Float      @default(0)
-  currency    Currencies
-  deadline    DateTime
-  description String
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id           String        @id @default(uuid())
+  title        String
+  amount       Float
+  balance      Float         @default(0)
+  currency     Currencies
+  deadline     DateTime
+  description  String
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Loan {
-  id          String     @id @default(uuid())
-  title       String
-  amount      Float
-  balance     Float      @default(0)
-  deadline    DateTime
-  currency    Currencies
+  id           String        @id @default(uuid())
+  title        String
+  amount       Float
+  balance      Float         @default(0)
+  deadline     DateTime
+  currency     Currencies
+  date         DateTime
+  description  String
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  url       String
+  fileId    String
+  userId    String
+  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Budget {
+  id         String     @id @default(uuid())
+  title      String
+  balance    Float
+  currency   Currencies
+  period     Period
+  startDate  DateTime
+  endDate    DateTime
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories Category[] @relation("BudgetCategory")
+  cards      Card[]     @relation("BudgetCard")
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  title        String
+  image        String
+  color        String
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgets      Budget[]      @relation("BudgetCategory")
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
   date        DateTime
+  amount      Float
   description String
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  cardId      String
+  card        Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  goalId      String?
+  goal        Goal?    @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  loanId      String?
+  loan        Loan?    @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  uuid      String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

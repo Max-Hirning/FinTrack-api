@@ -16,7 +16,6 @@ const find = async (query: Prisma.UserWhereInput) => {
         const user = await prisma.user.findFirstOrThrow({
             where: query,
         });
-
         return user;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -34,7 +33,6 @@ const getUser = async (query: Prisma.UserWhereUniqueInput) => {
                 goals: true,
             },
         });
-
         return {
             ...user,
             dateOfBirth: user.dateOfBirth.toISOString(),
@@ -58,9 +56,13 @@ const deleteUser = async (query: Prisma.UserWhereUniqueInput) => {
         throw new NotFoundError((error as Error).message);
     }
 
-    await tokenService.deleteTokens({
-        userId: user.id,
-    });
+    try {
+        await tokenService.deleteTokens({
+            userId: user.id,
+        });
+    } catch (error) {
+        console.log(error);
+    }
 
     return user;
 };
@@ -104,7 +106,6 @@ const updateUserPassword = async (
 
     if (payload.oldPassword) {
         const user = await find({ id: userId });
-
         const comparedPasses = hashing.comparePassword(
             payload.oldPassword,
             user.password,

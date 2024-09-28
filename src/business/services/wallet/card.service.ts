@@ -12,7 +12,6 @@ const find = async (query: Prisma.CardWhereInput) => {
         const user = await prisma.card.findFirstOrThrow({
             where: query,
         });
-
         return user;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -109,7 +108,6 @@ const deleteCard = async (cardId: string) => {
                 id: cardId,
             },
         });
-
         return card;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -121,7 +119,7 @@ const updateCard = async (cardId: string, payload: updateCardBody) => {
     if (payload.startBalance) {
         const card = await find({ id: cardId });
         const incrementValue = -1 * (card.startBalance - payload.startBalance);
-        // TODO also increment all transactions balances
+
         updatePayload = {
             balance: card.balance + incrementValue,
             startBalance: +payload.startBalance.toFixed(2),
@@ -138,7 +136,6 @@ const updateCard = async (cardId: string, payload: updateCardBody) => {
                 currency: payload.currency,
             },
         });
-
         return card;
     } catch (error) {
         throw new InternalServerError((error as Error).message);
@@ -157,7 +154,6 @@ const createCard = async (userId: string, payload: createCardBody) => {
                 startBalance: +payload.startBalance.toFixed(2),
             },
         });
-
         return card;
     } catch (error) {
         throw new InternalServerError((error as Error).message);

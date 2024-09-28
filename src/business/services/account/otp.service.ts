@@ -48,7 +48,6 @@ const createOtp = async (userQuery: Prisma.UserWhereUniqueInput) => {
                 userId: user.id,
             },
         });
-
         return code;
     } catch (error) {
         throw new InternalServerError((error as Error).message);

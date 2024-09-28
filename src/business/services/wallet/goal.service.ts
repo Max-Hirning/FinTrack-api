@@ -12,7 +12,6 @@ const find = async (query: Prisma.GoalWhereInput) => {
         const user = await prisma.goal.findFirstOrThrow({
             where: query,
         });
-
         return user;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -109,7 +108,6 @@ const deleteGoal = async (goalId: string) => {
                 id: goalId,
             },
         });
-
         return goal;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -121,7 +119,7 @@ const updateGoal = async (goalId: string, payload: updateGoalBody) => {
     if (payload.startBalance) {
         const goal = await find({ id: goalId });
         const incrementValue = -1 * (goal.balance - payload.startBalance);
-        // TODO also increment all transactions balances
+
         updatePayload = {
             balance: goal.balance + incrementValue,
         };

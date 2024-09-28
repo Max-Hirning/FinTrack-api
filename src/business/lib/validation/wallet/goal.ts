@@ -17,8 +17,7 @@ export const getGoalsQueriesSchema = z
             if (!arg.goalIds && !arg.currencies && !arg.userIds) return false;
         },
         {
-            message:
-        "At least one of fields: 'userIds', 'goalIds' or 'currencies' is required",
+            message: "At least one query is required",
         },
     );
 
@@ -63,6 +62,7 @@ type createGoalBody = z.infer<typeof createGoalBodySchema>;
 type updateGoalBody = z.infer<typeof updateGoalBodySchema>;
 
 export const goalResponseSchema = z.object({
+    id: z.string(),
     title: z.string(),
     amount: z.number(),
     balance: z.number(),

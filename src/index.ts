@@ -1,7 +1,10 @@
 import "fastify";
 import * as fastifyTypeProviderZod from "fastify-type-provider-zod";
+import path from "path";
+import middie from "@fastify/middie";
 import fastifyJwt from "@fastify/jwt";
 import fastifyAmqp from "fastify-amqp";
+import serveStatic from "serve-static";
 import fastifyCors from "@fastify/cors";
 import { configureRoutes } from "@/routes";
 import { Roles, User } from "@prisma/client";
@@ -44,6 +47,7 @@ async function main() {
             setupImageConsumer(fastify.amqp.channel);
             setupNotificationConsumer(fastify.amqp.channel);
         });
+    await fastify.register(middie);
     await fastify.register(fastifyJwt, {
         secret: environmentVariables.APPLICATION_SECRET,
     });
@@ -51,6 +55,10 @@ async function main() {
         origin: true,
         credentials: true,
     });
+    await fastify.use(
+        "/assets",
+        serveStatic(path.resolve(__dirname, "../assets")),
+    );
 
     fastify.setValidatorCompiler(fastifyTypeProviderZod.validatorCompiler);
     fastify.setSerializerCompiler(fastifyTypeProviderZod.serializerCompiler);

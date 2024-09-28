@@ -19,7 +19,6 @@ const find = async (query: Prisma.BudgetWhereInput) => {
         const user = await prisma.budget.findFirstOrThrow({
             where: query,
         });
-
         return user;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -116,7 +115,6 @@ const deleteBudget = async (budgetId: string) => {
                 id: budgetId,
             },
         });
-
         return budget;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -238,7 +236,6 @@ const createBudget = async (userId: string, payload: createBudgetBody) => {
                 },
             },
         });
-
         return budget;
     } catch (error) {
         throw new InternalServerError((error as Error).message);
