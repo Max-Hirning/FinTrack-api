@@ -155,9 +155,6 @@ model Transaction {
   date        DateTime
   amount      Float
   description String
-  balance     Float
-  goalBalance Float?
-  loanBalance Float?
   categoryId  String
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   cardId      String

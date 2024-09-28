@@ -120,24 +120,6 @@ const updateGoal = async (goalId: string, payload: updateGoalBody) => {
         const goal = await find({ id: goalId });
         const incrementValue = -1 * (goal.balance - payload.startBalance);
 
-        try {
-            await prisma.transaction.updateMany({
-                where: {
-                    goalId: goalId,
-                    goalBalance: {
-                        not: null,
-                    },
-                },
-                data: {
-                    goalBalance: {
-                        increment: incrementValue,
-                    },
-                },
-            });
-        } catch (error) {
-            console.log(error);
-        }
-
         updatePayload = {
             balance: goal.balance + incrementValue,
         };

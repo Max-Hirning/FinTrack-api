@@ -23,23 +23,6 @@ const deleteTransaction = async (transactionId: string) => {
     }
 
     try {
-        await prisma.transaction.updateMany({
-            where: {
-                date: {
-                    gte: transaction.date,
-                },
-            },
-            data: {
-                balance: {
-                    increment: -1 * transaction.amount,
-                },
-            },
-        });
-    } catch (error) {
-        console.log(error);
-    }
-
-    try {
         await prisma.card.update({
             where: {
                 id: transaction.cardId,
@@ -179,11 +162,10 @@ const getTransactions = async (query: getTransactionsQueries) => {
     };
 };
 const createTransaction = async (payload: createTransactionBody) => {
-    let transaction, nearestTransaction;
+    let transaction;
     try {
         transaction = await prisma.transaction.create({
             data: {
-                balance: 0,
                 date: payload.date,
                 amount: payload.amount,
                 cardId: payload.cardId,
@@ -191,16 +173,6 @@ const createTransaction = async (payload: createTransactionBody) => {
                 loanId: payload.loanId,
                 categoryId: payload.categoryId,
                 description: payload.description || "",
-            },
-        });
-        nearestTransaction = await prisma.transaction.findFirst({
-            where: {
-                date: {
-                    lte: transaction.date,
-                },
-            },
-            orderBy: {
-                date: "desc",
             },
         });
     } catch (error) {
@@ -218,23 +190,13 @@ const createTransaction = async (payload: createTransactionBody) => {
                 },
             },
         });
-        if (nearestTransaction) {
-            await prisma.transaction.update({
-                where: {
-                    id: transaction.id,
-                },
-                data: {
-                    balance: nearestTransaction.balance + transaction.amount,
-                },
-            });
-        }
     } catch (error) {
         throw new InternalServerError((error as Error).message);
     }
 
     if (payload.goalId) {
         try {
-            const goal = await prisma.goal.update({
+            await prisma.goal.update({
                 where: {
                     id: payload.goalId,
                 },
@@ -244,14 +206,6 @@ const createTransaction = async (payload: createTransactionBody) => {
                     },
                 },
             });
-            await prisma.transaction.update({
-                where: {
-                    id: transaction.id,
-                },
-                data: {
-                    goalBalance: goal.balance,
-                },
-            });
         } catch (error) {
             throw new InternalServerError((error as Error).message);
         }
@@ -259,7 +213,7 @@ const createTransaction = async (payload: createTransactionBody) => {
 
     if (payload.loanId) {
         try {
-            const loan = await prisma.loan.update({
+            await prisma.loan.update({
                 where: {
                     id: payload.loanId,
                 },
@@ -269,44 +223,9 @@ const createTransaction = async (payload: createTransactionBody) => {
                     },
                 },
             });
-            await prisma.transaction.update({
-                where: {
-                    id: transaction.id,
-                },
-                data: {
-                    loanBalance: loan.balance,
-                },
-            });
         } catch (error) {
             throw new InternalServerError((error as Error).message);
         }
-    }
-
-    try {
-        await prisma.transaction.updateMany({
-            where: {
-                date: {
-                    gte: transaction.date,
-                },
-            },
-            data: {
-                balance: {
-                    increment: transaction.amount,
-                },
-                ...(transaction.goalId && {
-                    goalBalance: {
-                        increment: transaction.amount,
-                    },
-                }),
-                ...(transaction.loanId && {
-                    loanBalance: {
-                        increment: transaction.amount,
-                    },
-                }),
-            },
-        });
-    } catch (error) {
-        console.log(error);
     }
 
     return transaction;
@@ -333,30 +252,6 @@ const updateTransaction = async (
     }
 
     if (payload.amount) {
-        try {
-            const nearestTransaction = await prisma.transaction.findFirst({
-                where: {
-                    date: {
-                        lte: transaction.date,
-                    },
-                },
-                orderBy: {
-                    date: "desc",
-                },
-            });
-            if (nearestTransaction) {
-                await prisma.transaction.update({
-                    where: {
-                        id: transaction.id,
-                    },
-                    data: {
-                        balance: nearestTransaction.balance + transaction.amount,
-                    },
-                });
-            }
-        } catch (error) {
-            console.log(error);
-        }
         try {
             const card = await cardServcice.find({
                 id: transaction.cardId,
@@ -411,32 +306,6 @@ const updateTransaction = async (
             } catch (error) {
                 console.log(error);
             }
-        }
-        try {
-            await prisma.transaction.updateMany({
-                where: {
-                    date: {
-                        gte: transaction.date,
-                    },
-                },
-                data: {
-                    balance: {
-                        increment: transaction.amount,
-                    },
-                    ...(transaction.goalId && {
-                        goalBalance: {
-                            increment: transaction.amount,
-                        },
-                    }),
-                    ...(transaction.loanId && {
-                        loanBalance: {
-                            increment: transaction.amount,
-                        },
-                    }),
-                },
-            });
-        } catch (error) {
-            console.log(error);
         }
     }
 

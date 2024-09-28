@@ -120,21 +120,6 @@ const updateCard = async (cardId: string, payload: updateCardBody) => {
         const card = await find({ id: cardId });
         const incrementValue = -1 * (card.startBalance - payload.startBalance);
 
-        try {
-            await prisma.transaction.updateMany({
-                where: {
-                    cardId: cardId,
-                },
-                data: {
-                    balance: {
-                        increment: incrementValue,
-                    },
-                },
-            });
-        } catch (error) {
-            console.log(error);
-        }
-
         updatePayload = {
             balance: card.balance + incrementValue,
             startBalance: +payload.startBalance.toFixed(2),
