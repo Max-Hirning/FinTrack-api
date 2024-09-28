@@ -72,6 +72,7 @@ model Card {
   balance      Float
   currency     Currencies
   startBalance Float
+  color        String
   userId       String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   budgets      Budget[]      @relation("BudgetCard")

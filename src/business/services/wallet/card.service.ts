@@ -148,6 +148,7 @@ const createCard = async (userId: string, payload: createCardBody) => {
         const card = await prisma.card.create({
             data: {
                 userId,
+                color: payload.color,
                 title: payload.title,
                 currency: payload.currency,
                 balance: +payload.startBalance.toFixed(2),
