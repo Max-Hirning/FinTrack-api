@@ -54,6 +54,7 @@ export const createTransactionBodySchema = z.object({
 });
 export const updateTransactionBodySchema = createTransactionBodySchema
     .omit({
+        date: true,
         cardId: true,
         loanId: true,
         goalId: true,

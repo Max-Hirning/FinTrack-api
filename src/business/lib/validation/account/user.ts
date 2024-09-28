@@ -49,10 +49,30 @@ export const userResponseSchema = z.object({
     lastName: z.string(),
     firstName: z.string(),
     dateOfBirth: z.string(),
-    cards: z.array(z.string()),
-    loans: z.array(z.string()),
-    goals: z.array(z.string()),
-    budgets: z.array(z.string()),
+    cards: z.array(
+        z.object({
+            id: z.string(),
+            title: z.string(),
+        }),
+    ),
+    loans: z.array(
+        z.object({
+            id: z.string(),
+            title: z.string(),
+        }),
+    ),
+    goals: z.array(
+        z.object({
+            id: z.string(),
+            title: z.string(),
+        }),
+    ),
+    budgets: z.array(
+        z.object({
+            id: z.string(),
+            title: z.string(),
+        }),
+    ),
     goalNotification: z.boolean(),
     loanNotification: z.boolean(),
     budgetNotification: z.boolean(),

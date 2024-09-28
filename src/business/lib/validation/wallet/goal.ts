@@ -62,6 +62,7 @@ type createGoalBody = z.infer<typeof createGoalBodySchema>;
 type updateGoalBody = z.infer<typeof updateGoalBodySchema>;
 
 export const goalResponseSchema = z.object({
+    id: z.string(),
     title: z.string(),
     amount: z.number(),
     balance: z.number(),

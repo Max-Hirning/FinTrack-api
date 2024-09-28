@@ -323,7 +323,6 @@ const updateTransaction = async (
                 id: transactionId,
             },
             data: {
-                date: payload.date,
                 amount: payload.amount,
                 categoryId: payload.categoryId,
                 description: payload.description || "",
