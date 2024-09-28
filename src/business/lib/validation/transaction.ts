@@ -52,8 +52,13 @@ export const createTransactionBodySchema = z.object({
     loanId: z.string().optional(),
     description: z.string().optional(),
 });
-export const updateTransactionBodySchema =
-  createTransactionBodySchema.partial();
+export const updateTransactionBodySchema = createTransactionBodySchema
+    .omit({
+        cardId: true,
+        loanId: true,
+        goalId: true,
+    })
+    .partial();
 
 type createTransactionBody = z.infer<typeof createTransactionBodySchema>;
 type updateTransactionBody = z.infer<typeof updateTransactionBodySchema>;

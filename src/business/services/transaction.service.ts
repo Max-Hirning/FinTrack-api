@@ -1,3 +1,6 @@
+import { cardServcice } from "./wallet/card.service";
+import { goalServcice } from "./wallet/goal.service";
+import { loanServcice } from "./wallet/loan.service";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import {
@@ -312,25 +315,133 @@ const updateTransaction = async (
     transactionId: string,
     payload: updateTransactionBody,
 ) => {
+    let transaction;
+
     try {
-        const transaction = await prisma.transaction.update({
+        transaction = await prisma.transaction.update({
             where: {
                 id: transactionId,
             },
             data: {
                 date: payload.date,
                 amount: payload.amount,
-                cardId: payload.cardId,
-                goalId: payload.goalId,
-                loanId: payload.loanId,
                 categoryId: payload.categoryId,
                 description: payload.description || "",
             },
         });
-        return transaction;
     } catch (error) {
         throw new InternalServerError((error as Error).message);
     }
+
+    if (payload.amount) {
+        try {
+            const nearestTransaction = await prisma.transaction.findFirst({
+                where: {
+                    date: {
+                        lte: transaction.date,
+                    },
+                },
+                orderBy: {
+                    date: "desc",
+                },
+            });
+            if (nearestTransaction) {
+                await prisma.transaction.update({
+                    where: {
+                        id: transaction.id,
+                    },
+                    data: {
+                        balance: nearestTransaction.balance + transaction.amount,
+                    },
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        try {
+            const card = await cardServcice.find({
+                id: transaction.cardId,
+            });
+            await prisma.card.update({
+                where: {
+                    id: transaction.id,
+                },
+                data: {
+                    balance: {
+                        increment: -1 * card.balance + transaction.amount,
+                    },
+                },
+            });
+        } catch (error) {
+            console.log(error);
+        }
+        if (transaction.goalId) {
+            try {
+                const goal = await goalServcice.find({
+                    id: transaction.goalId,
+                });
+                await prisma.goal.update({
+                    where: {
+                        id: goal.id,
+                    },
+                    data: {
+                        balance: {
+                            increment: -1 * goal.balance + transaction.amount,
+                        },
+                    },
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        if (transaction.loanId) {
+            try {
+                const loan = await loanServcice.find({
+                    id: transaction.loanId,
+                });
+                await prisma.loan.update({
+                    where: {
+                        id: loan.id,
+                    },
+                    data: {
+                        balance: {
+                            increment: -1 * loan.balance + transaction.amount,
+                        },
+                    },
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        try {
+            await prisma.transaction.updateMany({
+                where: {
+                    date: {
+                        gte: transaction.date,
+                    },
+                },
+                data: {
+                    balance: {
+                        increment: transaction.amount,
+                    },
+                    ...(transaction.goalId && {
+                        goalBalance: {
+                            increment: transaction.amount,
+                        },
+                    }),
+                    ...(transaction.loanId && {
+                        loanBalance: {
+                            increment: transaction.amount,
+                        },
+                    }),
+                },
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    return transaction;
 };
 
 export const transactionServcice = {
