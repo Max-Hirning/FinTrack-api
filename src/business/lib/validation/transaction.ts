@@ -73,17 +73,22 @@ export const transactionResponseSchema = z.object({
     loanBalance: z.number().nullable(),
     category: categoryResponseSchema,
 });
-export const transactionsResponseSchema = z.array(transactionResponseSchema);
+export const transactionsListResponseSchema = z.object({
+    totalPages: z.number().int(),
+    data: z.array(transactionResponseSchema),
+    prevPage: z.number().int().nullable(),
+    nextPage: z.number().int().nullable(),
+});
 
 type transactionResponse = z.infer<typeof transactionResponseSchema>;
-type transactionsResponse = z.infer<typeof transactionsResponseSchema>;
+type transactionsListResponse = z.infer<typeof transactionsListResponseSchema>;
 
 export type {
     transactionResponse,
-    transactionsResponse,
     createTransactionBody,
     updateTransactionBody,
     deleteTransactionParam,
     updateTransactionParam,
     getTransactionsQueries,
+    transactionsListResponse,
 };

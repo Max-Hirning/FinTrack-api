@@ -1,65 +1,65 @@
 import { FastifyInstance } from "fastify";
-import { cardHandler } from "./transaction.handler";
+import { transactionHandler } from "./transaction.handler";
 import {
-    cardsListResponseSchema,
-    createCardBodySchema,
-    deleteCardParamSchema,
-    getCardsQueriesSchema,
-    updateCardBodySchema,
-    updateCardParamSchema,
+    transactionsListResponseSchema,
+    createTransactionBodySchema,
+    deleteTransactionParamSchema,
+    updateTransactionBodySchema,
+    updateTransactionParamSchema,
+    getTransactionsQueriesSchema,
 } from "@/business/lib/validation";
 
-export const cardRoutes = async (fastify: FastifyInstance) => {
+export const transactionRoutes = async (fastify: FastifyInstance) => {
     fastify.get(
         "/",
         {
             schema: {
                 response: {
-                    200: cardsListResponseSchema,
+                    200: transactionsListResponseSchema,
                 },
-                tags: ["card"],
+                tags: ["transaction"],
                 security: [{ bearerAuth: [] }],
-                querystring: getCardsQueriesSchema,
+                querystring: getTransactionsQueriesSchema,
             },
             preHandler: [fastify.authorization],
         },
-        cardHandler.getCards,
+        transactionHandler.getTransactions,
     );
     fastify.put(
-        "/:cardId",
+        "/:transactionId",
         {
             schema: {
-                tags: ["card"],
-                body: updateCardBodySchema,
-                params: updateCardParamSchema,
+                tags: ["transaction"],
+                body: updateTransactionBodySchema,
+                params: updateTransactionParamSchema,
                 security: [{ bearerAuth: [] }],
             },
             preHandler: [fastify.authorization],
         },
-        cardHandler.updateCard,
+        transactionHandler.updateTransaction,
     );
     fastify.delete(
-        "/:cardId",
+        "/:transactionId",
         {
             schema: {
-                tags: ["card"],
-                params: deleteCardParamSchema,
+                tags: ["transaction"],
+                params: deleteTransactionParamSchema,
                 security: [{ bearerAuth: [] }],
             },
             preHandler: [fastify.authorization],
         },
-        cardHandler.deleteCard,
+        transactionHandler.deleteTransaction,
     );
     fastify.post(
         "/",
         {
             schema: {
-                tags: ["card"],
-                body: createCardBodySchema,
+                tags: ["transaction"],
+                body: createTransactionBodySchema,
                 security: [{ bearerAuth: [] }],
             },
             preHandler: [fastify.authorization],
         },
-        cardHandler.createCard,
+        transactionHandler.createTransaction,
     );
 };

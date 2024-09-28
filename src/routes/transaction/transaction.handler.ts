@@ -55,7 +55,7 @@ const createTransaction = async (
         const { body } = request as FastifyRequest<{
       Body: createTransactionBody;
     }>;
-        await transactionServcice.createTransaction(request.user.id, body);
+        await transactionServcice.createTransaction(body);
 
         return "Transaction was created";
     });
