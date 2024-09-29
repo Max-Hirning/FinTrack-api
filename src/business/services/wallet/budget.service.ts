@@ -175,7 +175,6 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
                 title: payload.title,
                 period: payload.period,
                 balance: payload.balance,
-                currency: payload.currency,
                 cards: {
                     connect: (payload.cardIds || []).map((cardId) => ({ id: cardId })),
                 },

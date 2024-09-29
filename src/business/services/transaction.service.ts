@@ -1,6 +1,6 @@
-import { cardServcice } from "./wallet/card.service";
 import { goalServcice } from "./wallet/goal.service";
 import { loanServcice } from "./wallet/loan.service";
+import { currencyService } from "./currency.service";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import {
@@ -16,6 +16,11 @@ const deleteTransaction = async (transactionId: string) => {
         transaction = await prisma.transaction.delete({
             where: {
                 id: transactionId,
+            },
+            include: {
+                card: true,
+                loan: true,
+                goal: true,
             },
         });
     } catch (error) {
@@ -34,18 +39,28 @@ const deleteTransaction = async (transactionId: string) => {
             },
         });
     } catch (error) {
-        console.log(error);
+        throw new NotFoundError((error as Error).message);
     }
 
     if (transaction.goalId) {
         try {
+            let goalAmount = transaction.amount;
+            const goal = await goalServcice.find({ id: transaction.goalId });
+            if (goal.currency !== transaction.card.currency) {
+                const currencyRate = await currencyService.getCurrencyRate({
+                    base: goal.currency,
+                    symbols: [transaction.card.currency],
+                });
+                goalAmount =
+          goalAmount * (currencyRate[transaction.card.currency] || 1);
+            }
             await prisma.goal.update({
                 where: {
                     id: transaction.goalId,
                 },
                 data: {
                     balance: {
-                        increment: -1 * transaction.amount,
+                        increment: -1 * goalAmount,
                     },
                 },
             });
@@ -56,13 +71,23 @@ const deleteTransaction = async (transactionId: string) => {
 
     if (transaction.loanId) {
         try {
+            let loanAmount = transaction.amount;
+            const loan = await loanServcice.find({ id: transaction.loanId });
+            if (loan.currency !== transaction.card.currency) {
+                const currencyRate = await currencyService.getCurrencyRate({
+                    base: loan.currency,
+                    symbols: [transaction.card.currency],
+                });
+                loanAmount =
+          loanAmount * (currencyRate[transaction.card.currency] || 1);
+            }
             await prisma.loan.update({
                 where: {
                     id: transaction.loanId,
                 },
                 data: {
                     balance: {
-                        increment: -1 * transaction.amount,
+                        increment: -1 * loanAmount,
                     },
                 },
             });
@@ -174,6 +199,11 @@ const createTransaction = async (payload: createTransactionBody) => {
                 categoryId: payload.categoryId,
                 description: payload.description || "",
             },
+            include: {
+                card: true,
+                loan: true,
+                goal: true,
+            },
         });
     } catch (error) {
         throw new InternalServerError((error as Error).message);
@@ -191,18 +221,36 @@ const createTransaction = async (payload: createTransactionBody) => {
             },
         });
     } catch (error) {
-        throw new InternalServerError((error as Error).message);
+        console.log(error);
     }
 
     if (payload.goalId) {
         try {
+            let goalAmount = transaction.amount;
+            const goal = await goalServcice.find({ id: payload.goalId });
+            if (goal.currency !== transaction.card.currency) {
+                const currencyRate = await currencyService.getCurrencyRate({
+                    base: goal.currency,
+                    symbols: [transaction.card.currency],
+                });
+                goalAmount =
+          goalAmount * (currencyRate[transaction.card.currency] || 1);
+            }
+            await prisma.transaction.update({
+                where: {
+                    id: transaction.id,
+                },
+                data: {
+                    goalAmount,
+                },
+            });
             await prisma.goal.update({
                 where: {
                     id: payload.goalId,
                 },
                 data: {
                     balance: {
-                        increment: payload.amount,
+                        increment: goalAmount,
                     },
                 },
             });
@@ -213,13 +261,31 @@ const createTransaction = async (payload: createTransactionBody) => {
 
     if (payload.loanId) {
         try {
+            let loanAmount = transaction.amount;
+            const loan = await loanServcice.find({ id: payload.loanId });
+            if (loan.currency !== transaction.card.currency) {
+                const currencyRate = await currencyService.getCurrencyRate({
+                    base: loan.currency,
+                    symbols: [transaction.card.currency],
+                });
+                loanAmount =
+          loanAmount * (currencyRate[transaction.card.currency] || 1);
+            }
+            await prisma.transaction.update({
+                where: {
+                    id: transaction.id,
+                },
+                data: {
+                    loanAmount,
+                },
+            });
             await prisma.loan.update({
                 where: {
                     id: payload.loanId,
                 },
                 data: {
                     balance: {
-                        increment: payload.amount,
+                        increment: loanAmount,
                     },
                 },
             });
@@ -246,6 +312,11 @@ const updateTransaction = async (
                 categoryId: payload.categoryId,
                 description: payload.description || "",
             },
+            include: {
+                card: true,
+                goal: true,
+                loan: true,
+            },
         });
     } catch (error) {
         throw new InternalServerError((error as Error).message);
@@ -253,34 +324,45 @@ const updateTransaction = async (
 
     if (payload.amount) {
         try {
-            const card = await cardServcice.find({
-                id: transaction.cardId,
-            });
             await prisma.card.update({
                 where: {
                     id: transaction.id,
                 },
                 data: {
                     balance: {
-                        increment: -1 * card.balance + transaction.amount,
+                        increment: -1 * transaction.card.balance + transaction.amount,
                     },
                 },
             });
         } catch (error) {
             console.log(error);
         }
-        if (transaction.goalId) {
+        if (transaction.goal) {
             try {
-                const goal = await goalServcice.find({
-                    id: transaction.goalId,
+                let goalAmount = transaction.amount;
+                if (transaction.goal.currency !== transaction.card.currency) {
+                    const currencyRate = await currencyService.getCurrencyRate({
+                        base: transaction.goal.currency,
+                        symbols: [transaction.card.currency],
+                    });
+                    goalAmount =
+            goalAmount * (currencyRate[transaction.card.currency] || 1);
+                }
+                await prisma.transaction.update({
+                    where: {
+                        id: transaction.id,
+                    },
+                    data: {
+                        goalAmount,
+                    },
                 });
                 await prisma.goal.update({
                     where: {
-                        id: goal.id,
+                        id: transaction.goal.id,
                     },
                     data: {
                         balance: {
-                            increment: -1 * goal.balance + transaction.amount,
+                            increment: -1 * transaction.goal.balance + goalAmount,
                         },
                     },
                 });
@@ -288,18 +370,32 @@ const updateTransaction = async (
                 console.log(error);
             }
         }
-        if (transaction.loanId) {
+        if (transaction.loan) {
             try {
-                const loan = await loanServcice.find({
-                    id: transaction.loanId,
+                let loanAmount = transaction.amount;
+                if (transaction.loan.currency !== transaction.card.currency) {
+                    const currencyRate = await currencyService.getCurrencyRate({
+                        base: transaction.loan.currency,
+                        symbols: [transaction.card.currency],
+                    });
+                    loanAmount =
+            loanAmount * (currencyRate[transaction.card.currency] || 1);
+                }
+                await prisma.transaction.update({
+                    where: {
+                        id: transaction.id,
+                    },
+                    data: {
+                        loanAmount,
+                    },
                 });
                 await prisma.loan.update({
                     where: {
-                        id: loan.id,
+                        id: transaction.loan.id,
                     },
                     data: {
                         balance: {
-                            increment: -1 * loan.balance + transaction.amount,
+                            increment: -1 * transaction.loan.balance + loanAmount,
                         },
                     },
                 });

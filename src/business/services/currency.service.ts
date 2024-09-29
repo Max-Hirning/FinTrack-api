@@ -18,6 +18,27 @@ const getCurrency = (currency: Currencies) => {
     return currencies[currency];
 };
 
+const getCurrencyRate = async (
+    config: Pick<getCurrenciesRatesConfig, "base" | "symbols">,
+): Promise<Record<string, number>> => {
+    const { base, symbols } = config;
+    try {
+        const response = await axios.get(
+            "https://api.currencybeacon.com/v1/latest",
+            {
+                params: {
+                    base,
+                    symbols: symbols.join(","),
+                    api_key: environmentVariables.CURRENCY_API_KEY,
+                },
+            },
+        );
+        return response.data.rates;
+    } catch {
+        throw new InternalServerError("Something went wrong");
+    }
+};
+
 const getCurrenciesRates = async (
     config: getCurrenciesRatesConfig,
 ): Promise<currenciesRatesResponse> => {
@@ -43,5 +64,6 @@ const getCurrenciesRates = async (
 export const currencyService = {
     getCurrency,
     getCurrencies,
+    getCurrencyRate,
     getCurrenciesRates,
 };

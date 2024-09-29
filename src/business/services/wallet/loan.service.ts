@@ -103,21 +103,34 @@ const getLoans = async (query: getLoansQueries) => {
     };
 };
 const deleteLoan = async (loanId: string) => {
+    let loan;
     try {
-        const loan = await prisma.loan.delete({
+        loan = await prisma.loan.delete({
             where: {
                 id: loanId,
             },
         });
-
-        return loan;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
     }
+
+    try {
+        await prisma.transaction.updateMany({
+            where: {
+                loanId: loan.id,
+            },
+            data: {
+                loanId: null,
+                loanAmount: null,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+    }
+
+    return loan;
 };
 const updateLoan = async (loanId: string, payload: updateLoanBody) => {
-    if (payload.currency) currencyService.getCurrency(payload.currency);
-
     try {
         const loan = await prisma.loan.update({
             where: {
@@ -126,7 +139,6 @@ const updateLoan = async (loanId: string, payload: updateLoanBody) => {
             data: {
                 title: payload.title,
                 amount: payload.amount,
-                currency: payload.currency,
                 description: payload.description,
                 date: payload.date ? new Date(payload.date) : undefined,
                 deadline: payload.deadline ? new Date(payload.deadline) : undefined,
