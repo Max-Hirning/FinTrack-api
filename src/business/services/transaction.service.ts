@@ -42,6 +42,59 @@ const deleteTransaction = async (transactionId: string) => {
         throw new NotFoundError((error as Error).message);
     }
 
+    try {
+        const budgets = await prisma.budget.findMany({
+            where: {
+                startDate: {
+                    lte: transaction.date,
+                },
+                endDate: {
+                    gt: transaction.date,
+                },
+                categories: {
+                    some: {
+                        id: transaction.categoryId,
+                    },
+                },
+                cards: {
+                    some: {
+                        id: transaction.cardId,
+                    },
+                },
+            },
+        });
+
+        const currenciesRates = await currencyService.getCurrentCurrenciesRates({
+            base: transaction.card.currency,
+            symbols: Array.from(new Set(budgets.map(({ currency }) => currency))),
+        });
+
+        for (const budget of budgets) {
+            let tarnsactionAmount = transaction.amount;
+            if (budget.currency !== transaction.card.currency) {
+                tarnsactionAmount =
+          transaction.amount *
+          (currenciesRates[transaction.card.currency] || 1);
+            }
+            try {
+                await prisma.budget.update({
+                    where: {
+                        id: budget.id,
+                    },
+                    data: {
+                        amount: {
+                            increment: -1 * tarnsactionAmount,
+                        },
+                    },
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    } catch (error) {
+        console.log(error);
+    }
+
     if (transaction.goalId) {
         try {
             let goalAmount = transaction.amount;
@@ -252,6 +305,12 @@ const createTransaction = async (payload: createTransactionBody) => {
         });
 
         for (const budget of budgets) {
+            let tarnsactionAmount = transaction.amount;
+            if (budget.currency !== transaction.card.currency) {
+                tarnsactionAmount =
+          transaction.amount *
+          (currenciesRates[transaction.card.currency] || 1);
+            }
             try {
                 await prisma.budget.update({
                     where: {
@@ -259,9 +318,7 @@ const createTransaction = async (payload: createTransactionBody) => {
                     },
                     data: {
                         amount: {
-                            increment:
-                transaction.amount *
-                (currenciesRates[transaction.card.currency] || 1),
+                            increment: tarnsactionAmount,
                         },
                     },
                 });
@@ -357,101 +414,12 @@ const updateTransaction = async (
                 id: transactionId,
             },
             data: {
-                amount: payload.amount,
                 categoryId: payload.categoryId,
                 description: payload.description || "",
-            },
-            include: {
-                card: true,
-                goal: true,
-                loan: true,
             },
         });
     } catch (error) {
         throw new InternalServerError((error as Error).message);
-    }
-
-    if (payload.amount) {
-        try {
-            await prisma.card.update({
-                where: {
-                    id: transaction.id,
-                },
-                data: {
-                    balance: {
-                        increment: -1 * transaction.card.balance + transaction.amount,
-                    },
-                },
-            });
-        } catch (error) {
-            console.log(error);
-        }
-        if (transaction.goal) {
-            try {
-                let goalAmount = transaction.amount;
-                if (transaction.goal.currency !== transaction.card.currency) {
-                    const currencyRate = await currencyService.getCurrentCurrenciesRates({
-                        base: transaction.goal.currency,
-                        symbols: [transaction.card.currency],
-                    });
-                    goalAmount =
-            goalAmount * (currencyRate[transaction.card.currency] || 1);
-                }
-                await prisma.transaction.update({
-                    where: {
-                        id: transaction.id,
-                    },
-                    data: {
-                        goalAmount,
-                    },
-                });
-                await prisma.goal.update({
-                    where: {
-                        id: transaction.goal.id,
-                    },
-                    data: {
-                        balance: {
-                            increment: -1 * transaction.goal.balance + goalAmount,
-                        },
-                    },
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        if (transaction.loan) {
-            try {
-                let loanAmount = transaction.amount;
-                if (transaction.loan.currency !== transaction.card.currency) {
-                    const currencyRate = await currencyService.getCurrentCurrenciesRates({
-                        base: transaction.loan.currency,
-                        symbols: [transaction.card.currency],
-                    });
-                    loanAmount =
-            loanAmount * (currencyRate[transaction.card.currency] || 1);
-                }
-                await prisma.transaction.update({
-                    where: {
-                        id: transaction.id,
-                    },
-                    data: {
-                        loanAmount,
-                    },
-                });
-                await prisma.loan.update({
-                    where: {
-                        id: transaction.loan.id,
-                    },
-                    data: {
-                        balance: {
-                            increment: -1 * transaction.loan.balance + loanAmount,
-                        },
-                    },
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        }
     }
 
     return transaction;

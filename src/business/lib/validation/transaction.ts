@@ -53,11 +53,9 @@ export const createTransactionBodySchema = z.object({
     description: z.string().optional(),
 });
 export const updateTransactionBodySchema = createTransactionBodySchema
-    .omit({
-        date: true,
-        cardId: true,
-        loanId: true,
-        goalId: true,
+    .pick({
+        categoryId: true,
+        description: true,
     })
     .partial();
 
