@@ -114,26 +114,14 @@ const deleteCard = async (cardId: string) => {
     }
 };
 const updateCard = async (cardId: string, payload: updateCardBody) => {
-    let updatePayload = {};
-    if (payload.currency) currencyService.getCurrency(payload.currency);
-    if (payload.startBalance) {
-        const card = await find({ id: cardId });
-        const incrementValue = -1 * (card.startBalance - payload.startBalance);
-
-        updatePayload = {
-            balance: card.balance + incrementValue,
-            startBalance: +payload.startBalance.toFixed(2),
-        };
-    }
     try {
         const card = await prisma.card.update({
             where: {
                 id: cardId,
             },
             data: {
-                ...updatePayload,
                 title: payload.title,
-                currency: payload.currency,
+                color: payload.color,
             },
         });
         return card;
@@ -148,6 +136,7 @@ const createCard = async (userId: string, payload: createCardBody) => {
         const card = await prisma.card.create({
             data: {
                 userId,
+                color: payload.color,
                 title: payload.title,
                 currency: payload.currency,
                 balance: +payload.startBalance.toFixed(2),

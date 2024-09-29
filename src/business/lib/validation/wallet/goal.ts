@@ -50,11 +50,7 @@ export const updateGoalBodySchema = createGoalBodySchema
         title: true,
         amount: true,
         deadline: true,
-        currency: true,
         description: true,
-    })
-    .extend({
-        startBalance: z.number(),
     })
     .partial();
 

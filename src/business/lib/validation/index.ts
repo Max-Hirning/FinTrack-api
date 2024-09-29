@@ -1,6 +1,7 @@
 export * from "./image";
 export * from "./currency";
 export * from "./category";
+export * from "./statistic";
 export * from "./wallet/card";
 export * from "./wallet/loan";
 export * from "./wallet/goal";

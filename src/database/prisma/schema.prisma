@@ -72,6 +72,7 @@ model Card {
   balance      Float
   currency     Currencies
   startBalance Float
+  color        String
   userId       String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   budgets      Budget[]      @relation("BudgetCard")
@@ -154,15 +155,17 @@ model Transaction {
   id          String   @id @default(uuid())
   date        DateTime
   amount      Float
+  loanAmount  Float?
+  goalAmount  Float?
   description String
   categoryId  String
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   cardId      String
   card        Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
   goalId      String?
-  goal        Goal?    @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goal        Goal?    @relation(fields: [goalId], references: [id])
   loanId      String?
-  loan        Loan?    @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  loan        Loan?    @relation(fields: [loanId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

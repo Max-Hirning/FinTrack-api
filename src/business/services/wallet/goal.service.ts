@@ -102,39 +102,42 @@ const getGoals = async (query: getGoalsQueries) => {
     };
 };
 const deleteGoal = async (goalId: string) => {
+    let goal;
     try {
-        const goal = await prisma.goal.delete({
+        goal = await prisma.goal.delete({
             where: {
                 id: goalId,
             },
         });
-        return goal;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
     }
-};
-const updateGoal = async (goalId: string, payload: updateGoalBody) => {
-    if (payload.currency) currencyService.getCurrency(payload.currency);
-    let updatePayload = {};
-    if (payload.startBalance) {
-        const goal = await find({ id: goalId });
-        const incrementValue = -1 * (goal.balance - payload.startBalance);
 
-        updatePayload = {
-            balance: goal.balance + incrementValue,
-        };
+    try {
+        await prisma.transaction.updateMany({
+            where: {
+                goalId: goal.id,
+            },
+            data: {
+                goalId: null,
+                goalAmount: null,
+            },
+        });
+    } catch (error) {
+        console.log(error);
     }
 
+    return goal;
+};
+const updateGoal = async (goalId: string, payload: updateGoalBody) => {
     try {
         const goal = await prisma.goal.update({
             where: {
                 id: goalId,
             },
             data: {
-                ...updatePayload,
                 title: payload.title,
                 amount: payload.amount,
-                currency: payload.currency,
                 description: payload.description,
                 deadline: payload.deadline ? new Date(payload.deadline) : undefined,
             },

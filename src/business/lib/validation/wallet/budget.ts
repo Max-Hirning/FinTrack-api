@@ -68,9 +68,6 @@ export const updateBudgetBodySchema = z
         endDate: z.string().datetime().optional(),
         startDate: z.string().datetime().optional(),
         period: z.enum(Object.values(Period) as [Period, ...Period[]]),
-        currency: z.enum(
-      Object.values(Currencies) as [Currencies, ...Currencies[]],
-        ),
     })
     .partial()
     .refine(

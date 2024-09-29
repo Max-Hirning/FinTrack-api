@@ -39,10 +39,16 @@ type updateCardParam = z.infer<typeof updateCardParamSchema>;
 
 export const createCardBodySchema = z.object({
     title: z.string(),
+    color: z.string(),
     startBalance: z.number(),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
 });
-export const updateCardBodySchema = createCardBodySchema.partial();
+export const updateCardBodySchema = createCardBodySchema
+    .pick({
+        title: true,
+        color: true,
+    })
+    .partial();
 
 type createCardBody = z.infer<typeof createCardBodySchema>;
 type updateCardBody = z.infer<typeof updateCardBodySchema>;

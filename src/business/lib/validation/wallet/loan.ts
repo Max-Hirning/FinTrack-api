@@ -51,7 +51,6 @@ export const updateLoanBodySchema = createLoanBodySchema
         date: true,
         title: true,
         amount: true,
-        currency: true,
         deadline: true,
         description: true,
     })
