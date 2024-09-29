@@ -126,6 +126,7 @@ model Budget {
   id         String     @id @default(uuid())
   title      String
   balance    Float
+  amount     Float
   currency   Currencies
   period     Period
   startDate  DateTime

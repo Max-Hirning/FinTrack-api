@@ -18,7 +18,7 @@ const getCurrency = (currency: Currencies) => {
     return currencies[currency];
 };
 
-const getCurrencyRate = async (
+const getCurrentCurrenciesRates = async (
     config: Pick<getCurrenciesRatesConfig, "base" | "symbols">,
 ): Promise<Record<string, number>> => {
     const { base, symbols } = config;
@@ -64,6 +64,6 @@ const getCurrenciesRates = async (
 export const currencyService = {
     getCurrency,
     getCurrencies,
-    getCurrencyRate,
     getCurrenciesRates,
+    getCurrentCurrenciesRates,
 };
