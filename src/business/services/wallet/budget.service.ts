@@ -223,6 +223,7 @@ const createBudget = async (userId: string, payload: createBudgetBody) => {
     try {
         const budget = await prisma.budget.create({
             data: {
+                amount: 0,
                 title: payload.title,
                 balance: payload.balance,
                 currency: payload.currency,

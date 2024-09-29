@@ -47,7 +47,7 @@ const deleteTransaction = async (transactionId: string) => {
             let goalAmount = transaction.amount;
             const goal = await goalServcice.find({ id: transaction.goalId });
             if (goal.currency !== transaction.card.currency) {
-                const currencyRate = await currencyService.getCurrencyRate({
+                const currencyRate = await currencyService.getCurrentCurrenciesRates({
                     base: goal.currency,
                     symbols: [transaction.card.currency],
                 });
@@ -74,7 +74,7 @@ const deleteTransaction = async (transactionId: string) => {
             let loanAmount = transaction.amount;
             const loan = await loanServcice.find({ id: transaction.loanId });
             if (loan.currency !== transaction.card.currency) {
-                const currencyRate = await currencyService.getCurrencyRate({
+                const currencyRate = await currencyService.getCurrentCurrenciesRates({
                     base: loan.currency,
                     symbols: [transaction.card.currency],
                 });
@@ -224,12 +224,61 @@ const createTransaction = async (payload: createTransactionBody) => {
         console.log(error);
     }
 
+    try {
+        const budgets = await prisma.budget.findMany({
+            where: {
+                startDate: {
+                    lte: transaction.date,
+                },
+                endDate: {
+                    gt: transaction.date,
+                },
+                categories: {
+                    some: {
+                        id: transaction.categoryId,
+                    },
+                },
+                cards: {
+                    some: {
+                        id: transaction.cardId,
+                    },
+                },
+            },
+        });
+
+        const currenciesRates = await currencyService.getCurrentCurrenciesRates({
+            base: transaction.card.currency,
+            symbols: Array.from(new Set(budgets.map(({ currency }) => currency))),
+        });
+
+        for (const budget of budgets) {
+            try {
+                await prisma.budget.update({
+                    where: {
+                        id: budget.id,
+                    },
+                    data: {
+                        amount: {
+                            increment:
+                transaction.amount *
+                (currenciesRates[transaction.card.currency] || 1),
+                        },
+                    },
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    } catch (error) {
+        console.log(error);
+    }
+
     if (payload.goalId) {
         try {
             let goalAmount = transaction.amount;
             const goal = await goalServcice.find({ id: payload.goalId });
             if (goal.currency !== transaction.card.currency) {
-                const currencyRate = await currencyService.getCurrencyRate({
+                const currencyRate = await currencyService.getCurrentCurrenciesRates({
                     base: goal.currency,
                     symbols: [transaction.card.currency],
                 });
@@ -264,7 +313,7 @@ const createTransaction = async (payload: createTransactionBody) => {
             let loanAmount = transaction.amount;
             const loan = await loanServcice.find({ id: payload.loanId });
             if (loan.currency !== transaction.card.currency) {
-                const currencyRate = await currencyService.getCurrencyRate({
+                const currencyRate = await currencyService.getCurrentCurrenciesRates({
                     base: loan.currency,
                     symbols: [transaction.card.currency],
                 });
@@ -341,7 +390,7 @@ const updateTransaction = async (
             try {
                 let goalAmount = transaction.amount;
                 if (transaction.goal.currency !== transaction.card.currency) {
-                    const currencyRate = await currencyService.getCurrencyRate({
+                    const currencyRate = await currencyService.getCurrentCurrenciesRates({
                         base: transaction.goal.currency,
                         symbols: [transaction.card.currency],
                     });
@@ -374,7 +423,7 @@ const updateTransaction = async (
             try {
                 let loanAmount = transaction.amount;
                 if (transaction.loan.currency !== transaction.card.currency) {
-                    const currencyRate = await currencyService.getCurrencyRate({
+                    const currencyRate = await currencyService.getCurrentCurrenciesRates({
                         base: transaction.loan.currency,
                         symbols: [transaction.card.currency],
                     });
