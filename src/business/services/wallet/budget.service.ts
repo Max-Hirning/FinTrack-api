@@ -1,4 +1,4 @@
-import { Period } from "@prisma/client";
+import { Periods } from "@prisma/client";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { getMonthRange, getWeekRange, getYearRange } from "@/business/lib/date";
@@ -125,21 +125,21 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
     let endDate = payload.endDate ? new Date(payload.endDate) : undefined;
     if (payload.period) {
         switch (payload.period) {
-        case Period.month:
+        case Periods.month:
             {
                 const range = getMonthRange();
                 startDate = new Date(range.startDate);
                 endDate = new Date(range.endDate);
             }
             break;
-        case Period.week:
+        case Periods.week:
             {
                 const range = getWeekRange();
                 startDate = new Date(range.startDate);
                 endDate = new Date(range.endDate);
             }
             break;
-        case Period.year:
+        case Periods.year:
             {
                 const range = getYearRange();
                 startDate = new Date(range.startDate);
@@ -152,7 +152,7 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
     }
     const budget = await find({ id: budgetId });
     if (payload.endDate || payload.startDate) {
-        if (budget.period !== Period.oneTime && payload.period !== Period.oneTime)
+        if (budget.period !== Periods.oneTime && payload.period !== Periods.oneTime)
             throw new ForbiddenError(
                 "Only one time budget can update startDate and endDate",
             );
@@ -192,21 +192,21 @@ const createBudget = async (userId: string, payload: createBudgetBody) => {
     let startDate = payload.startDate ? new Date(payload.startDate) : new Date(),
         endDate = payload.endDate ? new Date(payload.endDate) : new Date();
     switch (payload.period) {
-    case Period.month:
+    case Periods.month:
         {
             const range = getMonthRange();
             startDate = new Date(range.startDate);
             endDate = new Date(range.endDate);
         }
         break;
-    case Period.week:
+    case Periods.week:
         {
             const range = getWeekRange();
             startDate = new Date(range.startDate);
             endDate = new Date(range.endDate);
         }
         break;
-    case Period.year:
+    case Periods.year:
         {
             const range = getYearRange();
             startDate = new Date(range.startDate);
@@ -241,6 +241,54 @@ const createBudget = async (userId: string, payload: createBudgetBody) => {
         throw new InternalServerError((error as Error).message);
     }
 };
+const updateBudgetsDateRange = async (period: Periods) => {
+    let startDate = new Date(),
+        endDate = new Date();
+    switch (period) {
+    case Periods.month:
+        {
+            const range = getMonthRange();
+            startDate = new Date(range.startDate);
+            endDate = new Date(range.endDate);
+        }
+        break;
+    case Periods.week:
+        {
+            const range = getWeekRange();
+            startDate = new Date(range.startDate);
+            endDate = new Date(range.endDate);
+        }
+        break;
+    case Periods.year:
+        {
+            const range = getYearRange();
+            startDate = new Date(range.startDate);
+            endDate = new Date(range.endDate);
+        }
+        break;
+    default:
+        throw new BadRequestError("Start date and end date is required");
+    }
+
+    if (startDate >= endDate)
+        throw new BadRequestError("startDate can't be less or equal than endDate");
+
+    try {
+        const budget = await prisma.budget.updateMany({
+            where: {
+                period,
+            },
+            data: {
+                amount: 0,
+                startDate,
+                endDate,
+            },
+        });
+        return budget;
+    } catch (error) {
+        throw new InternalServerError((error as Error).message);
+    }
+};
 
 export const budgetServcice = {
     find,
@@ -248,4 +296,5 @@ export const budgetServcice = {
     createBudget,
     updateBudget,
     deleteBudget,
+    updateBudgetsDateRange,
 };

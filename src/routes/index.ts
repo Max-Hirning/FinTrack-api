@@ -10,6 +10,7 @@ import { categoryRoutes } from "./category/category.route";
 import { budgetRoutes } from "./wallet/budget/budget.route";
 import { statisticRoutes } from "./statistic/statistic.route";
 import { transactionRoutes } from "./transaction/transaction.route";
+import { notificationRoutes } from "./account/notification/notification.route";
 
 const configureRoutes = async (fastify: FastifyInstance) => {
     await fastify.register(applicationRoutes, {
@@ -44,6 +45,9 @@ const configureRoutes = async (fastify: FastifyInstance) => {
     });
     await fastify.register(statisticRoutes, {
         prefix: "api/statistic",
+    });
+    await fastify.register(notificationRoutes, {
+        prefix: "api/notification",
     });
 };
 

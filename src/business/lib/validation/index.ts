@@ -9,3 +9,4 @@ export * from "./transaction";
 export * from "./account/auth";
 export * from "./account/user";
 export * from "./wallet/budget";
+export * from "./account/notification";

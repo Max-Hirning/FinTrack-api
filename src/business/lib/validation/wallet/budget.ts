@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Currencies, Period } from "@prisma/client";
+import { Currencies, Periods } from "@prisma/client";
 import { userResponseSchema } from "../account/user";
 
 export const getBudgetsQueriesSchema = z
@@ -44,14 +44,14 @@ export const createBudgetBodySchema = z
         cardIds: z.array(z.string()),
         endDate: z.string().datetime().optional(),
         startDate: z.string().datetime().optional(),
-        period: z.enum(Object.values(Period) as [Period, ...Period[]]),
+        period: z.enum(Object.values(Periods) as [Periods, ...Periods[]]),
         currency: z.enum(
       Object.values(Currencies) as [Currencies, ...Currencies[]],
         ),
     })
     .refine(
         (arg) => {
-            if (arg.period === Period.oneTime) {
+            if (arg.period === Periods.oneTime) {
                 if (!arg.startDate || !arg.endDate) return false;
             }
             return true;
@@ -67,12 +67,12 @@ export const updateBudgetBodySchema = z
         cardIds: z.array(z.string()),
         endDate: z.string().datetime().optional(),
         startDate: z.string().datetime().optional(),
-        period: z.enum(Object.values(Period) as [Period, ...Period[]]),
+        period: z.enum(Object.values(Periods) as [Periods, ...Periods[]]),
     })
     .partial()
     .refine(
         (arg) => {
-            if (arg.period === Period.oneTime) {
+            if (arg.period === Periods.oneTime) {
                 if (!arg.startDate || !arg.endDate) return false;
             }
             return true;
@@ -92,7 +92,7 @@ export const budgetResponseSchema = z.object({
     balance: z.number(),
     endDate: z.string().datetime(),
     startDate: z.string().datetime(),
-    period: z.enum(Object.values(Period) as [Period, ...Period[]]),
+    period: z.enum(Object.values(Periods) as [Periods, ...Periods[]]),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     user: userResponseSchema.pick({
         lastName: true,

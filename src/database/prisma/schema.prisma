@@ -13,12 +13,11 @@ enum Roles {
   guest
 }
 
-enum Period {
+enum Periods {
   oneTime
   year
   month
   week
-  day
 }
 
 enum Currencies {
@@ -62,6 +61,7 @@ model User {
   budgets            Budget[]
   goals              Goal[]
   loans              Loan[]
+  notifiactions      Notification[]
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 }
@@ -82,34 +82,36 @@ model Card {
 }
 
 model Goal {
-  id           String        @id @default(uuid())
-  title        String
-  amount       Float
-  balance      Float         @default(0)
-  currency     Currencies
-  deadline     DateTime
-  description  String
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id            String         @id @default(uuid())
+  title         String
+  amount        Float
+  balance       Float          @default(0)
+  currency      Currencies
+  deadline      DateTime
+  description   String
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Loan {
-  id           String        @id @default(uuid())
-  title        String
-  amount       Float
-  balance      Float         @default(0)
-  deadline     DateTime
-  currency     Currencies
-  date         DateTime
-  description  String
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id            String         @id @default(uuid())
+  title         String
+  amount        Float
+  balance       Float          @default(0)
+  deadline      DateTime
+  currency      Currencies
+  date          DateTime
+  description   String
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Image {
@@ -123,20 +125,21 @@ model Image {
 }
 
 model Budget {
-  id         String     @id @default(uuid())
-  title      String
-  balance    Float
-  amount     Float
-  currency   Currencies
-  period     Period
-  startDate  DateTime
-  endDate    DateTime
-  userId     String
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  categories Category[] @relation("BudgetCategory")
-  cards      Card[]     @relation("BudgetCard")
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id            String         @id @default(uuid())
+  title         String
+  balance       Float
+  amount        Float
+  currency      Currencies
+  period        Periods
+  startDate     DateTime
+  endDate       DateTime
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories    Category[]     @relation("BudgetCategory")
+  cards         Card[]         @relation("BudgetCard")
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Category {
@@ -150,6 +153,23 @@ model Category {
   transactions Transaction[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgetId  String?
+  budget    Budget?  @relation(fields: [budgetId], references: [id])
+  loanId    String?
+  loan      Loan?    @relation(fields: [loanId], references: [id])
+  goalId    String?
+  goal      Goal?    @relation(fields: [goalId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Transaction {

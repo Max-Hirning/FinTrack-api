@@ -11,3 +11,4 @@ export * from "./account/auth.service";
 export * from "./account/user.service";
 export * from "./wallet/budget.service";
 export * from "./account/token.service";
+export * from "./inform/notification.service";

@@ -10,17 +10,14 @@ const generateOTP = (length: number = 6) => {
     const characters = uppercase + lowercase + digits;
     let otp = "";
 
-    // Ensure at least one character from each category
     otp += uppercase[Math.floor(Math.random() * uppercase.length)];
     otp += lowercase[Math.floor(Math.random() * lowercase.length)];
     otp += digits[Math.floor(Math.random() * digits.length)];
 
-    // Fill the rest of the OTP length
     for (let i = 3; i < length; i++) {
         otp += characters[Math.floor(Math.random() * characters.length)];
     }
 
-    // Shuffle the OTP to avoid predictable patterns
     otp = otp
         .split("")
         .sort(() => Math.random() - 0.5)
