@@ -8,16 +8,17 @@ RUN npm i
 
 COPY . .
 
-RUN npm run build
+FROM base AS production
 
-# Use tini to handle signals
+# Node js cannot be run as PID 1 in a container, 
+# so we use tini to pass signals to the node process.
 ENV TINI_VERSION=v0.19.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
-# Set the command to run your application
-CMD ["node", "build/index.js"]
+ENV NODE_PATH=./build
 
-# Expose the port your app runs on
-EXPOSE 3001
+RUN npm run build
+
+CMD ["node", "build/index.js"]
