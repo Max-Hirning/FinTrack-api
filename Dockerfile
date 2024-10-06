@@ -4,7 +4,7 @@ WORKDIR /home/node/app
 
 COPY package*.json ./
 
-RUN npm i
+RUN npm install
 
 COPY . .
 
@@ -16,6 +16,10 @@ ENV TINI_VERSION=v0.19.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
+
+# Pass DATABASE_URL as a build argument
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
 
 ENV NODE_PATH=./build
 
