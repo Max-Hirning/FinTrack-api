@@ -9,9 +9,8 @@ import { InternalServerError } from "@/business/lib/errors";
 const sendDeleteUserEmail = async (
     payload: Pick<User, "email" | "lastName" | "firstName">,
 ) => {
-    const templatePath = path.resolve(
-        __dirname,
-        "../../../../",
+    const templatePath = path.join(
+        process.cwd(),
         "templates",
         "deleteAccount.html",
     );
@@ -20,7 +19,6 @@ const sendDeleteUserEmail = async (
         recipientName: `${payload.firstName} ${payload.lastName}`,
         currentYear: new Date().getFullYear(),
     });
-
     try {
         await transporter.sendMail({
             to: payload.email,
@@ -36,9 +34,8 @@ const sendDeleteUserEmail = async (
 const sendUpdateUserEmailEmail = async (
     payload: Pick<User, "email" | "lastName" | "firstName">,
 ) => {
-    const templatePath = path.resolve(
-        __dirname,
-        "../../../../",
+    const templatePath = path.join(
+        process.cwd(),
         "templates",
         "updateEmail.html",
     );
@@ -64,12 +61,7 @@ const sendOtpEmail = async (
     payload: Pick<User, "email" | "lastName" | "firstName">,
     otp: string,
 ) => {
-    const templatePath = path.resolve(
-        __dirname,
-        "../../../../",
-        "templates",
-        "otp.html",
-    );
+    const templatePath = path.join(process.cwd(), "templates", "otp.html");
     const template = fs.readFileSync(templatePath, "utf-8");
     const htmlContent = ejs.render(template, {
         otp: otp,
@@ -92,9 +84,8 @@ const sendOtpEmail = async (
 const sendUpdateUserPasswordEmail = async (
     payload: Pick<User, "email" | "lastName" | "firstName">,
 ) => {
-    const templatePath = path.resolve(
-        __dirname,
-        "../../../../",
+    const templatePath = path.join(
+        process.cwd(),
         "templates",
         "updatePassword.html",
     );
