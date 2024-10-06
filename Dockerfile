@@ -21,4 +21,4 @@ ENV NODE_PATH=./build
 
 RUN npm run build
 
-CMD ["node", "build/src/index.js"]
+CMD ["node", "build/index.js"]

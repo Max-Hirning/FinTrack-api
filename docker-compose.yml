@@ -1,22 +1,22 @@
 version: "3.8"
 
 services:
-    postgresdb:
-        image: postgres:16.3
-        container_name: app-postgres-db
-        restart: no
-        environment:
-            POSTGRES_DB: "postgres"
-            POSTGRES_USER: "postgres"
-            POSTGRES_PASSWORD: "12345"
-        ports:
-            - "5432:5432"
-        expose:
-            - "5432"
-        networks:
-            - primary
-        volumes:
-            - "./.volumes/postgresql:/var/lib/postgresql/data"
+    # postgresdb:
+    #     image: postgres:16.3
+    #     container_name: app-postgres-db
+    #     restart: no
+    #     environment:
+    #         POSTGRES_DB: "postgres"
+    #         POSTGRES_USER: "postgres"
+    #         POSTGRES_PASSWORD: "12345"
+    #     ports:
+    #         - "5432:5432"
+    #     expose:
+    #         - "5432"
+    #     networks:
+    #         - primary
+    #     volumes:
+    #         - "./.volumes/postgresql:/var/lib/postgresql/data"
 
     nodejs:
         build:
