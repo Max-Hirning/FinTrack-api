@@ -23,6 +23,8 @@ services:
             context: .
             dockerfile: Dockerfile
             target: production
+            args:
+                DATABASE_URL: ${DATABASE_URL}  # Pass the DATABASE_URL as build argument
         container_name: app-node-api
         volumes:
             - ./src:/home/node/app/src
@@ -30,7 +32,6 @@ services:
         environment:
             - .env
             - PORT=3001
-            - DATABASE_URL=${DATABASE_URL}
         ports:
             - "3001:3001"
         command: bash -c "npm run prisma:generate && npm run start:dev"

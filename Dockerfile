@@ -10,6 +10,9 @@ COPY . .
 
 FROM base AS production
 
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+
 # Node js cannot be run as PID 1 in a container, 
 # so we use tini to pass signals to the node process.
 ENV TINI_VERSION=v0.19.0
