@@ -19,7 +19,7 @@ type updateCategoryParam = z.infer<typeof updateCategoryParamSchema>;
 export const createCategoryBodySchema = z.object({
     title: z.string(),
     color: z.string(),
-    image: z.string(),
+    imageId: z.string(),
 });
 export const updateCategoryBodySchema = createCategoryBodySchema.partial();
 

@@ -46,7 +46,7 @@ const createCategory = async (payload: createCategoryBody, userId?: string) => {
                 userId,
                 title: payload.title,
                 color: payload.color,
-                image: payload.image,
+                image: payload.imageId,
             },
         });
     } catch (error) {
@@ -67,7 +67,7 @@ const updateCategory = async (
             data: {
                 title: payload.title,
                 color: payload.color,
-                image: payload.image,
+                image: payload.imageId,
             },
         });
     } catch (error) {
