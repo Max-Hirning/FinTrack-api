@@ -4,22 +4,14 @@ import { userResponseSchema } from "../account/user";
 
 export const getGoalsQueriesSchema = z
     .object({
-        page: z.number(),
-        userIds: z.array(z.string()),
-        goalIds: z.array(z.string()),
+        page: z.number().optional(),
+        userIds: z.array(z.string()).optional(),
+        goalIds: z.array(z.string()).optional(),
         currencies: z.array(
             z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
         ),
     })
-    .partial()
-    .refine(
-        (arg) => {
-            if (!arg.goalIds && !arg.currencies && !arg.userIds) return false;
-        },
-        {
-            message: "At least one query is required",
-        },
-    );
+    .partial();
 
 type getGoalsQueries = z.infer<typeof getGoalsQueriesSchema>;
 
@@ -66,6 +58,7 @@ export const goalResponseSchema = z.object({
     description: z.string().optional(),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     user: userResponseSchema.pick({
+        id: true,
         lastName: true,
         firstName: true,
         images: true,

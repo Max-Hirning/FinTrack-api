@@ -4,22 +4,14 @@ import { userResponseSchema } from "../account/user";
 
 export const getCardsQueriesSchema = z
     .object({
-        page: z.number(),
-        userIds: z.array(z.string()),
-        cardIds: z.array(z.string()),
-        currencies: z.array(
-            z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
-        ),
+        page: z.number().optional(),
+        userIds: z.array(z.string()).optional(),
+        cardIds: z.array(z.string()).optional(),
+        currencies: z
+            .array(z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]))
+            .optional(),
     })
-    .partial()
-    .refine(
-        (arg) => {
-            if (!arg.cardIds && !arg.currencies && !arg.userIds) return false;
-        },
-        {
-            message: "At least one query is required",
-        },
-    );
+    .partial();
 
 type getCardsQueries = z.infer<typeof getCardsQueriesSchema>;
 
@@ -59,6 +51,7 @@ export const cardResponseSchema = z.object({
     balance: z.number(),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     user: userResponseSchema.pick({
+        id: true,
         lastName: true,
         firstName: true,
         images: true,

@@ -4,22 +4,14 @@ import { userResponseSchema } from "../account/user";
 
 export const getBudgetsQueriesSchema = z
     .object({
-        page: z.number(),
-        userIds: z.array(z.string()),
-        budgetIds: z.array(z.string()),
+        page: z.number().optional(),
+        userIds: z.array(z.string()).optional(),
+        budgetIds: z.array(z.string()).optional(),
         currencies: z.array(
             z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
         ),
     })
-    .partial()
-    .refine(
-        (arg) => {
-            if (!arg.budgetIds && !arg.currencies && !arg.userIds) return false;
-        },
-        {
-            message: "At least one query is required",
-        },
-    );
+    .partial();
 
 type getBudgetsQueries = z.infer<typeof getBudgetsQueriesSchema>;
 
@@ -95,6 +87,7 @@ export const budgetResponseSchema = z.object({
     period: z.enum(Object.values(Periods) as [Periods, ...Periods[]]),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     user: userResponseSchema.pick({
+        id: true,
         lastName: true,
         firstName: true,
         images: true,

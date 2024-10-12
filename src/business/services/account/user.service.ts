@@ -36,10 +36,6 @@ const getUser = async (query: Prisma.UserWhereUniqueInput) => {
         return {
             ...user,
             dateOfBirth: user.dateOfBirth.toISOString(),
-            budgets: user.budgets.map((el) => el.id),
-            cards: user.cards.map((el) => el.id),
-            loans: user.loans.map((el) => el.id),
-            goals: user.goals.map((el) => el.id),
         };
     } catch (error) {
         throw new NotFoundError((error as Error).message);

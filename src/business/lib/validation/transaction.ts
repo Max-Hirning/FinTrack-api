@@ -2,34 +2,18 @@ import { z } from "zod";
 import { Currencies } from "@prisma/client";
 import { categoryResponseSchema } from "./category";
 
-export const getTransactionsQueriesSchema = z
-    .object({
-        page: z.number(),
-        currencies: z.array(
-            z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
-        ),
-        goalIds: z.array(z.string()),
-        cardIds: z.array(z.string()),
-        loanIds: z.array(z.string()),
-        userIds: z.array(z.string()),
-        budgetIds: z.array(z.string()),
-        transactionIds: z.array(z.string()),
-    })
-    .refine(
-        (arg) => {
-            if (
-                !arg.budgetIds &&
-        !arg.currencies &&
-        !arg.goalIds &&
-        !arg.transactionIds &&
-        !arg.loanIds &&
-        !arg.cardIds &&
-        !arg.userIds
-            )
-                return false;
-        },
-        { message: "At least one query is required" },
-    );
+export const getTransactionsQueriesSchema = z.object({
+    page: z.number(),
+    currencies: z
+        .array(z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]))
+        .optional(),
+    goalIds: z.array(z.string()).optional(),
+    cardIds: z.array(z.string()).optional(),
+    loanIds: z.array(z.string()).optional(),
+    userIds: z.array(z.string()).optional(),
+    budgetIds: z.array(z.string()).optional(),
+    transactionIds: z.array(z.string()).optional(),
+});
 
 type getTransactionsQueries = z.infer<typeof getTransactionsQueriesSchema>;
 
@@ -63,7 +47,7 @@ type createTransactionBody = z.infer<typeof createTransactionBodySchema>;
 type updateTransactionBody = z.infer<typeof updateTransactionBodySchema>;
 
 export const transactionResponseSchema = z.object({
-    is: z.string(),
+    id: z.string(),
     amount: z.number(),
     balance: z.number(),
     description: z.string(),

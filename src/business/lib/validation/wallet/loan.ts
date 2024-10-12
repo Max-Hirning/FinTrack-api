@@ -4,23 +4,14 @@ import { userResponseSchema } from "../account/user";
 
 export const getLoansQueriesSchema = z
     .object({
-        page: z.number(),
-        userIds: z.array(z.string()),
-        loanIds: z.array(z.string()),
+        page: z.number().optional(),
+        userIds: z.array(z.string()).optional(),
+        loanIds: z.array(z.string()).optional(),
         currencies: z.array(
             z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
         ),
     })
-    .partial()
-    .refine(
-        (arg) => {
-            if (!arg.loanIds && !arg.currencies && !arg.userIds) return false;
-        },
-        {
-            message:
-        "At least one of fields: 'userIds', 'loanIds' or 'currencies' is required",
-        },
-    );
+    .partial();
 
 type getLoansQueries = z.infer<typeof getLoansQueriesSchema>;
 
@@ -69,6 +60,7 @@ export const loanResponseSchema = z.object({
     deadline: z.string().datetime(),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     user: userResponseSchema.pick({
+        id: true,
         lastName: true,
         firstName: true,
         images: true,
