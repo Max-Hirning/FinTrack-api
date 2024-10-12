@@ -39,6 +39,15 @@ const checkOtp = async (
         return authService.checkOtp(body);
     });
 };
+const preSignUp = async (
+    request: FastifyRequest<{ Body: SignUpBody }>,
+    reply: FastifyReply,
+) => {
+    return tryCatchApiMiddleware(reply, async () => {
+        const { body } = request;
+        return authService.preSignUp(body);
+    });
+};
 const requestOtp = async (
     request: FastifyRequest<{ Body: RequestOtpBody }>,
     reply: FastifyReply,
@@ -85,6 +94,7 @@ export const authHandler = {
     signIn,
     signUp,
     checkOtp,
+    preSignUp,
     requestOtp,
     resetPassword,
     refreshTokens,

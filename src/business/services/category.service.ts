@@ -1,3 +1,4 @@
+import { environmentVariables } from "@/config";
 import { prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import { createCategoryBody, updateCategoryBody } from "../lib/validation";
@@ -17,29 +18,35 @@ const find = async (categoryId: string) => {
 const getCategories = async (userId?: string[]) => {
     const categories = await prisma.category.findMany({
         where: {
-            AND: [
+            OR: [
                 {
-                    userId: {
-                        in: userId || [],
-                    },
+                    userId: null,
                 },
                 {
-                    userId: undefined,
+                    userId: {
+                        in: userId,
+                    },
                 },
             ],
         },
+        orderBy: {
+            userId: "asc",
+        },
     });
-    return categories;
+    return categories.map((el) => ({
+        ...el,
+        image: `${environmentVariables.API_URL}/assets/category/${el.image}.svg`,
+    }));
 };
-const createCategory = async (payload: createCategoryBody) => {
+const createCategory = async (payload: createCategoryBody, userId?: string) => {
     let category;
     try {
         category = await prisma.category.create({
             data: {
+                userId,
                 title: payload.title,
                 color: payload.color,
                 image: payload.image,
-                userId: payload.userId,
             },
         });
     } catch (error) {

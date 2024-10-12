@@ -34,7 +34,7 @@ export const categoryRoutes = async (fastify: FastifyInstance) => {
             },
             preHandler: [
                 fastify.authorization,
-                fastify.checkRole([Roles.guest, Roles.user]),
+                fastify.checkRole([Roles.guest, Roles.user, Roles.admin]),
             ],
         },
         categoryHandler.createCategory,
@@ -50,7 +50,7 @@ export const categoryRoutes = async (fastify: FastifyInstance) => {
             },
             preHandler: [
                 fastify.authorization,
-                fastify.checkRole([Roles.guest, Roles.user]),
+                fastify.checkRole([Roles.guest, Roles.user, Roles.admin]),
             ],
         },
         categoryHandler.updateCategory,
@@ -65,7 +65,7 @@ export const categoryRoutes = async (fastify: FastifyInstance) => {
             },
             preHandler: [
                 fastify.authorization,
-                fastify.checkRole([Roles.guest, Roles.user]),
+                fastify.checkRole([Roles.guest, Roles.user, Roles.admin]),
             ],
         },
         categoryHandler.deleteCategory,

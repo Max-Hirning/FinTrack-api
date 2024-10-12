@@ -49,6 +49,16 @@ export const authRoutes = async (fastify: FastifyInstance) => {
         authHandler.signUp,
     );
     fastify.post(
+        "/pre/sign-up",
+        {
+            schema: {
+                tags: ["auth"],
+                body: signUpBodySchema,
+            },
+        },
+        authHandler.preSignUp,
+    );
+    fastify.post(
         "/request-otp",
         {
             schema: {

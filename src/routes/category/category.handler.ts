@@ -1,3 +1,4 @@
+import { Roles } from "@prisma/client";
 import { categoryService } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ForbiddenError } from "@/business/lib/errors";
@@ -11,10 +12,13 @@ import {
 
 const createCategory = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
-        const { body } = request as FastifyRequest<{ Body: createCategoryBody }>;
-        await categoryService.createCategory(body);
+        const { body, user } = request as FastifyRequest<{
+      Body: createCategoryBody;
+    }>;
+        const userId = user.role !== Roles.admin ? user.id : undefined;
+        await categoryService.createCategory(body, userId);
 
-        return "Budget was removed";
+        return "Category was created";
     });
 };
 const getCategories = async (request: FastifyRequest, reply: FastifyReply) => {

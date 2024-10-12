@@ -67,6 +67,17 @@ const signUp = async (payload: SignUpBody) => {
         throw new InternalServerError((error as Error).message);
     }
 };
+const preSignUp = async (payload: SignUpBody) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            email: payload.email,
+        },
+    });
+
+    if (user) throw new ForbiddenError("User allready exists");
+
+    return "Success";
+};
 const checkOtp = async (payload: CheckOtpBody) => {
     await otpService.checkOtp({ email: payload.email }, payload.code);
 
@@ -117,6 +128,7 @@ export const authService = {
     signIn,
     signUp,
     checkOtp,
+    preSignUp,
     requestOtp,
     refreshTokens,
     resetPassword,

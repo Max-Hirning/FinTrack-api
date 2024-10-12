@@ -19,14 +19,9 @@ type updateCategoryParam = z.infer<typeof updateCategoryParamSchema>;
 export const createCategoryBodySchema = z.object({
     title: z.string(),
     color: z.string(),
-    image: z.string().url(),
-    userId: z.string().optional(),
+    image: z.string(),
 });
-export const updateCategoryBodySchema = createCategoryBodySchema
-    .omit({
-        userId: true,
-    })
-    .partial();
+export const updateCategoryBodySchema = createCategoryBodySchema.partial();
 
 type createCategoryBody = z.infer<typeof createCategoryBodySchema>;
 type updateCategoryBody = z.infer<typeof updateCategoryBodySchema>;
