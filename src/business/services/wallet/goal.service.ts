@@ -11,6 +11,9 @@ const find = async (query: Prisma.GoalWhereInput) => {
     try {
         const user = await prisma.goal.findFirstOrThrow({
             where: query,
+            include: {
+                user: true,
+            },
         });
         return user;
     } catch (error) {

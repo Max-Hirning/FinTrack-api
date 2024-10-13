@@ -11,6 +11,9 @@ const find = async (query: Prisma.LoanWhereInput) => {
     try {
         const user = await prisma.loan.findFirstOrThrow({
             where: query,
+            include: {
+                user: true,
+            },
         });
 
         return user;
