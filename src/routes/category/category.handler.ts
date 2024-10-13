@@ -26,7 +26,7 @@ const getCategories = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getCategoriesQueries;
     }>;
-        const data = await categoryService.getCategories(query.userIds);
+        const data = await categoryService.getCategories(query);
 
         return data;
     });
@@ -38,7 +38,10 @@ const updateCategory = async (request: FastifyRequest, reply: FastifyReply) => {
       Body: updateCategoryBody;
     }>;
         const category = await categoryService.find(params.categoryId);
-        if (category?.userId !== request.user.id)
+        if (
+            request.user.role !== Roles.admin &&
+      category?.userId !== request.user.id
+        )
             throw new ForbiddenError("You have no rights");
         await categoryService.updateCategory(params.categoryId, body);
 

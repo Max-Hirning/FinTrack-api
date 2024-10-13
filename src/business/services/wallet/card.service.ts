@@ -11,6 +11,9 @@ const find = async (query: Prisma.CardWhereInput) => {
     try {
         const user = await prisma.card.findFirstOrThrow({
             where: query,
+            include: {
+                user: true,
+            },
         });
         return user;
     } catch (error) {

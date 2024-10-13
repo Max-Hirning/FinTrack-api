@@ -32,6 +32,11 @@ enum Currencies {
   USD
 }
 
+enum CategoryType {
+  income
+  outcome
+}
+
 model Otp {
   id        String   @id @default(uuid())
   otp       String   @unique
@@ -147,6 +152,7 @@ model Category {
   title        String
   image        String
   color        String
+  type         CategoryType
   userId       String?
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   budgets      Budget[]      @relation("BudgetCategory")

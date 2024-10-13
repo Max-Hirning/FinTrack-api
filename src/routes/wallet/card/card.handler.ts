@@ -4,11 +4,22 @@ import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     createCardBody,
     deleteCardParam,
+    getCardParam,
     getCardsQueries,
     updateCardBody,
     updateCardParam,
 } from "@/business/lib/validation";
 
+const getCard = async (request: FastifyRequest, reply: FastifyReply) => {
+    return tryCatchApiMiddleware(reply, async () => {
+        const { params } = request as FastifyRequest<{
+      Params: getCardParam;
+    }>;
+        const card = await cardServcice.find({ id: params.cardId });
+
+        return card;
+    });
+};
 const getCards = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { query } = request as FastifyRequest<{
@@ -48,6 +59,7 @@ const createCard = async (request: FastifyRequest, reply: FastifyReply) => {
 };
 
 export const cardHandler = {
+    getCard,
     getCards,
     createCard,
     updateCard,

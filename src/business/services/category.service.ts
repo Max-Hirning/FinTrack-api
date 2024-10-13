@@ -1,7 +1,11 @@
 import { environmentVariables } from "@/config";
 import { prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
-import { createCategoryBody, updateCategoryBody } from "../lib/validation";
+import {
+    createCategoryBody,
+    getCategoriesQueries,
+    updateCategoryBody,
+} from "../lib/validation";
 
 const find = async (categoryId: string) => {
     try {
@@ -15,7 +19,8 @@ const find = async (categoryId: string) => {
         throw new NotFoundError((error as Error).message);
     }
 };
-const getCategories = async (userId?: string[]) => {
+const getCategories = async (query: getCategoriesQueries) => {
+    const { userIds, type } = query;
     const categories = await prisma.category.findMany({
         where: {
             OR: [
@@ -24,10 +29,15 @@ const getCategories = async (userId?: string[]) => {
                 },
                 {
                     userId: {
-                        in: userId,
+                        in: userIds || [],
                     },
                 },
             ],
+            ...(type
+                ? {
+                    type,
+                }
+                : {}),
         },
         orderBy: {
             userId: "asc",
@@ -44,6 +54,7 @@ const createCategory = async (payload: createCategoryBody, userId?: string) => {
         category = await prisma.category.create({
             data: {
                 userId,
+                type: payload.type,
                 title: payload.title,
                 color: payload.color,
                 image: payload.imageId,
@@ -65,6 +76,7 @@ const updateCategory = async (
                 id: categoryId,
             },
             data: {
+                type: payload.type,
                 title: payload.title,
                 color: payload.color,
                 image: payload.imageId,

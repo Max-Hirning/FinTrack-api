@@ -48,13 +48,13 @@ type updateCardBody = z.infer<typeof updateCardBodySchema>;
 export const cardResponseSchema = z.object({
     id: z.string(),
     title: z.string(),
+    color: z.string(),
     balance: z.number(),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     user: userResponseSchema.pick({
         id: true,
         lastName: true,
         firstName: true,
-        images: true,
     }),
 });
 export const cardsListResponseSchema = z.object({

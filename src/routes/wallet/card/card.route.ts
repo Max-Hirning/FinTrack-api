@@ -1,9 +1,11 @@
 import { FastifyInstance } from "fastify";
 import { cardHandler } from "./card.handler";
 import {
+    cardResponseSchema,
     cardsListResponseSchema,
     createCardBodySchema,
     deleteCardParamSchema,
+    getCardParamSchema,
     getCardsQueriesSchema,
     updateCardBodySchema,
     updateCardParamSchema,
@@ -24,6 +26,21 @@ export const cardRoutes = async (fastify: FastifyInstance) => {
             preHandler: [fastify.authorization],
         },
         cardHandler.getCards,
+    );
+    fastify.get(
+        "/:cardId",
+        {
+            schema: {
+                response: {
+                    200: cardResponseSchema,
+                },
+                tags: ["card"],
+                params: getCardParamSchema,
+                security: [{ bearerAuth: [] }],
+            },
+            preHandler: [fastify.authorization],
+        },
+        cardHandler.getCard,
     );
     fastify.put(
         "/:cardId",

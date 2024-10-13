@@ -1,7 +1,11 @@
 import { z } from "zod";
+import { CategoryType } from "@prisma/client";
 
 export const getCategoriesQueriesSchema = z.object({
     userIds: z.array(z.string()).optional(),
+    type: z
+        .enum(Object.values(CategoryType) as [CategoryType, ...CategoryType[]])
+        .optional(),
 });
 
 type getCategoriesQueries = z.infer<typeof getCategoriesQueriesSchema>;
@@ -20,6 +24,9 @@ export const createCategoryBodySchema = z.object({
     title: z.string(),
     color: z.string(),
     imageId: z.string(),
+    type: z.enum(
+    Object.values(CategoryType) as [CategoryType, ...CategoryType[]],
+    ),
 });
 export const updateCategoryBodySchema = createCategoryBodySchema.partial();
 
