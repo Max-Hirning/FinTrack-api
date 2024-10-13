@@ -4,11 +4,18 @@ import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     createGoalBody,
     deleteGoalParam,
+    getGoalParam,
     getGoalsQueries,
     updateGoalBody,
     updateGoalParam,
 } from "@/business/lib/validation";
 
+const getGoal = async (request: FastifyRequest, reply: FastifyReply) => {
+    return tryCatchApiMiddleware(reply, async () => {
+        const { params } = request as FastifyRequest<{ Params: getGoalParam }>;
+        return goalServcice.find({ id: params.goalId });
+    });
+};
 const getGoals = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { query } = request as FastifyRequest<{
@@ -48,6 +55,7 @@ const createGoal = async (request: FastifyRequest, reply: FastifyReply) => {
 };
 
 export const goalHandler = {
+    getGoal,
     getGoals,
     createGoal,
     updateGoal,

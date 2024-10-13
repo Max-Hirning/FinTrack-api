@@ -16,10 +16,15 @@ import {
 
 const find = async (query: Prisma.BudgetWhereInput) => {
     try {
-        const user = await prisma.budget.findFirstOrThrow({
+        const budget = await prisma.budget.findFirstOrThrow({
             where: query,
+            include: {
+                user: true,
+                cards: true,
+                categories: true,
+            },
         });
-        return user;
+        return budget;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
     }
@@ -120,7 +125,14 @@ const deleteBudget = async (budgetId: string) => {
         throw new NotFoundError((error as Error).message);
     }
 };
+const validateBudget = (payload: updateBudgetBody) => {
+    if (payload.period === Periods.oneTime) {
+        if (!payload.startDate || !payload.endDate)
+            throw new BadRequestError("Start date and end date is required");
+    }
+};
 const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
+    validateBudget(payload);
     let startDate = payload.startDate ? new Date(payload.startDate) : undefined;
     let endDate = payload.endDate ? new Date(payload.endDate) : undefined;
     if (payload.period) {
@@ -163,6 +175,38 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
     (startDate && new Date(budget.endDate) <= startDate)
     )
         throw new BadRequestError("startDate can't be less or equal than endDate");
+    if (payload.cardIds) {
+        try {
+            await prisma.budget.update({
+                where: {
+                    id: budgetId,
+                },
+                data: {
+                    cards: {
+                        set: [],
+                    },
+                },
+            });
+        } catch (error) {
+            throw new InternalServerError((error as Error).message);
+        }
+    }
+    if (payload.categoryIds) {
+        try {
+            await prisma.budget.update({
+                where: {
+                    id: budgetId,
+                },
+                data: {
+                    categories: {
+                        set: [],
+                    },
+                },
+            });
+        } catch (error) {
+            throw new InternalServerError((error as Error).message);
+        }
+    }
 
     try {
         const budget = await prisma.budget.update({
@@ -178,6 +222,11 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
                 cards: {
                     connect: (payload.cardIds || []).map((cardId) => ({ id: cardId })),
                 },
+                categories: {
+                    connect: (payload.categoryIds || []).map((categoryId) => ({
+                        id: categoryId,
+                    })),
+                },
             },
         });
 
@@ -187,6 +236,7 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
     }
 };
 const createBudget = async (userId: string, payload: createBudgetBody) => {
+    validateBudget(payload);
     currencyService.getCurrency(payload.currency);
 
     let startDate = payload.startDate ? new Date(payload.startDate) : new Date(),
@@ -233,6 +283,11 @@ const createBudget = async (userId: string, payload: createBudgetBody) => {
                 userId,
                 cards: {
                     connect: payload.cardIds.map((cardId) => ({ id: cardId })),
+                },
+                categories: {
+                    connect: payload.categoryIds.map((categoryId) => ({
+                        id: categoryId,
+                    })),
                 },
             },
         });

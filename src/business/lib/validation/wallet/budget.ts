@@ -29,50 +29,17 @@ type getBudgetParam = z.infer<typeof getBudgetParamSchema>;
 type deleteBudgetParam = z.infer<typeof deleteBudgetParamSchema>;
 type updateBudgetParam = z.infer<typeof updateBudgetParamSchema>;
 
-export const createBudgetBodySchema = z
-    .object({
-        title: z.string(),
-        balance: z.number(),
-        cardIds: z.array(z.string()),
-        endDate: z.string().datetime().optional(),
-        startDate: z.string().datetime().optional(),
-        period: z.enum(Object.values(Periods) as [Periods, ...Periods[]]),
-        currency: z.enum(
-      Object.values(Currencies) as [Currencies, ...Currencies[]],
-        ),
-    })
-    .refine(
-        (arg) => {
-            if (arg.period === Periods.oneTime) {
-                if (!arg.startDate || !arg.endDate) return false;
-            }
-            return true;
-        },
-        {
-            message: "Start date and end date is required",
-        },
-    );
-export const updateBudgetBodySchema = z
-    .object({
-        title: z.string(),
-        balance: z.number(),
-        cardIds: z.array(z.string()),
-        endDate: z.string().datetime().optional(),
-        startDate: z.string().datetime().optional(),
-        period: z.enum(Object.values(Periods) as [Periods, ...Periods[]]),
-    })
-    .partial()
-    .refine(
-        (arg) => {
-            if (arg.period === Periods.oneTime) {
-                if (!arg.startDate || !arg.endDate) return false;
-            }
-            return true;
-        },
-        {
-            message: "Start date and end date is required",
-        },
-    );
+export const createBudgetBodySchema = z.object({
+    title: z.string(),
+    balance: z.number(),
+    cardIds: z.array(z.string()),
+    categoryIds: z.array(z.string()),
+    endDate: z.string().datetime().optional(),
+    startDate: z.string().datetime().optional(),
+    period: z.enum(Object.values(Periods) as [Periods, ...Periods[]]),
+    currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
+});
+export const updateBudgetBodySchema = createBudgetBodySchema.partial();
 
 type createBudgetBody = z.infer<typeof createBudgetBodySchema>;
 type updateBudgetBody = z.infer<typeof updateBudgetBodySchema>;
@@ -80,22 +47,28 @@ type updateBudgetBody = z.infer<typeof updateBudgetBodySchema>;
 export const budgetResponseSchema = z.object({
     id: z.string(),
     title: z.string(),
+    endDate: z.date(),
     amount: z.number(),
     balance: z.number(),
-    endDate: z.string().datetime(),
-    startDate: z.string().datetime(),
+    startDate: z.date(),
+    cards: z.array(z.string()),
+    categories: z.array(z.string()),
     period: z.enum(Object.values(Periods) as [Periods, ...Periods[]]),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     user: userResponseSchema.pick({
         id: true,
         lastName: true,
         firstName: true,
-        images: true,
     }),
 });
 export const budgetsListResponseSchema = z.object({
     totalPages: z.number().int(),
-    data: z.array(budgetResponseSchema),
+    data: z.array(
+        budgetResponseSchema.omit({
+            cards: true,
+            categories: true,
+        }),
+    ),
     prevPage: z.number().int().nullable(),
     nextPage: z.number().int().nullable(),
 });

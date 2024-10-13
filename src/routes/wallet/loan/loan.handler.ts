@@ -4,11 +4,20 @@ import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     createLoanBody,
     deleteLoanParam,
+    getLoanParam,
     getLoansQueries,
     updateLoanBody,
     updateLoanParam,
 } from "@/business/lib/validation";
 
+const getLoan = async (request: FastifyRequest, reply: FastifyReply) => {
+    return tryCatchApiMiddleware(reply, async () => {
+        const { params } = request as FastifyRequest<{
+      Params: getLoanParam;
+    }>;
+        return loanServcice.find({ id: params.loanId });
+    });
+};
 const getLoans = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { query } = request as FastifyRequest<{
@@ -48,6 +57,7 @@ const createLoan = async (request: FastifyRequest, reply: FastifyReply) => {
 };
 
 export const loanHandler = {
+    getLoan,
     getLoans,
     createLoan,
     updateLoan,

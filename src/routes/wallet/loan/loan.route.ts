@@ -7,6 +7,8 @@ import {
     getLoansQueriesSchema,
     updateLoanBodySchema,
     updateLoanParamSchema,
+    loanResponseSchema,
+    getLoanParamSchema,
 } from "@/business/lib/validation";
 
 export const loanRoutes = async (fastify: FastifyInstance) => {
@@ -24,6 +26,21 @@ export const loanRoutes = async (fastify: FastifyInstance) => {
             preHandler: [fastify.authorization],
         },
         loanHandler.getLoans,
+    );
+    fastify.get(
+        "/:loanId",
+        {
+            schema: {
+                response: {
+                    200: loanResponseSchema,
+                },
+                tags: ["loan"],
+                params: getLoanParamSchema,
+                security: [{ bearerAuth: [] }],
+            },
+            preHandler: [fastify.authorization],
+        },
+        loanHandler.getLoan,
     );
     fastify.put(
         "/:loanId",

@@ -1,9 +1,11 @@
 import { FastifyInstance } from "fastify";
 import { budgetHandler } from "./budget.handler";
 import {
+    budgetResponseSchema,
     budgetsListResponseSchema,
     createBudgetBodySchema,
     deleteBudgetParamSchema,
+    getBudgetParamSchema,
     getBudgetsQueriesSchema,
     updateBudgetBodySchema,
     updateBudgetParamSchema,
@@ -24,6 +26,21 @@ export const budgetRoutes = async (fastify: FastifyInstance) => {
             preHandler: [fastify.authorization],
         },
         budgetHandler.getBudgets,
+    );
+    fastify.get(
+        "/:budgetId",
+        {
+            schema: {
+                response: {
+                    200: budgetResponseSchema,
+                },
+                tags: ["budget"],
+                params: getBudgetParamSchema,
+                security: [{ bearerAuth: [] }],
+            },
+            preHandler: [fastify.authorization],
+        },
+        budgetHandler.getBudget,
     );
     fastify.put(
         "/:budgetId",

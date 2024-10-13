@@ -63,7 +63,6 @@ export const loanResponseSchema = z.object({
         id: true,
         lastName: true,
         firstName: true,
-        images: true,
     }),
 });
 export const loansListResponseSchema = z.object({

@@ -7,6 +7,8 @@ import {
     getGoalsQueriesSchema,
     updateGoalBodySchema,
     updateGoalParamSchema,
+    goalResponseSchema,
+    getGoalParamSchema,
 } from "@/business/lib/validation";
 
 export const goalRoutes = async (fastify: FastifyInstance) => {
@@ -24,6 +26,21 @@ export const goalRoutes = async (fastify: FastifyInstance) => {
             preHandler: [fastify.authorization],
         },
         goalHandler.getGoals,
+    );
+    fastify.get(
+        "/:goalId",
+        {
+            schema: {
+                response: {
+                    200: goalResponseSchema,
+                },
+                tags: ["goal"],
+                params: getGoalParamSchema,
+                security: [{ bearerAuth: [] }],
+            },
+            preHandler: [fastify.authorization],
+        },
+        goalHandler.getGoal,
     );
     fastify.put(
         "/:goalId",

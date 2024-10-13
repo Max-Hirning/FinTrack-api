@@ -4,11 +4,25 @@ import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     createBudgetBody,
     deleteBudgetParam,
+    getBudgetParam,
     getBudgetsQueries,
     updateBudgetBody,
     updateBudgetParam,
 } from "@/business/lib/validation";
 
+const getBudget = async (request: FastifyRequest, reply: FastifyReply) => {
+    return tryCatchApiMiddleware(reply, async () => {
+        const { params } = request as FastifyRequest<{
+      Params: getBudgetParam;
+    }>;
+        const response = await budgetServcice.find({ id: params.budgetId });
+        return {
+            ...response,
+            cards: response.cards.map((el) => el.id),
+            categories: response.categories.map((el) => el.id),
+        };
+    });
+};
 const getBudgets = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { query } = request as FastifyRequest<{
@@ -48,6 +62,7 @@ const createBudget = async (request: FastifyRequest, reply: FastifyReply) => {
 };
 
 export const budgetHandler = {
+    getBudget,
     getBudgets,
     createBudget,
     updateBudget,
