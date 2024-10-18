@@ -4,11 +4,24 @@ import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     createTransactionBody,
     deleteTransactionParam,
+    getTransactionParam,
     getTransactionsQueries,
     updateTransactionBody,
     updateTransactionParam,
 } from "@/business/lib/validation";
 
+const getTransaction = async (request: FastifyRequest, reply: FastifyReply) => {
+    return tryCatchApiMiddleware(reply, async () => {
+        const { params } = request as FastifyRequest<{
+      Params: getTransactionParam;
+    }>;
+        const transaction = await transactionServcice.find({
+            id: params.transactionId,
+        });
+
+        return transaction;
+    });
+};
 const getTransactions = async (
     request: FastifyRequest,
     reply: FastifyReply,
@@ -62,6 +75,7 @@ const createTransaction = async (
 };
 
 export const transactionHandler = {
+    getTransaction,
     getTransactions,
     createTransaction,
     updateTransaction,

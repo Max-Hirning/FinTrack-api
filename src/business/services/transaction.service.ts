@@ -1,3 +1,4 @@
+import { environmentVariables } from "@/config";
 import { goalServcice } from "./wallet/goal.service";
 import { loanServcice } from "./wallet/loan.service";
 import { currencyService } from "./currency.service";
@@ -153,10 +154,22 @@ const deleteTransaction = async (transactionId: string) => {
 };
 const find = async (query: Prisma.TransactionWhereInput) => {
     try {
-        const user = await prisma.transaction.findFirstOrThrow({
+        const transaction = await prisma.transaction.findFirstOrThrow({
             where: query,
+            include: {
+                category: true,
+                card: true,
+                loan: true,
+                goal: true,
+            },
         });
-        return user;
+        return {
+            ...transaction,
+            category: {
+                ...transaction.category,
+                image: `${environmentVariables.API_URL}/assets/category/${transaction.category.image}.svg`,
+            },
+        };
     } catch (error) {
         throw new NotFoundError((error as Error).message);
     }
@@ -201,6 +214,9 @@ const getTransactions = async (query: getTransactionsQueries) => {
                 skip: (page - 1) * perPage,
                 include: {
                     category: true,
+                    card: true,
+                    loan: true,
+                    goal: true,
                 },
             }),
             prisma.transaction.findMany({
@@ -213,7 +229,13 @@ const getTransactions = async (query: getTransactionsQueries) => {
             }),
         ]);
         return {
-            data: transactions,
+            data: transactions.map((el) => ({
+                ...el,
+                ...{
+                    ...el.category,
+                    image: `${environmentVariables.API_URL}/assets/category/${el.category.image}.svg`,
+                },
+            })),
             prevPage: page > 1 ? page - 1 : null,
             totalPages: Math.ceil(total / perPage),
             nextPage: nextPageExists.length > 0 ? page + 1 : null,
@@ -229,11 +251,20 @@ const getTransactions = async (query: getTransactionsQueries) => {
         where: params,
         include: {
             category: true,
+            card: true,
+            loan: true,
+            goal: true,
         },
     });
 
     return {
-        data: transactions,
+        data: transactions.map((el) => ({
+            ...el,
+            category: {
+                ...el.category,
+                image: `${environmentVariables.API_URL}/assets/category/${el.category.image}.svg`,
+            },
+        })),
         totalPages: 1,
         prevPage: null,
         nextPage: null,

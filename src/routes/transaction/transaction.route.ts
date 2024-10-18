@@ -7,6 +7,7 @@ import {
     updateTransactionBodySchema,
     updateTransactionParamSchema,
     getTransactionsQueriesSchema,
+    transactionResponseSchema,
 } from "@/business/lib/validation";
 
 export const transactionRoutes = async (fastify: FastifyInstance) => {
@@ -24,6 +25,21 @@ export const transactionRoutes = async (fastify: FastifyInstance) => {
             preHandler: [fastify.authorization],
         },
         transactionHandler.getTransactions,
+    );
+    fastify.get(
+        "/:transactionId",
+        {
+            schema: {
+                response: {
+                    200: transactionResponseSchema,
+                },
+                tags: ["transaction"],
+                params: updateTransactionParamSchema,
+                security: [{ bearerAuth: [] }],
+            },
+            preHandler: [fastify.authorization],
+        },
+        transactionHandler.getTransaction,
     );
     fastify.put(
         "/:transactionId",

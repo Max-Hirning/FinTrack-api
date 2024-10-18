@@ -1,9 +1,12 @@
 import { z } from "zod";
 import { Currencies } from "@prisma/client";
+import { cardResponseSchema } from "./wallet/card";
+import { loanResponseSchema } from "./wallet/loan";
+import { goalResponseSchema } from "./wallet/goal";
 import { categoryResponseSchema } from "./category";
 
 export const getTransactionsQueriesSchema = z.object({
-    page: z.number(),
+    page: z.number().optional(),
     currencies: z
         .array(z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]))
         .optional(),
@@ -17,6 +20,9 @@ export const getTransactionsQueriesSchema = z.object({
 
 type getTransactionsQueries = z.infer<typeof getTransactionsQueriesSchema>;
 
+export const getTransactionParamSchema = z.object({
+    transactionId: z.string(),
+});
 export const deleteTransactionParamSchema = z.object({
     transactionId: z.string(),
 });
@@ -24,6 +30,7 @@ export const updateTransactionParamSchema = z.object({
     transactionId: z.string(),
 });
 
+type getTransactionParam = z.infer<typeof getTransactionParamSchema>;
 type deleteTransactionParam = z.infer<typeof deleteTransactionParamSchema>;
 type updateTransactionParam = z.infer<typeof updateTransactionParamSchema>;
 
@@ -48,13 +55,25 @@ type updateTransactionBody = z.infer<typeof updateTransactionBodySchema>;
 
 export const transactionResponseSchema = z.object({
     id: z.string(),
+    date: z.date(),
     amount: z.number(),
-    balance: z.number(),
     description: z.string(),
-    date: z.string().datetime(),
-    goalBalance: z.number().nullable(),
-    loanBalance: z.number().nullable(),
+    goalAmount: z.number().nullable(),
+    loanAmount: z.number().nullable(),
     category: categoryResponseSchema,
+    card: cardResponseSchema.omit({
+        user: true,
+    }),
+    loan: loanResponseSchema
+        .omit({
+            user: true,
+        })
+        .nullable(),
+    goal: goalResponseSchema
+        .omit({
+            user: true,
+        })
+        .nullable(),
 });
 export const transactionsListResponseSchema = z.object({
     totalPages: z.number().int(),
@@ -67,6 +86,7 @@ type transactionResponse = z.infer<typeof transactionResponseSchema>;
 type transactionsListResponse = z.infer<typeof transactionsListResponseSchema>;
 
 export type {
+    getTransactionParam,
     transactionResponse,
     createTransactionBody,
     updateTransactionBody,
