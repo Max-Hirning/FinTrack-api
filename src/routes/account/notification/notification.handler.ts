@@ -22,7 +22,7 @@ const getNotifications = async (
             async () => {
                 return {
                     code: 200,
-                    data: notificationService.getNotifications(userId, query.page),
+                    data: await notificationService.getNotifications(userId, query.page),
                 };
             },
         );

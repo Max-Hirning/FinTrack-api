@@ -1,4 +1,3 @@
-import { environmentVariables } from "@/config";
 import { goalServcice } from "./wallet/goal.service";
 import { loanServcice } from "./wallet/loan.service";
 import { currencyService } from "./currency.service";
@@ -163,13 +162,7 @@ const find = async (query: Prisma.TransactionWhereInput) => {
                 goal: true,
             },
         });
-        return {
-            ...transaction,
-            category: {
-                ...transaction.category,
-                image: `${environmentVariables.API_URL}/assets/category/${transaction.category.image}.svg`,
-            },
-        };
+        return transaction;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
     }
@@ -229,13 +222,7 @@ const getTransactions = async (query: getTransactionsQueries) => {
             }),
         ]);
         return {
-            data: transactions.map((el) => ({
-                ...el,
-                ...{
-                    ...el.category,
-                    image: `${environmentVariables.API_URL}/assets/category/${el.category.image}.svg`,
-                },
-            })),
+            data: transactions,
             prevPage: page > 1 ? page - 1 : null,
             totalPages: Math.ceil(total / perPage),
             nextPage: nextPageExists.length > 0 ? page + 1 : null,
@@ -258,13 +245,7 @@ const getTransactions = async (query: getTransactionsQueries) => {
     });
 
     return {
-        data: transactions.map((el) => ({
-            ...el,
-            category: {
-                ...el.category,
-                image: `${environmentVariables.API_URL}/assets/category/${el.category.image}.svg`,
-            },
-        })),
+        data: transactions,
         totalPages: 1,
         prevPage: null,
         nextPage: null,

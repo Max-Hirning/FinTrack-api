@@ -44,7 +44,7 @@ const getCategories = async (request: FastifyRequest, reply: FastifyReply) => {
             async () => {
                 return {
                     code: 200,
-                    data: categoryService.getCategories(query),
+                    data: await categoryService.getCategories(query),
                 };
             },
         );

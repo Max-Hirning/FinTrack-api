@@ -24,9 +24,13 @@ const getUser = async (request: FastifyRequest, reply: FastifyReply) => {
         return redisGetSetCacheMiddleware(
             `${RedisKey.user}_${userId}`,
             async () => {
+                const response = await userService.find({ id: userId });
                 return {
                     code: 200,
-                    data: userService.getUser({ id: userId }),
+                    data: {
+                        ...response,
+                        dateOfBirth: response.dateOfBirth.toString(),
+                    },
                 };
             },
         );

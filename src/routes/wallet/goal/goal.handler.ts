@@ -22,9 +22,13 @@ const getGoal = async (request: FastifyRequest, reply: FastifyReply) => {
         return redisGetSetCacheMiddleware(
             `${RedisKey.goal}_${goalId}`,
             async () => {
+                const response = await goalServcice.find({ id: params.goalId });
                 return {
                     code: 200,
-                    data: goalServcice.find({ id: params.goalId }),
+                    data: {
+                        ...response,
+                        deadline: response.deadline.toISOString(),
+                    },
                 };
             },
         );
@@ -39,9 +43,16 @@ const getGoals = async (request: FastifyRequest, reply: FastifyReply) => {
         return redisGetSetCacheMiddleware(
             `${RedisKey.goal}${(userIds || []).map((el) => `_${el}`)}${(goalIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}_${page}`,
             async () => {
+                const response = await goalServcice.getGoals(query);
                 return {
                     code: 200,
-                    data: goalServcice.getGoals(query),
+                    data: {
+                        ...response,
+                        data: response.data.map((el) => ({
+                            ...el,
+                            deadline: el.deadline.toISOString(),
+                        })),
+                    },
                 };
             },
         );

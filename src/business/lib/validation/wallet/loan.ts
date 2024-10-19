@@ -52,11 +52,11 @@ type updateLoanBody = z.infer<typeof updateLoanBodySchema>;
 
 export const loanResponseSchema = z.object({
     id: z.string(),
-    date: z.date(),
+    date: z.string().datetime(),
     title: z.string(),
-    deadline: z.date(),
     amount: z.number(),
     balance: z.number(),
+    deadline: z.string().datetime(),
     description: z.string(),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     user: userResponseSchema.pick({

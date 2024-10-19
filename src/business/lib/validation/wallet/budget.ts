@@ -47,10 +47,10 @@ type updateBudgetBody = z.infer<typeof updateBudgetBodySchema>;
 export const budgetResponseSchema = z.object({
     id: z.string(),
     title: z.string(),
-    endDate: z.date(),
     amount: z.number(),
+    endDate: z.string().datetime(),
     balance: z.number(),
-    startDate: z.date(),
+    startDate: z.string().datetime(),
     cards: z.array(z.string()),
     categories: z.array(z.string()),
     period: z.enum(Object.values(Periods) as [Periods, ...Periods[]]),

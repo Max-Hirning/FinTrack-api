@@ -29,6 +29,8 @@ const getBudget = async (request: FastifyRequest, reply: FastifyReply) => {
                     code: 200,
                     data: {
                         ...response,
+                        startDate: response.startDate.toISOString(),
+                        endDate: response.endDate.toISOString(),
                         cards: response.cards.map((el) => el.id),
                         categories: response.categories.map((el) => el.id),
                     },
@@ -46,9 +48,17 @@ const getBudgets = async (request: FastifyRequest, reply: FastifyReply) => {
         return redisGetSetCacheMiddleware(
             `${RedisKey.budget}${(userIds || []).map((el) => `_${el}`)}${(budgetIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}_${page}`,
             async () => {
+                const response = await budgetServcice.getBudgets(query);
                 return {
                     code: 200,
-                    data: budgetServcice.getBudgets(query),
+                    data: {
+                        ...response,
+                        data: response.data.map((el) => ({
+                            ...el,
+                            startDate: el.startDate.toISOString(),
+                            endDate: el.endDate.toISOString(),
+                        })),
+                    },
                 };
             },
         );

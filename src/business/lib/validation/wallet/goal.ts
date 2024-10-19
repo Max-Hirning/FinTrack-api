@@ -53,8 +53,8 @@ export const goalResponseSchema = z.object({
     id: z.string(),
     title: z.string(),
     amount: z.number(),
-    deadline: z.date(),
     balance: z.number(),
+    deadline: z.string().datetime(),
     description: z.string().optional(),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     user: userResponseSchema.pick({

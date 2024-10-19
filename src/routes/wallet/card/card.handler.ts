@@ -26,7 +26,7 @@ const getCard = async (request: FastifyRequest, reply: FastifyReply) => {
             async () => {
                 return {
                     code: 200,
-                    data: cardServcice.find({ id: params.cardId }),
+                    data: await cardServcice.find({ id: params.cardId }),
                 };
             },
         );
@@ -43,7 +43,7 @@ const getCards = async (request: FastifyRequest, reply: FastifyReply) => {
             async () => {
                 return {
                     code: 200,
-                    data: cardServcice.getCards(query),
+                    data: await cardServcice.getCards(query),
                 };
             },
         );

@@ -1,4 +1,5 @@
 import { RedisKey } from "@/business/constants";
+import { environmentVariables } from "@/config";
 import { deleteCache } from "@/business/lib/redis";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { transactionServcice } from "@/business/services";
@@ -24,11 +25,19 @@ const getTransaction = async (request: FastifyRequest, reply: FastifyReply) => {
         return redisGetSetCacheMiddleware(
             `${RedisKey.transaction}_${transactionId}`,
             async () => {
+                const response = await transactionServcice.find({
+                    id: transactionId,
+                });
                 return {
                     code: 200,
-                    data: transactionServcice.find({
-                        id: transactionId,
-                    }),
+                    data: {
+                        ...response,
+                        date: response.date.toISOString(),
+                        category: {
+                            ...response.category,
+                            image: `${environmentVariables.API_URL}/assets/category/${response.category.image}.svg`,
+                        },
+                    },
                 };
             },
         );
@@ -55,9 +64,20 @@ const getTransactions = async (
         return redisGetSetCacheMiddleware(
             `${RedisKey.transaction}${(userIds || []).map((el) => `_${el}`)}${(cardIds || []).map((el) => `_${el}`)}${(budgetIds || []).map((el) => `_${el}`)}${(loanIds || []).map((el) => `_${el}`)}${(goalIds || []).map((el) => `_${el}`)}${(transactionIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}_${page}`,
             async () => {
+                const response = await transactionServcice.getTransactions(query);
                 return {
                     code: 200,
-                    data: transactionServcice.getTransactions(query),
+                    data: {
+                        ...response,
+                        data: response.data.map((el) => ({
+                            ...el,
+                            date: el.date.toISOString(),
+                            category: {
+                                ...el.category,
+                                image: `${environmentVariables.API_URL}/assets/category/${el.category.image}.svg`,
+                            },
+                        })),
+                    },
                 };
             },
         );

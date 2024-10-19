@@ -20,7 +20,7 @@ const signIn = async (
         const { body } = request;
         return {
             code: 200,
-            data: authService.signIn(body),
+            data: await authService.signIn(body),
         };
     });
 };
@@ -32,7 +32,7 @@ const signUp = async (
         const { body } = request;
         return {
             code: 201,
-            data: authService.signUp(body),
+            data: await authService.signUp(body),
         };
     });
 };
@@ -44,7 +44,7 @@ const checkOtp = async (
         const { body } = request;
         return {
             code: 200,
-            data: authService.checkOtp(body),
+            data: await authService.checkOtp(body),
         };
     });
 };
@@ -56,7 +56,7 @@ const preSignUp = async (
         const { body } = request;
         return {
             code: 200,
-            data: authService.preSignUp(body),
+            data: await authService.preSignUp(body),
         };
     });
 };
@@ -68,7 +68,7 @@ const requestOtp = async (
         const { body } = request;
         return {
             code: 200,
-            data: authService.requestOtp(body),
+            data: await authService.requestOtp(body),
         };
     });
 };
@@ -80,7 +80,7 @@ const refreshTokens = async (
         const { body } = request;
         return {
             code: 201,
-            data: authService.refreshTokens(body),
+            data: await authService.refreshTokens(body),
         };
     });
 };
