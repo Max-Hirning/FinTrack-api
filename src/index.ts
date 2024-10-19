@@ -7,6 +7,7 @@ import fastifyJwt from "@fastify/jwt";
 import fastifyAmqp from "fastify-amqp";
 import serveStatic from "serve-static";
 import fastifyCors from "@fastify/cors";
+import fastifyRedis from "@fastify/redis";
 import { configureRoutes } from "@/routes";
 import { IAccessToken } from "@/types/token";
 import { environmentVariables } from "@/config";
@@ -57,6 +58,9 @@ async function main() {
     await fastify.register(fastifyCors, {
         origin: true,
         credentials: true,
+    });
+    await fastify.register(fastifyRedis, {
+        url: environmentVariables.REDIS_URL,
     });
     await fastify.use(
         "/assets",

@@ -1,8 +1,12 @@
 import { Roles } from "@prisma/client";
+import { RedisKey } from "@/business/constants";
 import { categoryService } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ForbiddenError } from "@/business/lib/errors";
-import { tryCatchApiMiddleware } from "@/business/lib/middleware";
+import {
+    redisGetSetCacheMiddleware,
+    tryCatchApiMiddleware,
+} from "@/business/lib/middleware";
 import {
     createCategoryBody,
     deleteCategoryParam,
@@ -18,7 +22,10 @@ const createCategory = async (request: FastifyRequest, reply: FastifyReply) => {
         const userId = user.role !== Roles.admin ? user.id : undefined;
         await categoryService.createCategory(body, userId);
 
-        return "Category was created";
+        return {
+            code: 201,
+            data: "Category was created",
+        };
     });
 };
 const getCategories = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -26,9 +33,16 @@ const getCategories = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getCategoriesQueries;
     }>;
-        const data = await categoryService.getCategories(query);
-
-        return data;
+        const { type, userIds } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.category}${(userIds || []).map((el) => `_${el}`)}_${type}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: categoryService.getCategories(query),
+                };
+            },
+        );
     });
 };
 const updateCategory = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -45,7 +59,10 @@ const updateCategory = async (request: FastifyRequest, reply: FastifyReply) => {
             throw new ForbiddenError("You have no rights");
         await categoryService.updateCategory(params.categoryId, body);
 
-        return "Category was updated";
+        return {
+            code: 200,
+            data: "Category was updated",
+        };
     });
 };
 const deleteCategory = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -58,7 +75,10 @@ const deleteCategory = async (request: FastifyRequest, reply: FastifyReply) => {
             throw new ForbiddenError("You have no rights");
         await categoryService.deleteCategory(params.categoryId);
 
-        return "Category was removed";
+        return {
+            code: 200,
+            data: "Category was removed",
+        };
     });
 };
 

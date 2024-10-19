@@ -1,6 +1,10 @@
+import { RedisKey } from "@/business/constants";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { transactionServcice } from "@/business/services";
-import { tryCatchApiMiddleware } from "@/business/lib/middleware";
+import {
+    redisGetSetCacheMiddleware,
+    tryCatchApiMiddleware,
+} from "@/business/lib/middleware";
 import {
     createTransactionBody,
     deleteTransactionParam,
@@ -15,11 +19,18 @@ const getTransaction = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{
       Params: getTransactionParam;
     }>;
-        const transaction = await transactionServcice.find({
-            id: params.transactionId,
-        });
-
-        return transaction;
+        const { transactionId } = params;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.transaction}_${transactionId}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: transactionServcice.find({
+                        id: transactionId,
+                    }),
+                };
+            },
+        );
     });
 };
 const getTransactions = async (
@@ -30,7 +41,25 @@ const getTransactions = async (
         const { query } = request as FastifyRequest<{
       Querystring: getTransactionsQueries;
     }>;
-        return transactionServcice.getTransactions(query);
+        const {
+            page,
+            currencies,
+            cardIds,
+            budgetIds,
+            userIds,
+            loanIds,
+            goalIds,
+            transactionIds,
+        } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.transaction}${(userIds || []).map((el) => `_${el}`)}${(cardIds || []).map((el) => `_${el}`)}${(budgetIds || []).map((el) => `_${el}`)}${(loanIds || []).map((el) => `_${el}`)}${(goalIds || []).map((el) => `_${el}`)}${(transactionIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}_${page}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: transactionServcice.getTransactions(query),
+                };
+            },
+        );
     });
 };
 const deleteTransaction = async (
@@ -43,7 +72,10 @@ const deleteTransaction = async (
     }>;
         await transactionServcice.deleteTransaction(params.transactionId);
 
-        return "Transaction was removed";
+        return {
+            code: 200,
+            data: "Transaction was removed",
+        };
     });
 };
 const updateTransaction = async (
@@ -57,7 +89,10 @@ const updateTransaction = async (
     }>;
         await transactionServcice.updateTransaction(params.transactionId, body);
 
-        return "Transaction info was updated";
+        return {
+            code: 200,
+            data: "Transaction info was updated",
+        };
     });
 };
 const createTransaction = async (
@@ -70,7 +105,10 @@ const createTransaction = async (
     }>;
         await transactionServcice.createTransaction(body);
 
-        return "Transaction was created";
+        return {
+            code: 201,
+            data: "Transaction was created",
+        };
     });
 };
 

@@ -11,7 +11,10 @@ const getStatistic = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        return statisticService.getStatistic(query, request.user.id);
+        return {
+            code: 200,
+            data: statisticService.getStatistic(query, request.user.id),
+        };
     });
 };
 const getCardsStatistic = async (
@@ -22,7 +25,10 @@ const getCardsStatistic = async (
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        return statisticService.getCardsStatistic(query, request.user.id);
+        return {
+            code: 200,
+            data: statisticService.getCardsStatistic(query, request.user.id),
+        };
     });
 };
 const getCategoriesStatistic = async (
@@ -33,7 +39,10 @@ const getCategoriesStatistic = async (
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        return statisticService.getCategoriesStatistic(query, request.user.id);
+        return {
+            code: 200,
+            data: statisticService.getCategoriesStatistic(query, request.user.id),
+        };
     });
 };
 const getAccountStatistic = async (
@@ -44,7 +53,10 @@ const getAccountStatistic = async (
         const { params } = request as FastifyRequest<{
       Params: accountStatisticParam;
     }>;
-        return statisticService.getAccountStatistic(params);
+        return {
+            code: 200,
+            data: statisticService.getAccountStatistic(params),
+        };
     });
 };
 

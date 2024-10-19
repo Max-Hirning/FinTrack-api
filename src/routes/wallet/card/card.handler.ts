@@ -1,6 +1,10 @@
+import { RedisKey } from "@/business/constants";
 import { cardServcice } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { tryCatchApiMiddleware } from "@/business/lib/middleware";
+import {
+    redisGetSetCacheMiddleware,
+    tryCatchApiMiddleware,
+} from "@/business/lib/middleware";
 import {
     createCardBody,
     deleteCardParam,
@@ -15,9 +19,16 @@ const getCard = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{
       Params: getCardParam;
     }>;
-        const card = await cardServcice.find({ id: params.cardId });
-
-        return card;
+        const { cardId } = params;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.card}_${cardId}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: cardServcice.find({ id: params.cardId }),
+                };
+            },
+        );
     });
 };
 const getCards = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -25,7 +36,16 @@ const getCards = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getCardsQueries;
     }>;
-        return cardServcice.getCards(query);
+        const { page, userIds, cardIds, currencies } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.card}${(userIds || []).map((el) => `_${el}`)}${(cardIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}_${page}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: cardServcice.getCards(query),
+                };
+            },
+        );
     });
 };
 const deleteCard = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -33,7 +53,10 @@ const deleteCard = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{ Params: deleteCardParam }>;
         await cardServcice.deleteCard(params.cardId);
 
-        return "Card was removed";
+        return {
+            code: 200,
+            data: "Card was removed",
+        };
     });
 };
 const updateCard = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -44,7 +67,10 @@ const updateCard = async (request: FastifyRequest, reply: FastifyReply) => {
     }>;
         await cardServcice.updateCard(params.cardId, body);
 
-        return "Card info was updated";
+        return {
+            code: 200,
+            data: "Card info was updated",
+        };
     });
 };
 const createCard = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -54,7 +80,10 @@ const createCard = async (request: FastifyRequest, reply: FastifyReply) => {
     }>;
         await cardServcice.createCard(request.user.id, body);
 
-        return "Card was created";
+        return {
+            code: 201,
+            data: "Card was created",
+        };
     });
 };
 

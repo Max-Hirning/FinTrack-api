@@ -1,6 +1,10 @@
+import { RedisKey } from "@/business/constants";
 import { budgetServcice } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { tryCatchApiMiddleware } from "@/business/lib/middleware";
+import {
+    redisGetSetCacheMiddleware,
+    tryCatchApiMiddleware,
+} from "@/business/lib/middleware";
 import {
     createBudgetBody,
     deleteBudgetParam,
@@ -15,12 +19,21 @@ const getBudget = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{
       Params: getBudgetParam;
     }>;
-        const response = await budgetServcice.find({ id: params.budgetId });
-        return {
-            ...response,
-            cards: response.cards.map((el) => el.id),
-            categories: response.categories.map((el) => el.id),
-        };
+        const { budgetId } = params;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.budget}_${budgetId}`,
+            async () => {
+                const response = await budgetServcice.find({ id: params.budgetId });
+                return {
+                    code: 200,
+                    data: {
+                        ...response,
+                        cards: response.cards.map((el) => el.id),
+                        categories: response.categories.map((el) => el.id),
+                    },
+                };
+            },
+        );
     });
 };
 const getBudgets = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -28,7 +41,16 @@ const getBudgets = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getBudgetsQueries;
     }>;
-        return budgetServcice.getBudgets(query);
+        const { page, userIds, budgetIds, currencies } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.budget}${(userIds || []).map((el) => `_${el}`)}${(budgetIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}_${page}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: budgetServcice.getBudgets(query),
+                };
+            },
+        );
     });
 };
 const deleteBudget = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -36,7 +58,10 @@ const deleteBudget = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{ Params: deleteBudgetParam }>;
         await budgetServcice.deleteBudget(params.budgetId);
 
-        return "Budget was removed";
+        return {
+            code: 200,
+            data: "Budget was removed",
+        };
     });
 };
 const updateBudget = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -47,7 +72,10 @@ const updateBudget = async (request: FastifyRequest, reply: FastifyReply) => {
     }>;
         await budgetServcice.updateBudget(params.budgetId, body);
 
-        return "Budget info was updated";
+        return {
+            code: 200,
+            data: "Budget info was updated",
+        };
     });
 };
 const createBudget = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -57,7 +85,10 @@ const createBudget = async (request: FastifyRequest, reply: FastifyReply) => {
     }>;
         await budgetServcice.createBudget(request.user.id, body);
 
-        return "Budget was created";
+        return {
+            code: 201,
+            data: "Budget was created",
+        };
     });
 };
 

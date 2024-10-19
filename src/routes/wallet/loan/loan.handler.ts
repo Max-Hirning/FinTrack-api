@@ -1,6 +1,10 @@
+import { RedisKey } from "@/business/constants";
 import { loanServcice } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { tryCatchApiMiddleware } from "@/business/lib/middleware";
+import {
+    redisGetSetCacheMiddleware,
+    tryCatchApiMiddleware,
+} from "@/business/lib/middleware";
 import {
     createLoanBody,
     deleteLoanParam,
@@ -15,7 +19,16 @@ const getLoan = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{
       Params: getLoanParam;
     }>;
-        return loanServcice.find({ id: params.loanId });
+        const { loanId } = params;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.loan}_${loanId}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: loanServcice.find({ id: params.loanId }),
+                };
+            },
+        );
     });
 };
 const getLoans = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -23,7 +36,16 @@ const getLoans = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getLoansQueries;
     }>;
-        return loanServcice.getLoans(query);
+        const { page, loanIds, userIds, currencies } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.loan}${(userIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}${(loanIds || []).map((el) => `_${el}`)}_${page}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: loanServcice.getLoans(query),
+                };
+            },
+        );
     });
 };
 const deleteLoan = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -31,7 +53,10 @@ const deleteLoan = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{ Params: deleteLoanParam }>;
         await loanServcice.deleteLoan(params.loanId);
 
-        return "Loan was removed";
+        return {
+            code: 200,
+            data: "Loan was removed",
+        };
     });
 };
 const updateLoan = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -42,7 +67,10 @@ const updateLoan = async (request: FastifyRequest, reply: FastifyReply) => {
     }>;
         await loanServcice.updateLoan(params.loanId, body);
 
-        return "Loan info was updated";
+        return {
+            code: 200,
+            data: "Loan info was updated",
+        };
     });
 };
 const createLoan = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -52,7 +80,10 @@ const createLoan = async (request: FastifyRequest, reply: FastifyReply) => {
     }>;
         await loanServcice.createLoan(request.user.id, body);
 
-        return "Loan was created";
+        return {
+            code: 201,
+            data: "Loan was created",
+        };
     });
 };
 

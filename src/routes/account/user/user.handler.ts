@@ -1,8 +1,12 @@
 import fastifyAmqp from "fastify-amqp";
+import { RedisKey } from "@/business/constants";
 import { userService } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { EmailType, RabbitMqQueues } from "@/types/rabbitmq";
-import { tryCatchApiMiddleware } from "@/business/lib/middleware";
+import {
+    redisGetSetCacheMiddleware,
+    tryCatchApiMiddleware,
+} from "@/business/lib/middleware";
 import {
     deleteUserParam,
     getUserParam,
@@ -15,7 +19,16 @@ import {
 const getUser = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: getUserParam }>;
-        return userService.getUser({ id: params.userId });
+        const { userId } = params;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.user}_${userId}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: userService.getUser({ id: userId }),
+                };
+            },
+        );
     });
 };
 const deleteUser = async (
@@ -38,7 +51,10 @@ const deleteUser = async (
         channel.assertQueue(RabbitMqQueues.email, { durable: false });
         channel.sendToQueue(RabbitMqQueues.email, Buffer.from(msg));
 
-        return "Account was removed";
+        return {
+            code: 200,
+            data: "Account was removed",
+        };
     });
 };
 const updateUser = async (
@@ -66,7 +82,10 @@ const updateUser = async (
             channel.sendToQueue(RabbitMqQueues.email, Buffer.from(msg));
         }
 
-        return "Account info was updated";
+        return {
+            code: 200,
+            data: "Account info was updated",
+        };
     });
 };
 const updateUserPassword = async (
@@ -97,7 +116,10 @@ const updateUserPassword = async (
             console.log(error);
         }
 
-        return "Password was updated";
+        return {
+            code: 200,
+            data: "Password was updated",
+        };
     });
 };
 

@@ -18,7 +18,10 @@ const signIn = async (
 ) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { body } = request;
-        return authService.signIn(body);
+        return {
+            code: 200,
+            data: authService.signIn(body),
+        };
     });
 };
 const signUp = async (
@@ -27,7 +30,10 @@ const signUp = async (
 ) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { body } = request;
-        return authService.signUp(body);
+        return {
+            code: 201,
+            data: authService.signUp(body),
+        };
     });
 };
 const checkOtp = async (
@@ -36,7 +42,10 @@ const checkOtp = async (
 ) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { body } = request;
-        return authService.checkOtp(body);
+        return {
+            code: 200,
+            data: authService.checkOtp(body),
+        };
     });
 };
 const preSignUp = async (
@@ -45,7 +54,10 @@ const preSignUp = async (
 ) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { body } = request;
-        return authService.preSignUp(body);
+        return {
+            code: 200,
+            data: authService.preSignUp(body),
+        };
     });
 };
 const requestOtp = async (
@@ -54,7 +66,10 @@ const requestOtp = async (
 ) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { body } = request;
-        return authService.requestOtp(body);
+        return {
+            code: 200,
+            data: authService.requestOtp(body),
+        };
     });
 };
 const refreshTokens = async (
@@ -63,7 +78,10 @@ const refreshTokens = async (
 ) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { body } = request;
-        return authService.refreshTokens(body);
+        return {
+            code: 201,
+            data: authService.refreshTokens(body),
+        };
     });
 };
 const resetPassword = async (
@@ -86,7 +104,10 @@ const resetPassword = async (
         channel.assertQueue(RabbitMqQueues.email, { durable: false });
         channel.sendToQueue(RabbitMqQueues.email, Buffer.from(msg));
 
-        return "Password was updated";
+        return {
+            code: 200,
+            data: "Password was updated",
+        };
     });
 };
 

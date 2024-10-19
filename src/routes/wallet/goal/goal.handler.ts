@@ -1,6 +1,10 @@
+import { RedisKey } from "@/business/constants";
 import { goalServcice } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { tryCatchApiMiddleware } from "@/business/lib/middleware";
+import {
+    redisGetSetCacheMiddleware,
+    tryCatchApiMiddleware,
+} from "@/business/lib/middleware";
 import {
     createGoalBody,
     deleteGoalParam,
@@ -13,7 +17,16 @@ import {
 const getGoal = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: getGoalParam }>;
-        return goalServcice.find({ id: params.goalId });
+        const { goalId } = params;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.goal}_${goalId}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: goalServcice.find({ id: params.goalId }),
+                };
+            },
+        );
     });
 };
 const getGoals = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -21,7 +34,16 @@ const getGoals = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getGoalsQueries;
     }>;
-        return goalServcice.getGoals(query);
+        const { page, userIds, goalIds, currencies } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.goal}${(userIds || []).map((el) => `_${el}`)}${(goalIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}_${page}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: goalServcice.getGoals(query),
+                };
+            },
+        );
     });
 };
 const deleteGoal = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -29,7 +51,10 @@ const deleteGoal = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{ Params: deleteGoalParam }>;
         await goalServcice.deleteGoal(params.goalId);
 
-        return "Goal was removed";
+        return {
+            code: 200,
+            data: "Goal was removed",
+        };
     });
 };
 const updateGoal = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -40,7 +65,10 @@ const updateGoal = async (request: FastifyRequest, reply: FastifyReply) => {
     }>;
         await goalServcice.updateGoal(params.goalId, body);
 
-        return "Goal info was updated";
+        return {
+            code: 200,
+            data: "Goal info was updated",
+        };
     });
 };
 const createGoal = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -50,7 +78,10 @@ const createGoal = async (request: FastifyRequest, reply: FastifyReply) => {
     }>;
         await goalServcice.createGoal(request.user.id, body);
 
-        return "Goal was created";
+        return {
+            code: 201,
+            data: "Goal was created",
+        };
     });
 };
 
