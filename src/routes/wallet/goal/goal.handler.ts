@@ -1,5 +1,6 @@
 import { RedisKey } from "@/business/constants";
 import { goalServcice } from "@/business/services";
+import { deleteCache } from "@/business/lib/redis";
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
     redisGetSetCacheMiddleware,
@@ -49,7 +50,9 @@ const getGoals = async (request: FastifyRequest, reply: FastifyReply) => {
 const deleteGoal = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: deleteGoalParam }>;
-        await goalServcice.deleteGoal(params.goalId);
+        const goal = await goalServcice.deleteGoal(params.goalId);
+
+        await deleteCache(`${RedisKey.goal}_${goal.userId}`);
 
         return {
             code: 200,
@@ -63,7 +66,9 @@ const updateGoal = async (request: FastifyRequest, reply: FastifyReply) => {
       Params: updateGoalParam;
       Body: updateGoalBody;
     }>;
-        await goalServcice.updateGoal(params.goalId, body);
+        const goal = await goalServcice.updateGoal(params.goalId, body);
+
+        await deleteCache(`${RedisKey.goal}_${goal.userId}`);
 
         return {
             code: 200,
@@ -76,7 +81,9 @@ const createGoal = async (request: FastifyRequest, reply: FastifyReply) => {
         const { body } = request as FastifyRequest<{
       Body: createGoalBody;
     }>;
-        await goalServcice.createGoal(request.user.id, body);
+        const goal = await goalServcice.createGoal(request.user.id, body);
+
+        await deleteCache(`${RedisKey.goal}_${goal.userId}`);
 
         return {
             code: 201,

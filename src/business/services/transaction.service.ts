@@ -448,6 +448,11 @@ const updateTransaction = async (
                 categoryId: payload.categoryId,
                 description: payload.description || "",
             },
+            include: {
+                card: true,
+                loan: true,
+                goal: true,
+            },
         });
     } catch (error) {
         throw new InternalServerError((error as Error).message);

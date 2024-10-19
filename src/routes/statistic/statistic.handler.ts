@@ -1,20 +1,30 @@
+import { RedisKey } from "@/business/constants";
 import { statisticService } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     accountStatisticParam,
     getStatisticsQueries,
 } from "@/business/lib/validation";
+import {
+    redisGetSetCacheMiddleware,
+    tryCatchApiMiddleware,
+} from "@/business/lib/middleware";
 
 const getStatistic = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        return {
-            code: 200,
-            data: statisticService.getStatistic(query, request.user.id),
-        };
+        const { endDate, startDate, cardIds, userId } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.statistic}_${userId}${(cardIds || []).map((el) => `_${el}`)}_${endDate}_${startDate}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: statisticService.getStatistic(query, request.user.id),
+                };
+            },
+        );
     });
 };
 const getCardsStatistic = async (
@@ -25,10 +35,16 @@ const getCardsStatistic = async (
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        return {
-            code: 200,
-            data: statisticService.getCardsStatistic(query, request.user.id),
-        };
+        const { endDate, startDate, cardIds, userId } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.statistic}_card_${userId}${(cardIds || []).map((el) => `_${el}`)}_${endDate}_${startDate}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: statisticService.getCardsStatistic(query, request.user.id),
+                };
+            },
+        );
     });
 };
 const getCategoriesStatistic = async (
@@ -39,10 +55,16 @@ const getCategoriesStatistic = async (
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        return {
-            code: 200,
-            data: statisticService.getCategoriesStatistic(query, request.user.id),
-        };
+        const { endDate, startDate, cardIds, userId } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.statistic}_category_${userId}${(cardIds || []).map((el) => `_${el}`)}_${endDate}_${startDate}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: statisticService.getCategoriesStatistic(query, request.user.id),
+                };
+            },
+        );
     });
 };
 const getAccountStatistic = async (
@@ -53,10 +75,16 @@ const getAccountStatistic = async (
         const { params } = request as FastifyRequest<{
       Params: accountStatisticParam;
     }>;
-        return {
-            code: 200,
-            data: statisticService.getAccountStatistic(params),
-        };
+        const { userId } = params;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.statistic}_account_${userId}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: statisticService.getAccountStatistic(params),
+                };
+            },
+        );
     });
 };
 

@@ -1,5 +1,6 @@
 import { RedisKey } from "@/business/constants";
 import { loanServcice } from "@/business/services";
+import { deleteCache } from "@/business/lib/redis";
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
     redisGetSetCacheMiddleware,
@@ -51,7 +52,9 @@ const getLoans = async (request: FastifyRequest, reply: FastifyReply) => {
 const deleteLoan = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: deleteLoanParam }>;
-        await loanServcice.deleteLoan(params.loanId);
+        const loan = await loanServcice.deleteLoan(params.loanId);
+
+        await deleteCache(`${RedisKey.loan}_${loan.userId}`);
 
         return {
             code: 200,
@@ -65,7 +68,9 @@ const updateLoan = async (request: FastifyRequest, reply: FastifyReply) => {
       Params: updateLoanParam;
       Body: updateLoanBody;
     }>;
-        await loanServcice.updateLoan(params.loanId, body);
+        const loan = await loanServcice.updateLoan(params.loanId, body);
+
+        await deleteCache(`${RedisKey.loan}_${loan.userId}`);
 
         return {
             code: 200,
@@ -78,7 +83,9 @@ const createLoan = async (request: FastifyRequest, reply: FastifyReply) => {
         const { body } = request as FastifyRequest<{
       Body: createLoanBody;
     }>;
-        await loanServcice.createLoan(request.user.id, body);
+        const loan = await loanServcice.createLoan(request.user.id, body);
+
+        await deleteCache(`${RedisKey.loan}_${loan.userId}`);
 
         return {
             code: 201,

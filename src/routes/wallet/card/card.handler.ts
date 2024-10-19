@@ -1,5 +1,6 @@
 import { RedisKey } from "@/business/constants";
 import { cardServcice } from "@/business/services";
+import { deleteCache } from "@/business/lib/redis";
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
     redisGetSetCacheMiddleware,
@@ -53,6 +54,13 @@ const deleteCard = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{ Params: deleteCardParam }>;
         await cardServcice.deleteCard(params.cardId);
 
+        await deleteCache(RedisKey.card);
+        await deleteCache(RedisKey.goal);
+        await deleteCache(RedisKey.loan);
+        await deleteCache(RedisKey.budget);
+        await deleteCache(RedisKey.statistic);
+        await deleteCache(RedisKey.transaction);
+
         return {
             code: 200,
             data: "Card was removed",
@@ -67,6 +75,13 @@ const updateCard = async (request: FastifyRequest, reply: FastifyReply) => {
     }>;
         await cardServcice.updateCard(params.cardId, body);
 
+        await deleteCache(RedisKey.card);
+        await deleteCache(RedisKey.goal);
+        await deleteCache(RedisKey.loan);
+        await deleteCache(RedisKey.budget);
+        await deleteCache(RedisKey.statistic);
+        await deleteCache(RedisKey.transaction);
+
         return {
             code: 200,
             data: "Card info was updated",
@@ -79,6 +94,13 @@ const createCard = async (request: FastifyRequest, reply: FastifyReply) => {
       Body: createCardBody;
     }>;
         await cardServcice.createCard(request.user.id, body);
+
+        await deleteCache(RedisKey.card);
+        await deleteCache(RedisKey.goal);
+        await deleteCache(RedisKey.loan);
+        await deleteCache(RedisKey.budget);
+        await deleteCache(RedisKey.statistic);
+        await deleteCache(RedisKey.transaction);
 
         return {
             code: 201,

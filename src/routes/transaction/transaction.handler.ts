@@ -1,4 +1,5 @@
 import { RedisKey } from "@/business/constants";
+import { deleteCache } from "@/business/lib/redis";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { transactionServcice } from "@/business/services";
 import {
@@ -72,6 +73,13 @@ const deleteTransaction = async (
     }>;
         await transactionServcice.deleteTransaction(params.transactionId);
 
+        await deleteCache(RedisKey.card);
+        await deleteCache(RedisKey.goal);
+        await deleteCache(RedisKey.loan);
+        await deleteCache(RedisKey.budget);
+        await deleteCache(RedisKey.statistic);
+        await deleteCache(RedisKey.transaction);
+
         return {
             code: 200,
             data: "Transaction was removed",
@@ -89,6 +97,13 @@ const updateTransaction = async (
     }>;
         await transactionServcice.updateTransaction(params.transactionId, body);
 
+        await deleteCache(RedisKey.card);
+        await deleteCache(RedisKey.goal);
+        await deleteCache(RedisKey.loan);
+        await deleteCache(RedisKey.budget);
+        await deleteCache(RedisKey.statistic);
+        await deleteCache(RedisKey.transaction);
+
         return {
             code: 200,
             data: "Transaction info was updated",
@@ -104,6 +119,13 @@ const createTransaction = async (
       Body: createTransactionBody;
     }>;
         await transactionServcice.createTransaction(body);
+
+        await deleteCache(RedisKey.card);
+        await deleteCache(RedisKey.goal);
+        await deleteCache(RedisKey.loan);
+        await deleteCache(RedisKey.budget);
+        await deleteCache(RedisKey.statistic);
+        await deleteCache(RedisKey.transaction);
 
         return {
             code: 201,

@@ -1,4 +1,5 @@
 import { RedisKey } from "@/business/constants";
+import { deleteCache } from "@/business/lib/redis";
 import { budgetServcice } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
@@ -56,7 +57,9 @@ const getBudgets = async (request: FastifyRequest, reply: FastifyReply) => {
 const deleteBudget = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: deleteBudgetParam }>;
-        await budgetServcice.deleteBudget(params.budgetId);
+        const budget = await budgetServcice.deleteBudget(params.budgetId);
+
+        await deleteCache(`${RedisKey.budget}_${budget.userId}`);
 
         return {
             code: 200,
@@ -70,7 +73,9 @@ const updateBudget = async (request: FastifyRequest, reply: FastifyReply) => {
       Params: updateBudgetParam;
       Body: updateBudgetBody;
     }>;
-        await budgetServcice.updateBudget(params.budgetId, body);
+        const budget = await budgetServcice.updateBudget(params.budgetId, body);
+
+        await deleteCache(`${RedisKey.budget}_${budget.userId}`);
 
         return {
             code: 200,
@@ -83,7 +88,9 @@ const createBudget = async (request: FastifyRequest, reply: FastifyReply) => {
         const { body } = request as FastifyRequest<{
       Body: createBudgetBody;
     }>;
-        await budgetServcice.createBudget(request.user.id, body);
+        const budget = await budgetServcice.createBudget(request.user.id, body);
+
+        await deleteCache(`${RedisKey.budget}_${budget.userId}`);
 
         return {
             code: 201,
