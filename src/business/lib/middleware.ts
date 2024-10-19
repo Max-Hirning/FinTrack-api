@@ -20,7 +20,7 @@ const tryCatchApiMiddleware = async (
 const redisGetSetCacheMiddleware = async (
     key: string,
     callback: () => Promise<IResponse>,
-    ttl: number = 1800,
+    ttl: number = 3600,
 ): Promise<IResponse> => {
     let cache;
 
