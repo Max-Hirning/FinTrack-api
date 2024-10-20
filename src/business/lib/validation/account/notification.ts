@@ -1,7 +1,16 @@
 import { z } from "zod";
 
 export const getNotificationsQueiresSchema = z.object({
-    page: z.number(),
+    page: z
+        .string()
+        .transform((val) => {
+            const parsedPage = Number(val);
+            if (isNaN(parsedPage)) {
+                throw new Error("Page must be a valid number");
+            }
+            return parsedPage;
+        })
+        .optional(),
 });
 
 type getNotificationsQueires = z.infer<typeof getNotificationsQueiresSchema>;

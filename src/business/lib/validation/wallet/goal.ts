@@ -4,7 +4,16 @@ import { userResponseSchema } from "../account/user";
 
 export const getGoalsQueriesSchema = z
     .object({
-        page: z.number().optional(),
+        page: z
+            .string()
+            .transform((val) => {
+                const parsedPage = Number(val);
+                if (isNaN(parsedPage)) {
+                    throw new Error("Page must be a valid number");
+                }
+                return parsedPage;
+            })
+            .optional(),
         userIds: z.array(z.string()).optional(),
         goalIds: z.array(z.string()).optional(),
         currencies: z.array(
