@@ -2,9 +2,9 @@ import { z } from "zod";
 
 export const getStatisticsQueriesSchema = z.object({
     endDate: z.string().date(),
-    cardIds: z.array(z.string()),
     startDate: z.string().date(),
     userId: z.string().optional(),
+    cardIds: z.array(z.string()).optional(),
 });
 
 type getStatisticsQueries = z.infer<typeof getStatisticsQueriesSchema>;

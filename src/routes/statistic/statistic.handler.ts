@@ -35,19 +35,16 @@ const getCardsStatistic = async (
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        const { endDate, startDate, cardIds, userId } = query;
-        return redisGetSetCacheMiddleware(
-            `${RedisKey.statistic}_card_${userId}${(cardIds || []).map((el) => `_${el}`)}_${endDate}_${startDate}`,
-            async () => {
-                return {
-                    code: 200,
-                    data: await statisticService.getCardsStatistic(
-                        query,
-                        request.user.id,
-                    ),
-                };
-            },
-        );
+        // const { endDate, startDate, cardIds, userId } = query;
+        // return redisGetSetCacheMiddleware(
+        //     `${RedisKey.statistic}_card_${userId}${(cardIds || []).map((el) => `_${el}`)}_${endDate}_${startDate}`,
+        //     async () => {
+        return {
+            code: 200,
+            data: await statisticService.getCardsStatistic(query, request.user.id),
+        };
+    //     },
+    // );
     });
 };
 const getCategoriesStatistic = async (

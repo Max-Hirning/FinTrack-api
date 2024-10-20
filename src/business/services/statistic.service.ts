@@ -78,7 +78,13 @@ const getAccountStatistic = async (param: accountStatisticParam) => {
 
     response.cashflow = response.incomes - response.expenses;
 
-    return response;
+    return {
+        loans: Math.abs(response.loans),
+        budget: Math.abs(response.budget),
+        incomes: Math.abs(response.incomes),
+        expenses: Math.abs(response.expenses),
+        cashflow: Math.abs(response.cashflow),
+    };
 };
 const getStatistic = async (query: getStatisticsQueries, userId: string) => {
     const { cardIds, userId: categoryUserId, startDate, endDate } = query;
@@ -97,8 +103,8 @@ const getStatistic = async (query: getStatisticsQueries, userId: string) => {
     const transactions = await prisma.transaction.findMany({
         where: {
             date: {
-                lte: endDate,
-                gte: startDate,
+                lte: new Date(endDate),
+                gte: new Date(startDate),
             },
             ...(cardIds && cardIds.length > 0
                 ? {
@@ -110,7 +116,14 @@ const getStatistic = async (query: getStatisticsQueries, userId: string) => {
             ...(categoryUserId
                 ? {
                     category: {
-                        userId: categoryUserId,
+                        OR: [
+                            {
+                                userId: categoryUserId,
+                            },
+                            {
+                                userId: null,
+                            },
+                        ],
                     },
                 }
                 : {}),
@@ -161,7 +174,11 @@ const getStatistic = async (query: getStatisticsQueries, userId: string) => {
         }
     }
 
-    return Object.values(response);
+    return Object.values(response).map((el) => ({
+        ...el,
+        incomes: Math.abs(el.incomes),
+        expenses: Math.abs(el.expenses),
+    }));
 };
 const getCardsStatistic = async (
     query: getStatisticsQueries,
@@ -183,8 +200,8 @@ const getCardsStatistic = async (
     const transactions = await prisma.transaction.findMany({
         where: {
             date: {
-                lte: endDate,
-                gte: startDate,
+                lte: new Date(endDate),
+                gte: new Date(startDate),
             },
             ...(cardIds && cardIds.length > 0
                 ? {
@@ -196,7 +213,14 @@ const getCardsStatistic = async (
             ...(categoryUserId
                 ? {
                     category: {
-                        userId: categoryUserId,
+                        OR: [
+                            {
+                                userId: categoryUserId,
+                            },
+                            {
+                                userId: null,
+                            },
+                        ],
                     },
                 }
                 : {}),
@@ -220,7 +244,7 @@ const getCardsStatistic = async (
             if (currencyRates[date][transaction.card.currency]) {
                 if (response[transaction.cardId]) {
                     if (transaction.amount < 0) {
-                        response[date].value +=
+                        response[transaction.cardId].value +=
               transaction.amount /
               currencyRates[date][transaction.card.currency];
                     }
@@ -239,7 +263,10 @@ const getCardsStatistic = async (
         }
     }
 
-    return Object.values(response);
+    return Object.values(response).map((el) => ({
+        ...el,
+        value: Math.abs(el.value),
+    }));
 };
 const getCategoriesStatistic = async (
     query: getStatisticsQueries,
@@ -261,8 +288,8 @@ const getCategoriesStatistic = async (
     const transactions = await prisma.transaction.findMany({
         where: {
             date: {
-                lte: endDate,
-                gte: startDate,
+                lte: new Date(endDate),
+                gte: new Date(startDate),
             },
             ...(cardIds && cardIds.length > 0
                 ? {
@@ -274,7 +301,14 @@ const getCategoriesStatistic = async (
             ...(categoryUserId
                 ? {
                     category: {
-                        userId: categoryUserId,
+                        OR: [
+                            {
+                                userId: categoryUserId,
+                            },
+                            {
+                                userId: null,
+                            },
+                        ],
                     },
                 }
                 : {}),
@@ -318,7 +352,10 @@ const getCategoriesStatistic = async (
         }
     }
 
-    return Object.values(response);
+    return Object.values(response).map((el) => ({
+        ...el,
+        value: Math.abs(el.value),
+    }));
 };
 
 export const statisticService = {
