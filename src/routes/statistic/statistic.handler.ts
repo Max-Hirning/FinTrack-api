@@ -15,9 +15,9 @@ const getStatistic = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        const { endDate, startDate, cardIds, userId } = query;
+        const { endDate, startDate, cardIds, userId, frequency } = query;
         return redisGetSetCacheMiddleware(
-            `${RedisKey.statistic}_${userId}${(cardIds || []).map((el) => `_${el}`)}_${endDate}_${startDate}`,
+            `${RedisKey.statistic}_${userId}${(cardIds || []).map((el) => `_${el}`)}_${endDate}_${startDate}_${frequency}`,
             async () => {
                 return {
                     code: 200,
@@ -35,16 +35,19 @@ const getCardsStatistic = async (
         const { query } = request as FastifyRequest<{
       Querystring: getStatisticsQueries;
     }>;
-        // const { endDate, startDate, cardIds, userId } = query;
-        // return redisGetSetCacheMiddleware(
-        //     `${RedisKey.statistic}_card_${userId}${(cardIds || []).map((el) => `_${el}`)}_${endDate}_${startDate}`,
-        //     async () => {
-        return {
-            code: 200,
-            data: await statisticService.getCardsStatistic(query, request.user.id),
-        };
-    //     },
-    // );
+        const { endDate, startDate, cardIds, userId } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.statistic}_card_${userId}${(cardIds || []).map((el) => `_${el}`)}_${endDate}_${startDate}`,
+            async () => {
+                return {
+                    code: 200,
+                    data: await statisticService.getCardsStatistic(
+                        query,
+                        request.user.id,
+                    ),
+                };
+            },
+        );
     });
 };
 const getCategoriesStatistic = async (

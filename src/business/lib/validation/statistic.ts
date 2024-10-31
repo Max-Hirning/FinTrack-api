@@ -5,6 +5,7 @@ export const getStatisticsQueriesSchema = z.object({
     startDate: z.string().date(),
     userId: z.string().optional(),
     cardIds: z.array(z.string()).optional(),
+    frequency: z.enum(["year", "month", "day"]).optional(),
 });
 
 type getStatisticsQueries = z.infer<typeof getStatisticsQueriesSchema>;

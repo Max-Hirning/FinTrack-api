@@ -1,7 +1,15 @@
 import { prisma } from "@/database/prisma/prisma";
 import { currencyService } from "./currency.service";
 import { userService } from "./account/user.service";
-import { addMonths, format, startOfMonth } from "date-fns";
+import {
+    addDays,
+    addMonths,
+    addYears,
+    format,
+    setDate,
+    setMonth,
+    startOfMonth,
+} from "date-fns";
 import {
     accountStatisticParam,
     getStatisticsQueries,
@@ -47,11 +55,9 @@ const getAccountStatistic = async (param: accountStatisticParam) => {
         },
     });
     const cardCurrencies = cards.map(({ currency }) => currency);
-    const currencyRates = await currencyService.getCurrenciesRates({
+    const currencyRates = await currencyService.getCurrentCurrenciesRates({
         base: user.currency,
         symbols: Array.from(new Set(cardCurrencies)),
-        end_date: format(startOfNextMonth, "yyyy-MM-dd"),
-        start_date: format(startOfCurrentMonth, "yyyy-MM-dd"),
     });
 
     response.loans = loans.reduce((res, el) => {
@@ -64,13 +70,13 @@ const getAccountStatistic = async (param: accountStatisticParam) => {
     for (const transaction of transactions) {
         const date = format(transaction.date, "yyyy-MM-dd");
         if (currencyRates[date]) {
-            if (currencyRates[date][transaction.card.currency]) {
+            if (currencyRates[transaction.card.currency]) {
                 if (transaction.amount > 0) {
                     response.incomes +=
-            transaction.amount / currencyRates[date][transaction.card.currency];
+            transaction.amount / currencyRates[transaction.card.currency];
                 } else {
                     response.expenses +=
-            transaction.amount / currencyRates[date][transaction.card.currency];
+            transaction.amount / currencyRates[transaction.card.currency];
                 }
             }
         }
@@ -86,8 +92,51 @@ const getAccountStatistic = async (param: accountStatisticParam) => {
         cashflow: Math.abs(response.cashflow),
     };
 };
+const statisticTemplate = (
+    payload: Pick<getStatisticsQueries, "endDate" | "startDate" | "frequency">,
+) => {
+    const { startDate, endDate, frequency } = payload;
+    const end = new Date(endDate);
+    const start = new Date(startDate);
+
+    const result: Record<string, statisticsResponse> = {};
+
+    let currentDate = start;
+
+    while (currentDate <= end) {
+        let key: string;
+
+        switch (frequency) {
+        case "year":
+            key = format(currentDate, "yyyy-MM-dd");
+            currentDate = addYears(currentDate, 1);
+            break;
+        case "month":
+            key = format(currentDate, "yyyy-MM-dd");
+            currentDate = addMonths(currentDate, 1);
+            break;
+        case "day":
+            key = format(currentDate, "yyyy-MM-dd");
+            currentDate = addDays(currentDate, 1);
+            break;
+        default:
+            throw new Error("Invalid frequency");
+        }
+
+        result[key] = { date: key, incomes: 0, expenses: 0 };
+    }
+
+    return result;
+};
 const getStatistic = async (query: getStatisticsQueries, userId: string) => {
-    const { cardIds, userId: categoryUserId, startDate, endDate } = query;
+    const {
+        userId: categoryUserId,
+        cardIds,
+        startDate,
+        endDate,
+        frequency = "day",
+    } = query;
+
     const user = await userService.find({ id: userId });
     const cardCurrencies = await prisma.card
         .findMany({
@@ -133,44 +182,40 @@ const getStatistic = async (query: getStatisticsQueries, userId: string) => {
         },
     });
 
-    const currencyRates = await currencyService.getCurrenciesRates({
-        end_date: endDate,
+    const currencyRates = await currencyService.getCurrentCurrenciesRates({
         base: user.currency,
-        start_date: startDate,
         symbols: Array.from(new Set(cardCurrencies)),
     });
 
-    const response: Record<string, statisticsResponse> = {};
+    const response = statisticTemplate({ startDate, endDate, frequency });
     for (const transaction of transactions) {
-        const date = format(transaction.date, "yyyy-MM-dd");
-        if (currencyRates[date]) {
-            if (currencyRates[date][transaction.card.currency]) {
-                if (response[date]) {
-                    if (transaction.amount > 0) {
-                        response[date].incomes +=
-              transaction.amount /
-              currencyRates[date][transaction.card.currency];
-                    } else {
-                        response[date].expenses +=
-              transaction.amount /
-              currencyRates[date][transaction.card.currency];
-                    }
-                } else {
-                    response[date] = {
-                        date,
-                        incomes:
-              transaction.amount > 0
-                  ? transaction.amount /
-                  currencyRates[date][transaction.card.currency]
-                  : 0,
-                        expenses:
-              transaction.amount < 0
-                  ? transaction.amount /
-                  currencyRates[date][transaction.card.currency]
-                  : 0,
-                    };
-                }
+        let date = format(transaction.date, "yyyy-MM-dd");
+        if (frequency === "month") {
+            date = format(setDate(transaction.date, 1), "yyyy-MM-dd");
+        }
+        if (frequency === "year") {
+            date = format(setMonth(setDate(transaction.date, 1), 0), "yyyy-MM-dd");
+        }
+        if (response[date]) {
+            if (transaction.amount > 0) {
+                response[date].incomes +=
+          transaction.amount / currencyRates[transaction.card.currency];
+            } else {
+                response[date].expenses +=
+          transaction.amount / currencyRates[transaction.card.currency];
             }
+        } else {
+            response[date] = {
+                date,
+                incomes:
+          transaction.amount > 0
+              ? transaction.amount / currencyRates[transaction.card.currency]
+              : 0,
+                expenses:
+          transaction.amount < 0
+              ? transaction.amount / currencyRates[transaction.card.currency]
+              : 0,
+            };
         }
     }
 
@@ -230,35 +275,28 @@ const getCardsStatistic = async (
         },
     });
 
-    const currencyRates = await currencyService.getCurrenciesRates({
-        end_date: endDate,
+    const currencyRates = await currencyService.getCurrentCurrenciesRates({
         base: user.currency,
-        start_date: startDate,
         symbols: Array.from(new Set(cardCurrencies)),
     });
 
     const response: Record<string, statisticsGroupedResponse> = {};
     for (const transaction of transactions) {
-        const date = format(transaction.date, "yyyy-MM-dd");
-        if (currencyRates[date]) {
-            if (currencyRates[date][transaction.card.currency]) {
-                if (response[transaction.cardId]) {
-                    if (transaction.amount < 0) {
-                        response[transaction.cardId].value +=
-              transaction.amount /
-              currencyRates[date][transaction.card.currency];
-                    }
-                } else {
-                    response[transaction.cardId] = {
-                        fill: transaction.card.color,
-                        title: transaction.card.title,
-                        value:
-              transaction.amount < 0
-                  ? transaction.amount /
-                  currencyRates[date][transaction.card.currency]
-                  : 0,
-                    };
+        if (currencyRates[transaction.card.currency]) {
+            if (response[transaction.cardId]) {
+                if (transaction.amount < 0) {
+                    response[transaction.cardId].value +=
+            transaction.amount / currencyRates[transaction.card.currency];
                 }
+            } else {
+                response[transaction.cardId] = {
+                    fill: transaction.card.color,
+                    title: transaction.card.title,
+                    value:
+            transaction.amount < 0
+                ? transaction.amount / currencyRates[transaction.card.currency]
+                : 0,
+                };
             }
         }
     }
@@ -319,35 +357,28 @@ const getCategoriesStatistic = async (
         },
     });
 
-    const currencyRates = await currencyService.getCurrenciesRates({
-        end_date: endDate,
+    const currencyRates = await currencyService.getCurrentCurrenciesRates({
         base: user.currency,
-        start_date: startDate,
         symbols: Array.from(new Set(cardCurrencies)),
     });
 
     const response: Record<string, statisticsGroupedResponse> = {};
     for (const transaction of transactions) {
-        const date = format(transaction.date, "yyyy-MM-dd");
-        if (currencyRates[date]) {
-            if (currencyRates[date][transaction.card.currency]) {
-                if (response[transaction.categoryId]) {
-                    if (transaction.amount < 0) {
-                        response[date].value +=
-              transaction.amount /
-              currencyRates[date][transaction.card.currency];
-                    }
-                } else {
-                    response[transaction.categoryId] = {
-                        fill: transaction.category.color,
-                        title: transaction.category.title,
-                        value:
-              transaction.amount < 0
-                  ? transaction.amount /
-                  currencyRates[date][transaction.card.currency]
-                  : 0,
-                    };
+        if (currencyRates[transaction.card.currency]) {
+            if (response[transaction.categoryId]) {
+                if (transaction.amount < 0) {
+                    response[transaction.categoryId].value +=
+            transaction.amount / currencyRates[transaction.card.currency];
                 }
+            } else {
+                response[transaction.categoryId] = {
+                    fill: transaction.category.color,
+                    title: transaction.category.title,
+                    value:
+            transaction.amount < 0
+                ? transaction.amount / currencyRates[transaction.card.currency]
+                : 0,
+                };
             }
         }
     }
