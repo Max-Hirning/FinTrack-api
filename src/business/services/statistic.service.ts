@@ -134,6 +134,9 @@ const getStatistic = async (query: getStatisticsQueries, userId: string) => {
         cardIds,
         startDate,
         endDate,
+        goalIds,
+        loanIds,
+        budgetIds,
         frequency = "day",
     } = query;
 
@@ -160,6 +163,48 @@ const getStatistic = async (query: getStatisticsQueries, userId: string) => {
                     cardId: {
                         in: cardIds,
                     },
+                }
+                : {}),
+            ...(loanIds && loanIds.length > 0
+                ? {
+                    loanId: {
+                        in: loanIds,
+                    },
+                }
+                : {}),
+            ...(goalIds && goalIds.length > 0
+                ? {
+                    goalId: {
+                        in: goalIds,
+                    },
+                }
+                : {}),
+            ...(budgetIds && budgetIds.length > 0
+                ? {
+                    budgetId: {
+                        in: budgetIds,
+                    },
+                }
+                : {}),
+            ...(!(cardIds && loanIds && goalIds && budgetIds)
+                ? {
+                    OR: [
+                        {
+                            card: {
+                                userId,
+                            },
+                        },
+                        {
+                            loan: {
+                                userId,
+                            },
+                        },
+                        {
+                            goal: {
+                                userId,
+                            },
+                        },
+                    ],
                 }
                 : {}),
             ...(categoryUserId
