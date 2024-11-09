@@ -9,14 +9,14 @@ import {
 
 const find = async (query: Prisma.LoanWhereInput) => {
     try {
-        const user = await prisma.loan.findFirstOrThrow({
+        const loan = await prisma.loan.findFirstOrThrow({
             where: query,
             include: {
                 user: true,
             },
         });
 
-        return user;
+        return loan;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
     }

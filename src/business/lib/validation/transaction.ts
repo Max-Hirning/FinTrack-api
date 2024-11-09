@@ -6,7 +6,16 @@ import { goalResponseSchema } from "./wallet/goal";
 import { categoryResponseSchema } from "./category";
 
 export const getTransactionsQueriesSchema = z.object({
-    page: z.number().optional(),
+    page: z
+        .string()
+        .transform((val) => {
+            const parsedPage = Number(val);
+            if (isNaN(parsedPage)) {
+                throw new Error("Page must be a valid number");
+            }
+            return parsedPage;
+        })
+        .optional(),
     currencies: z
         .array(z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]))
         .optional(),
@@ -55,7 +64,7 @@ type updateTransactionBody = z.infer<typeof updateTransactionBodySchema>;
 
 export const transactionResponseSchema = z.object({
     id: z.string(),
-    date: z.date(),
+    date: z.string(),
     amount: z.number(),
     description: z.string(),
     goalAmount: z.number().nullable(),

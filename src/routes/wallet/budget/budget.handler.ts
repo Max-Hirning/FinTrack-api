@@ -1,6 +1,11 @@
+import { RedisKey } from "@/business/constants";
+import { deleteCache } from "@/business/lib/redis";
 import { budgetServcice } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { tryCatchApiMiddleware } from "@/business/lib/middleware";
+import {
+    redisGetSetCacheMiddleware,
+    tryCatchApiMiddleware,
+} from "@/business/lib/middleware";
 import {
     createBudgetBody,
     deleteBudgetParam,
@@ -15,12 +20,23 @@ const getBudget = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{
       Params: getBudgetParam;
     }>;
-        const response = await budgetServcice.find({ id: params.budgetId });
-        return {
-            ...response,
-            cards: response.cards.map((el) => el.id),
-            categories: response.categories.map((el) => el.id),
-        };
+        const { budgetId } = params;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.budget}_${budgetId}`,
+            async () => {
+                const response = await budgetServcice.find({ id: params.budgetId });
+                return {
+                    code: 200,
+                    data: {
+                        ...response,
+                        startDate: response.startDate.toISOString(),
+                        endDate: response.endDate.toISOString(),
+                        cards: response.cards.map((el) => el.id),
+                        categories: response.categories.map((el) => el.id),
+                    },
+                };
+            },
+        );
     });
 };
 const getBudgets = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -28,15 +44,37 @@ const getBudgets = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getBudgetsQueries;
     }>;
-        return budgetServcice.getBudgets(query);
+        const { page, userIds, budgetIds, currencies } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.budget}${(userIds || []).map((el) => `_${el}`)}${(budgetIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}_${page}`,
+            async () => {
+                const response = await budgetServcice.getBudgets(query);
+                return {
+                    code: 200,
+                    data: {
+                        ...response,
+                        data: response.data.map((el) => ({
+                            ...el,
+                            startDate: el.startDate.toISOString(),
+                            endDate: el.endDate.toISOString(),
+                        })),
+                    },
+                };
+            },
+        );
     });
 };
 const deleteBudget = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: deleteBudgetParam }>;
-        await budgetServcice.deleteBudget(params.budgetId);
+        const budget = await budgetServcice.deleteBudget(params.budgetId);
 
-        return "Budget was removed";
+        await deleteCache(`${RedisKey.budget}_${budget.userId}`);
+
+        return {
+            code: 200,
+            data: "Budget was removed",
+        };
     });
 };
 const updateBudget = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -45,9 +83,14 @@ const updateBudget = async (request: FastifyRequest, reply: FastifyReply) => {
       Params: updateBudgetParam;
       Body: updateBudgetBody;
     }>;
-        await budgetServcice.updateBudget(params.budgetId, body);
+        const budget = await budgetServcice.updateBudget(params.budgetId, body);
 
-        return "Budget info was updated";
+        await deleteCache(`${RedisKey.budget}_${budget.userId}`);
+
+        return {
+            code: 200,
+            data: "Budget info was updated",
+        };
     });
 };
 const createBudget = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -55,9 +98,14 @@ const createBudget = async (request: FastifyRequest, reply: FastifyReply) => {
         const { body } = request as FastifyRequest<{
       Body: createBudgetBody;
     }>;
-        await budgetServcice.createBudget(request.user.id, body);
+        const budget = await budgetServcice.createBudget(request.user.id, body);
 
-        return "Budget was created";
+        await deleteCache(`${RedisKey.budget}_${budget.userId}`);
+
+        return {
+            code: 201,
+            data: "Budget was created",
+        };
     });
 };
 

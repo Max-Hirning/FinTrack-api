@@ -23,7 +23,7 @@ import {
 } from "@/business/lib/validation";
 
 const signIn = async (payload: SignInBody) => {
-    const user = await userService.getUser({
+    const user = await userService.find({
         email: payload.email,
     });
 

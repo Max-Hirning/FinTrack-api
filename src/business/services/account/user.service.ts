@@ -11,17 +11,7 @@ import {
     NotFoundError,
 } from "@/business/lib/errors";
 
-const find = async (query: Prisma.UserWhereInput) => {
-    try {
-        const user = await prisma.user.findFirstOrThrow({
-            where: query,
-        });
-        return user;
-    } catch (error) {
-        throw new NotFoundError((error as Error).message);
-    }
-};
-const getUser = async (query: Prisma.UserWhereUniqueInput) => {
+const find = async (query: Prisma.UserWhereUniqueInput) => {
     try {
         const user = await prisma.user.findUniqueOrThrow({
             where: query,
@@ -133,7 +123,6 @@ const updateUserPassword = async (
 
 export const userService = {
     find,
-    getUser,
     updateUser,
     deleteUser,
     updateUserPassword,

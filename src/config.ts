@@ -5,6 +5,7 @@ type EnvironmentVariables = {
   PORT: number;
   EMAIL: string;
   API_URL: string;
+  REDIS_URL: string;
   EMAIL_PASS: string;
   RABBITMQ_URL: string;
   DOCS_PASSWORD: string;
@@ -19,6 +20,7 @@ const environmentVariables: EnvironmentVariables = {
     EMAIL: process.env.EMAIL || "",
     API_URL: process.env.API_URL || "",
     HOST: process.env.HOST || "0.0.0.0",
+    REDIS_URL: process.env.REDIS_URL || "",
     EMAIL_PASS: process.env.EMAIL_PASS || "",
     RABBITMQ_URL: process.env.RABBITMQ_URL || "",
     RABBITMQ_PORT: process.env.RABBITMQ_PORT || "",

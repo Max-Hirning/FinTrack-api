@@ -1,6 +1,11 @@
+import { RedisKey } from "@/business/constants";
 import { loanServcice } from "@/business/services";
+import { deleteCache } from "@/business/lib/redis";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { tryCatchApiMiddleware } from "@/business/lib/middleware";
+import {
+    redisGetSetCacheMiddleware,
+    tryCatchApiMiddleware,
+} from "@/business/lib/middleware";
 import {
     createLoanBody,
     deleteLoanParam,
@@ -15,7 +20,21 @@ const getLoan = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{
       Params: getLoanParam;
     }>;
-        return loanServcice.find({ id: params.loanId });
+        const { loanId } = params;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.loan}_${loanId}`,
+            async () => {
+                const response = await loanServcice.find({ id: params.loanId });
+                return {
+                    code: 200,
+                    data: {
+                        ...response,
+                        date: response.date.toISOString(),
+                        deadline: response.deadline.toISOString(),
+                    },
+                };
+            },
+        );
     });
 };
 const getLoans = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -23,15 +42,37 @@ const getLoans = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getLoansQueries;
     }>;
-        return loanServcice.getLoans(query);
+        const { page, loanIds, userIds, currencies } = query;
+        return redisGetSetCacheMiddleware(
+            `${RedisKey.loan}${(userIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}${(loanIds || []).map((el) => `_${el}`)}_${page}`,
+            async () => {
+                const response = await loanServcice.getLoans(query);
+                return {
+                    code: 200,
+                    data: {
+                        ...response,
+                        data: response.data.map((el) => ({
+                            ...el,
+                            date: el.date.toISOString(),
+                            deadline: el.deadline.toISOString(),
+                        })),
+                    },
+                };
+            },
+        );
     });
 };
 const deleteLoan = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: deleteLoanParam }>;
-        await loanServcice.deleteLoan(params.loanId);
+        const loan = await loanServcice.deleteLoan(params.loanId);
 
-        return "Loan was removed";
+        await deleteCache(`${RedisKey.loan}_${loan.userId}`);
+
+        return {
+            code: 200,
+            data: "Loan was removed",
+        };
     });
 };
 const updateLoan = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -40,9 +81,14 @@ const updateLoan = async (request: FastifyRequest, reply: FastifyReply) => {
       Params: updateLoanParam;
       Body: updateLoanBody;
     }>;
-        await loanServcice.updateLoan(params.loanId, body);
+        const loan = await loanServcice.updateLoan(params.loanId, body);
 
-        return "Loan info was updated";
+        await deleteCache(`${RedisKey.loan}_${loan.userId}`);
+
+        return {
+            code: 200,
+            data: "Loan info was updated",
+        };
     });
 };
 const createLoan = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -50,9 +96,14 @@ const createLoan = async (request: FastifyRequest, reply: FastifyReply) => {
         const { body } = request as FastifyRequest<{
       Body: createLoanBody;
     }>;
-        await loanServcice.createLoan(request.user.id, body);
+        const loan = await loanServcice.createLoan(request.user.id, body);
 
-        return "Loan was created";
+        await deleteCache(`${RedisKey.loan}_${loan.userId}`);
+
+        return {
+            code: 201,
+            data: "Loan was created",
+        };
     });
 };
 
