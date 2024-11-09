@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { imageResponseSchema } from "../image";
+import { fileResponseSchema } from "../file";
 import { Currencies, Roles } from "@prisma/client";
 
 export const getUserParamSchema = z.object({
@@ -78,7 +78,7 @@ export const userResponseSchema = z.object({
     budgetNotification: z.boolean(),
     role: z.enum(Object.values(Roles) as [Roles, ...Roles[]]),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
-    images: z.array(imageResponseSchema),
+    images: z.array(fileResponseSchema),
 });
 
 type userResponse = z.infer<typeof userResponseSchema>;

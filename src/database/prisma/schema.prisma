@@ -20,6 +20,11 @@ enum Periods {
   week
 }
 
+enum FileTypes {
+  pdf
+  png
+}
+
 enum Currencies {
   AUD
   CAD
@@ -58,7 +63,7 @@ model User {
   dateOfBirth        DateTime       @default(now()) @db.Date
   role               Roles          @default(guest)
   currency           Currencies     @default(USD)
-  images             Image[]
+  images             File[]
   otps               Otp[]
   refreshTokens      RefreshToken[]
   cards              Card[]
@@ -69,6 +74,17 @@ model User {
   notifiactions      Notification[]
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
+}
+
+model File {
+  id        String    @id @default(uuid())
+  url       String
+  type      FileTypes
+  fileId    String
+  userId    String
+  users     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Card {
@@ -117,16 +133,6 @@ model Loan {
   notifications Notification[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-}
-
-model Image {
-  id        String   @id @default(uuid())
-  url       String
-  fileId    String
-  userId    String
-  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Budget {

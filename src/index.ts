@@ -8,8 +8,10 @@ import fastifyAmqp from "fastify-amqp";
 import serveStatic from "serve-static";
 import fastifyCors from "@fastify/cors";
 import fastifyRedis from "@fastify/redis";
+import fastifyMultipart from "@fastify/multipart";
 import { configureRoutes } from "@/routes";
 import { IAccessToken } from "@/types/token";
+import { v2 as cloudinary } from "cloudinary";
 import { environmentVariables } from "@/config";
 import { prisma } from "@/database/prisma/prisma";
 import { budgetServcice } from "./business/services";
@@ -51,6 +53,11 @@ async function main() {
             setupImageConsumer(fastify.amqp.channel);
             setupNotificationConsumer(fastify.amqp.channel);
         });
+    cloudinary.config({
+        api_key: environmentVariables.CLOUDINARY_API_KEY,
+        cloud_name: environmentVariables.CLOUDINARY_CLOUD_NAME,
+        api_secret: environmentVariables.CLOUDINARY_API_SECRET,
+    });
     await fastify.register(middie);
     await fastify.register(fastifyJwt, {
         secret: environmentVariables.APPLICATION_SECRET,
@@ -61,6 +68,11 @@ async function main() {
     });
     await fastify.register(fastifyRedis, {
         url: environmentVariables.REDIS_URL,
+    });
+    await fastify.register(fastifyMultipart, {
+        limits: {
+            fileSize: 50000000, // 50 mb
+        },
     });
     await fastify.use(
         "/assets",

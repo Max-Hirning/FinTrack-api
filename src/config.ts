@@ -13,7 +13,10 @@ type EnvironmentVariables = {
   CURRENCY_API_KEY: string;
   ACCESS_TOKEN_EXP: string;
   REFRESH_TOKEN_EXP: string;
+  CLOUDINARY_API_KEY: string;
   APPLICATION_SECRET: string;
+  CLOUDINARY_CLOUD_NAME: string;
+  CLOUDINARY_API_SECRET: string;
   NODE_ENV: "development" | "production" | "test";
 };
 const environmentVariables: EnvironmentVariables = {
@@ -30,6 +33,9 @@ const environmentVariables: EnvironmentVariables = {
     DOCS_PASSWORD: process.env.DOCS_PASSWORD || "password",
     REFRESH_TOKEN_EXP: process.env.REFRESH_TOKEN_EXP || "",
     PORT: process.env.PORT ? Number(process.env.PORT) : 3001,
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || "",
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || "",
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || "",
     NODE_ENV: process.env.NODE_ENV as EnvironmentVariables["NODE_ENV"],
 };
 
