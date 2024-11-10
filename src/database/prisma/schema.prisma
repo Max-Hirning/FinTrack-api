@@ -175,11 +175,11 @@ model Notification {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   budgetId  String?
-  budget    Budget?  @relation(fields: [budgetId], references: [id])
+  budget    Budget?  @relation(fields: [budgetId], references: [id], onDelete: Cascade)
   loanId    String?
-  loan      Loan?    @relation(fields: [loanId], references: [id])
+  loan      Loan?    @relation(fields: [loanId], references: [id], onDelete: Cascade)
   goalId    String?
-  goal      Goal?    @relation(fields: [goalId], references: [id])
+  goal      Goal?    @relation(fields: [goalId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
