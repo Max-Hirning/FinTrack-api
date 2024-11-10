@@ -1,11 +1,7 @@
-import { RedisKey } from "@/business/constants";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { notificationService } from "@/business/services";
+import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import { getNotificationsQueires } from "@/business/lib/validation";
-import {
-    redisGetSetCacheMiddleware,
-    tryCatchApiMiddleware,
-} from "@/business/lib/middleware";
 
 const getNotifications = async (
     request: FastifyRequest,
@@ -16,16 +12,10 @@ const getNotifications = async (
       Querystring: getNotificationsQueires;
     }>;
         const userId = request.user.id;
-        const { page } = query;
-        return redisGetSetCacheMiddleware(
-            `${RedisKey.notification}_${userId}_${page}`,
-            async () => {
-                return {
-                    code: 200,
-                    data: await notificationService.getNotifications(userId, query.page),
-                };
-            },
-        );
+        return {
+            code: 200,
+            data: await notificationService.getNotifications(userId, query.page),
+        };
     });
 };
 

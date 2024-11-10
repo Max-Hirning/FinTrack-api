@@ -1,10 +1,11 @@
+import { deleteCache } from "../lib/redis";
 import { environmentVariables } from "@/config";
 import { prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import {
     createCategoryBody,
-    getCategoriesQueries,
     updateCategoryBody,
+    getCategoriesQueries,
 } from "../lib/validation";
 
 const find = async (categoryId: string) => {
@@ -63,6 +64,7 @@ const createCategory = async (payload: createCategoryBody, userId?: string) => {
     } catch (error) {
         throw new InternalServerError((error as Error).message);
     }
+    if (userId) await deleteCache(userId);
     return category;
 };
 const updateCategory = async (
@@ -85,6 +87,7 @@ const updateCategory = async (
     } catch (error) {
         throw new InternalServerError((error as Error).message);
     }
+    if (category.userId) await deleteCache(category.userId);
     return category;
 };
 const deleteCategory = async (categoryId: string) => {
@@ -98,6 +101,7 @@ const deleteCategory = async (categoryId: string) => {
     } catch (error) {
         throw new InternalServerError((error as Error).message);
     }
+    if (category.userId) await deleteCache(category.userId);
     return category;
 };
 

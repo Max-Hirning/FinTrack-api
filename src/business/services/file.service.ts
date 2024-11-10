@@ -1,6 +1,5 @@
 import { File } from "@prisma/client";
 import { FileTypes } from "@prisma/client";
-import { RedisKey } from "@/business/constants";
 import { prisma } from "@/database/prisma/prisma";
 import { deleteCache } from "@/business/lib/redis";
 import { InternalServerError } from "@/business/lib/errors";
@@ -61,7 +60,7 @@ const deleteProfileAvatar = async (userId: string) => {
         await deletFile(file);
     }
 
-    await deleteCache(RedisKey.user);
+    await deleteCache(userId);
 
     return "Profile avatar was deleted";
 };
@@ -89,6 +88,8 @@ const saveProfileAvatar = async (userId: string, fileBuffer?: Buffer) => {
             throw new InternalServerError((error as Error).message);
         }
     }
+
+    await deleteCache(userId);
 
     return "New profile avatar was saved";
 };

@@ -1,17 +1,18 @@
 import { Periods } from "@prisma/client";
+import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { getMonthRange, getWeekRange, getYearRange } from "@/business/lib/date";
 import {
     createBudgetBody,
-    getBudgetsQueries,
     updateBudgetBody,
+    getBudgetsQueries,
 } from "@/business/lib/validation";
 import {
-    BadRequestError,
-    ForbiddenError,
-    InternalServerError,
     NotFoundError,
+    ForbiddenError,
+    BadRequestError,
+    InternalServerError,
 } from "@/business/lib/errors";
 
 const find = async (query: Prisma.BudgetWhereInput) => {
@@ -120,6 +121,7 @@ const deleteBudget = async (budgetId: string) => {
                 id: budgetId,
             },
         });
+        await deleteCache(budget.userId);
         return budget;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -230,6 +232,8 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
             },
         });
 
+        await deleteCache(budget.userId);
+
         return budget;
     } catch (error) {
         throw new InternalServerError((error as Error).message);
@@ -291,6 +295,9 @@ const createBudget = async (userId: string, payload: createBudgetBody) => {
                 },
             },
         });
+
+        await deleteCache(budget.userId);
+
         return budget;
     } catch (error) {
         throw new InternalServerError((error as Error).message);
@@ -339,6 +346,7 @@ const updateBudgetsDateRange = async (period: Periods) => {
                 endDate,
             },
         });
+
         return budget;
     } catch (error) {
         throw new InternalServerError((error as Error).message);

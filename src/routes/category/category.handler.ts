@@ -4,10 +4,7 @@ import { deleteCache } from "@/business/lib/redis";
 import { categoryService } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ForbiddenError } from "@/business/lib/errors";
-import {
-    redisGetSetCacheMiddleware,
-    tryCatchApiMiddleware,
-} from "@/business/lib/middleware";
+import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     createCategoryBody,
     deleteCategoryParam,
@@ -23,8 +20,6 @@ const createCategory = async (request: FastifyRequest, reply: FastifyReply) => {
         const userId = user.role !== Roles.admin ? user.id : undefined;
         await categoryService.createCategory(body, userId);
 
-        await deleteCache(RedisKey.category);
-        await deleteCache(RedisKey.transaction);
         await deleteCache(`${RedisKey.statistic}_category`);
 
         return {
@@ -38,16 +33,10 @@ const getCategories = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getCategoriesQueries;
     }>;
-        const { type, userIds } = query;
-        return redisGetSetCacheMiddleware(
-            `${RedisKey.category}${(userIds || []).map((el) => `_${el}`)}_${type}`,
-            async () => {
-                return {
-                    code: 200,
-                    data: await categoryService.getCategories(query),
-                };
-            },
-        );
+        return {
+            code: 200,
+            data: await categoryService.getCategories(query),
+        };
     });
 };
 const updateCategory = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -64,8 +53,6 @@ const updateCategory = async (request: FastifyRequest, reply: FastifyReply) => {
             throw new ForbiddenError("You have no rights");
         await categoryService.updateCategory(params.categoryId, body);
 
-        await deleteCache(RedisKey.category);
-        await deleteCache(RedisKey.transaction);
         await deleteCache(`${RedisKey.statistic}_category`);
 
         return {
@@ -84,8 +71,6 @@ const deleteCategory = async (request: FastifyRequest, reply: FastifyReply) => {
             throw new ForbiddenError("You have no rights");
         await categoryService.deleteCategory(params.categoryId);
 
-        await deleteCache(RedisKey.category);
-        await deleteCache(RedisKey.transaction);
         await deleteCache(`${RedisKey.statistic}_category`);
 
         return {

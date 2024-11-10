@@ -1,11 +1,6 @@
-import { RedisKey } from "@/business/constants";
 import { loanServcice } from "@/business/services";
-import { deleteCache } from "@/business/lib/redis";
 import { FastifyReply, FastifyRequest } from "fastify";
-import {
-    redisGetSetCacheMiddleware,
-    tryCatchApiMiddleware,
-} from "@/business/lib/middleware";
+import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     createLoanBody,
     deleteLoanParam,
@@ -20,21 +15,15 @@ const getLoan = async (request: FastifyRequest, reply: FastifyReply) => {
         const { params } = request as FastifyRequest<{
       Params: getLoanParam;
     }>;
-        const { loanId } = params;
-        return redisGetSetCacheMiddleware(
-            `${RedisKey.loan}_${loanId}`,
-            async () => {
-                const response = await loanServcice.find({ id: params.loanId });
-                return {
-                    code: 200,
-                    data: {
-                        ...response,
-                        date: response.date.toISOString(),
-                        deadline: response.deadline.toISOString(),
-                    },
-                };
+        const response = await loanServcice.find({ id: params.loanId });
+        return {
+            code: 200,
+            data: {
+                ...response,
+                date: response.date.toISOString(),
+                deadline: response.deadline.toISOString(),
             },
-        );
+        };
     });
 };
 const getLoans = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -42,32 +31,24 @@ const getLoans = async (request: FastifyRequest, reply: FastifyReply) => {
         const { query } = request as FastifyRequest<{
       Querystring: getLoansQueries;
     }>;
-        const { page, loanIds, userIds, currencies } = query;
-        return redisGetSetCacheMiddleware(
-            `${RedisKey.loan}${(userIds || []).map((el) => `_${el}`)}${(currencies || []).map((el) => `_${el}`)}${(loanIds || []).map((el) => `_${el}`)}_${page}`,
-            async () => {
-                const response = await loanServcice.getLoans(query);
-                return {
-                    code: 200,
-                    data: {
-                        ...response,
-                        data: response.data.map((el) => ({
-                            ...el,
-                            date: el.date.toISOString(),
-                            deadline: el.deadline.toISOString(),
-                        })),
-                    },
-                };
+        const response = await loanServcice.getLoans(query);
+        return {
+            code: 200,
+            data: {
+                ...response,
+                data: response.data.map((el) => ({
+                    ...el,
+                    date: el.date.toISOString(),
+                    deadline: el.deadline.toISOString(),
+                })),
             },
-        );
+        };
     });
 };
 const deleteLoan = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: deleteLoanParam }>;
-        const loan = await loanServcice.deleteLoan(params.loanId);
-
-        await deleteCache(`${RedisKey.loan}_${loan.userId}`);
+        await loanServcice.deleteLoan(params.loanId);
 
         return {
             code: 200,
@@ -81,9 +62,7 @@ const updateLoan = async (request: FastifyRequest, reply: FastifyReply) => {
       Params: updateLoanParam;
       Body: updateLoanBody;
     }>;
-        const loan = await loanServcice.updateLoan(params.loanId, body);
-
-        await deleteCache(`${RedisKey.loan}_${loan.userId}`);
+        await loanServcice.updateLoan(params.loanId, body);
 
         return {
             code: 200,
@@ -96,9 +75,7 @@ const createLoan = async (request: FastifyRequest, reply: FastifyReply) => {
         const { body } = request as FastifyRequest<{
       Body: createLoanBody;
     }>;
-        const loan = await loanServcice.createLoan(request.user.id, body);
-
-        await deleteCache(`${RedisKey.loan}_${loan.userId}`);
+        await loanServcice.createLoan(request.user.id, body);
 
         return {
             code: 201,

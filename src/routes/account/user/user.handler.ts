@@ -4,10 +4,7 @@ import { userService } from "@/business/services";
 import { deleteCache } from "@/business/lib/redis";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { EmailType, RabbitMqQueues } from "@/types/rabbitmq";
-import {
-    redisGetSetCacheMiddleware,
-    tryCatchApiMiddleware,
-} from "@/business/lib/middleware";
+import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
     deleteUserParam,
     getUserParam,
@@ -21,19 +18,14 @@ const getUser = async (request: FastifyRequest, reply: FastifyReply) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: getUserParam }>;
         const { userId } = params;
-        return redisGetSetCacheMiddleware(
-            `${RedisKey.user}_${userId}`,
-            async () => {
-                const response = await userService.find({ id: userId });
-                return {
-                    code: 200,
-                    data: {
-                        ...response,
-                        dateOfBirth: response.dateOfBirth.toString(),
-                    },
-                };
+        const response = await userService.find({ id: userId });
+        return {
+            code: 200,
+            data: {
+                ...response,
+                dateOfBirth: response.dateOfBirth.toString(),
             },
-        );
+        };
     });
 };
 const deleteUser = async (
@@ -92,8 +84,6 @@ const updateUser = async (
         if (body.currency) {
             await deleteCache(RedisKey.statistic);
         }
-
-        await deleteCache(RedisKey.user);
 
         return {
             code: 200,
