@@ -61,28 +61,34 @@ const getAccountStatistic = async (param: accountStatisticParam) => {
     });
 
     response.loans = loans.reduce((res, el) => {
-        return (res += el.amount);
+        if (currencyRates[el.currency]) {
+            res += el.amount / currencyRates[el.currency];
+        }
+        return res;
     }, 0);
     response.budget = cards.reduce((res, el) => {
-        return (res += el.balance);
+        if (currencyRates[el.currency]) {
+            res += el.balance / currencyRates[el.currency];
+        }
+        return res;
     }, 0);
 
     for (const transaction of transactions) {
-        const date = format(transaction.date, "yyyy-MM-dd");
-        if (currencyRates[date]) {
-            if (currencyRates[transaction.card.currency]) {
-                if (transaction.amount > 0) {
-                    response.incomes +=
-            transaction.amount / currencyRates[transaction.card.currency];
-                } else {
-                    response.expenses +=
-            transaction.amount / currencyRates[transaction.card.currency];
-                }
+    // const date = format(transaction.date, "yyyy-MM-dd");
+    // if (currencyRates[date]) {
+        if (currencyRates[transaction.card.currency]) {
+            if (transaction.amount > 0) {
+                response.incomes +=
+          transaction.amount / currencyRates[transaction.card.currency];
+            } else {
+                response.expenses +=
+          transaction.amount / currencyRates[transaction.card.currency];
             }
         }
+    // }
     }
 
-    response.cashflow = response.incomes - response.expenses;
+    response.cashflow = Math.abs(response.incomes) - Math.abs(response.expenses);
 
     return {
         loans: Math.abs(response.loans),
