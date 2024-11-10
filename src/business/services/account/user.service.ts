@@ -1,5 +1,6 @@
 import { hashing } from "@/business/lib/hashing";
 import { tokenService } from "@/business/services";
+import { deleteCache } from "@/business/lib/redis";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import {
     updateUserBody,
@@ -50,6 +51,8 @@ const deleteUser = async (query: Prisma.UserWhereUniqueInput) => {
         console.log(error);
     }
 
+    await deleteCache(user.id);
+
     return user;
 };
 const updateUser = async (userId: string, payload: updateUserBody) => {
@@ -80,6 +83,8 @@ const updateUser = async (userId: string, payload: updateUserBody) => {
             userId: user.id,
         });
     }
+
+    await deleteCache(user.id);
 
     return user;
 };

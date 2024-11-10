@@ -1,3 +1,4 @@
+import { deleteCache } from "../lib/redis";
 import { goalServcice } from "./wallet/goal.service";
 import { loanServcice } from "./wallet/loan.service";
 import { currencyService } from "./currency.service";
@@ -148,6 +149,8 @@ const deleteTransaction = async (transactionId: string) => {
             console.log(error);
         }
     }
+
+    await deleteCache(transaction.card.userId);
 
     return transaction;
 };
@@ -412,6 +415,8 @@ const createTransaction = async (payload: createTransactionBody) => {
         }
     }
 
+    await deleteCache(transaction.card.userId);
+
     return transaction;
 };
 const updateTransaction = async (
@@ -438,6 +443,8 @@ const updateTransaction = async (
     } catch (error) {
         throw new InternalServerError((error as Error).message);
     }
+
+    await deleteCache(transaction.card.userId);
 
     return transaction;
 };

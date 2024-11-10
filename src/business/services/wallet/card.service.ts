@@ -1,3 +1,4 @@
+import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
@@ -112,6 +113,8 @@ const deleteCard = async (cardId: string) => {
             },
         });
 
+        await deleteCache(card.userId);
+
         return card;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -128,6 +131,8 @@ const updateCard = async (cardId: string, payload: updateCardBody) => {
                 color: payload.color,
             },
         });
+
+        await deleteCache(card.userId);
 
         return card;
     } catch (error) {
@@ -148,6 +153,8 @@ const createCard = async (userId: string, payload: createCardBody) => {
                 startBalance: +payload.startBalance.toFixed(2),
             },
         });
+
+        await deleteCache(card.userId);
 
         return card;
     } catch (error) {

@@ -1,4 +1,6 @@
 import { Periods } from "@prisma/client";
+import { RedisKey } from "@/business/constants";
+import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { getMonthRange, getWeekRange, getYearRange } from "@/business/lib/date";
@@ -121,6 +123,8 @@ const deleteBudget = async (budgetId: string) => {
             },
         });
 
+        await deleteCache(budget.userId);
+
         return budget;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
@@ -231,6 +235,8 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
             },
         });
 
+        await deleteCache(budget.userId);
+
         return budget;
     } catch (error) {
         throw new InternalServerError((error as Error).message);
@@ -293,6 +299,8 @@ const createBudget = async (userId: string, payload: createBudgetBody) => {
             },
         });
 
+        await deleteCache(budget.userId);
+
         return budget;
     } catch (error) {
         throw new InternalServerError((error as Error).message);
@@ -341,6 +349,8 @@ const updateBudgetsDateRange = async (period: Periods) => {
                 endDate,
             },
         });
+
+        await deleteCache(RedisKey.statistic);
 
         return budget;
     } catch (error) {
