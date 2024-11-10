@@ -1,6 +1,4 @@
 import { Roles } from "@prisma/client";
-import { RedisKey } from "@/business/constants";
-import { deleteCache } from "@/business/lib/redis";
 import { categoryService } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ForbiddenError } from "@/business/lib/errors";
@@ -19,8 +17,6 @@ const createCategory = async (request: FastifyRequest, reply: FastifyReply) => {
     }>;
         const userId = user.role !== Roles.admin ? user.id : undefined;
         await categoryService.createCategory(body, userId);
-
-        await deleteCache(`${RedisKey.statistic}_category`);
 
         return {
             code: 201,
@@ -53,8 +49,6 @@ const updateCategory = async (request: FastifyRequest, reply: FastifyReply) => {
             throw new ForbiddenError("You have no rights");
         await categoryService.updateCategory(params.categoryId, body);
 
-        await deleteCache(`${RedisKey.statistic}_category`);
-
         return {
             code: 200,
             data: "Category was updated",
@@ -70,8 +64,6 @@ const deleteCategory = async (request: FastifyRequest, reply: FastifyReply) => {
         if (category?.userId !== request.user.id)
             throw new ForbiddenError("You have no rights");
         await categoryService.deleteCategory(params.categoryId);
-
-        await deleteCache(`${RedisKey.statistic}_category`);
 
         return {
             code: 200,

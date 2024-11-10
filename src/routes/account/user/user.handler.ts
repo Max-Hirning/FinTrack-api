@@ -1,7 +1,5 @@
 import fastifyAmqp from "fastify-amqp";
-import { RedisKey } from "@/business/constants";
 import { userService } from "@/business/services";
-import { deleteCache } from "@/business/lib/redis";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { EmailType, RabbitMqQueues } from "@/types/rabbitmq";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
@@ -48,8 +46,6 @@ const deleteUser = async (
         channel.assertQueue(RabbitMqQueues.email, { durable: false });
         channel.sendToQueue(RabbitMqQueues.email, Buffer.from(msg));
 
-        await deleteCache(params.userId);
-
         return {
             code: 200,
             data: "Account was removed",
@@ -79,10 +75,6 @@ const updateUser = async (
             });
             channel.assertQueue(RabbitMqQueues.email, { durable: false });
             channel.sendToQueue(RabbitMqQueues.email, Buffer.from(msg));
-        }
-
-        if (body.currency) {
-            await deleteCache(RedisKey.statistic);
         }
 
         return {

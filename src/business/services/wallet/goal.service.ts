@@ -1,4 +1,3 @@
-import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
@@ -131,8 +130,6 @@ const deleteGoal = async (goalId: string) => {
         console.log(error);
     }
 
-    await deleteCache(goal.userId);
-
     return goal;
 };
 const updateGoal = async (goalId: string, payload: updateGoalBody) => {
@@ -148,8 +145,6 @@ const updateGoal = async (goalId: string, payload: updateGoalBody) => {
                 deadline: payload.deadline ? new Date(payload.deadline) : undefined,
             },
         });
-
-        await deleteCache(goal.userId);
 
         return goal;
     } catch (error) {
@@ -171,8 +166,6 @@ const createGoal = async (userId: string, payload: createGoalBody) => {
                 description: payload.description || "",
             },
         });
-
-        await deleteCache(goal.userId);
 
         return goal;
     } catch (error) {

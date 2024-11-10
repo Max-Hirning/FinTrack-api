@@ -1,4 +1,3 @@
-import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
@@ -132,8 +131,6 @@ const deleteLoan = async (loanId: string) => {
         console.log(error);
     }
 
-    await deleteCache(loan.userId);
-
     return loan;
 };
 const updateLoan = async (loanId: string, payload: updateLoanBody) => {
@@ -150,8 +147,6 @@ const updateLoan = async (loanId: string, payload: updateLoanBody) => {
                 deadline: payload.deadline ? new Date(payload.deadline) : undefined,
             },
         });
-
-        await deleteCache(loan.userId);
 
         return loan;
     } catch (error) {
@@ -173,8 +168,6 @@ const createLoan = async (userId: string, payload: createLoanBody) => {
                 description: payload.description || "",
             },
         });
-
-        await deleteCache(loan.userId);
 
         return loan;
     } catch (error) {

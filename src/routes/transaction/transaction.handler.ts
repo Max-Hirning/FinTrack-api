@@ -1,6 +1,4 @@
-import { RedisKey } from "@/business/constants";
 import { environmentVariables } from "@/config";
-import { deleteCache } from "@/business/lib/redis";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { transactionServcice } from "@/business/services";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
@@ -69,8 +67,6 @@ const deleteTransaction = async (
     }>;
         await transactionServcice.deleteTransaction(params.transactionId);
 
-        await deleteCache(RedisKey.statistic);
-
         return {
             code: 200,
             data: "Transaction was removed",
@@ -88,8 +84,6 @@ const updateTransaction = async (
     }>;
         await transactionServcice.updateTransaction(params.transactionId, body);
 
-        await deleteCache(RedisKey.statistic);
-
         return {
             code: 200,
             data: "Transaction info was updated",
@@ -105,8 +99,6 @@ const createTransaction = async (
       Body: createTransactionBody;
     }>;
         await transactionServcice.createTransaction(body);
-
-        await deleteCache(RedisKey.statistic);
 
         return {
             code: 201,
