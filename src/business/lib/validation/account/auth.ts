@@ -38,13 +38,8 @@ export const signInResponseSchema = z.object({
     refreshToken: z.string(),
     user: userResponseSchema,
 });
-export const refreshTokensResponseSchema = z.object({
-    accessToken: z.string(),
-    refreshToken: z.string(),
-});
 
 type signInResponse = z.infer<typeof signInResponseSchema>;
-type refreshTokensResponse = z.infer<typeof refreshTokensResponseSchema>;
 
 export type {
     SignInBody,
@@ -54,5 +49,4 @@ export type {
     ResetPasswordBody,
     RefreshTokensBody,
     signInResponse,
-    refreshTokensResponse,
 };

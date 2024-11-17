@@ -110,9 +110,16 @@ const refreshTokens = async (payload: RefreshTokensBody) => {
         throw new UnauthorizedError(true);
     }
 
+    const user = await userService.find({
+        id: refreshToken.userId,
+    });
+
     const tokens = await tokenService.createTokens(refreshToken.userId);
 
-    return tokens;
+    return {
+        ...tokens,
+        user,
+    };
 };
 const resetPassword = async (payload: ResetPasswordBody) => {
     const { id } = await userService.find({ email: payload.email });

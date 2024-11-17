@@ -347,7 +347,7 @@ const createTransaction = async (payload: createTransactionBody) => {
 
     if (payload.goalId) {
         try {
-            let goalAmount = transaction.amount;
+            let goalAmount = Math.abs(transaction.amount);
             const goal = await goalServcice.find({ id: payload.goalId });
             if (goal.currency !== transaction.card.currency) {
                 const currencyRate = await currencyService.getCurrentCurrenciesRates({
@@ -382,7 +382,7 @@ const createTransaction = async (payload: createTransactionBody) => {
 
     if (payload.loanId) {
         try {
-            let loanAmount = transaction.amount;
+            let loanAmount = Math.abs(transaction.amount);
             const loan = await loanServcice.find({ id: payload.loanId });
             if (loan.currency !== transaction.card.currency) {
                 const currencyRate = await currencyService.getCurrentCurrenciesRates({

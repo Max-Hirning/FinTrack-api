@@ -8,7 +8,6 @@ import {
     signInResponseSchema,
     refreshTokensBodySchema,
     resetPasswordBodySchema,
-    refreshTokensResponseSchema,
     ResetPasswordBody,
 } from "@/business/lib/validation";
 
@@ -83,7 +82,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
         {
             schema: {
                 response: {
-                    200: refreshTokensResponseSchema,
+                    200: signInResponseSchema,
                 },
                 tags: ["auth"],
                 body: refreshTokensBodySchema,

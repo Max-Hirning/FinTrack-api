@@ -74,8 +74,18 @@ const checkOtp = async (
 
     return "Otp is verified";
 };
+const deleteOtps = async (query: Prisma.OtpWhereInput) => {
+    try {
+        await prisma.otp.deleteMany({
+            where: query,
+        });
+    } catch (error) {
+        throw new InternalServerError((error as Error).message);
+    }
+};
 
 export const otpService = {
     checkOtp,
     createOtp,
+    deleteOtps,
 };

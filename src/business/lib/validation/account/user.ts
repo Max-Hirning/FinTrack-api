@@ -53,24 +53,36 @@ export const userResponseSchema = z.object({
         z.object({
             id: z.string(),
             title: z.string(),
+            currency: z.enum(
+        Object.values(Currencies) as [Currencies, ...Currencies[]],
+            ),
         }),
     ),
     loans: z.array(
         z.object({
             id: z.string(),
             title: z.string(),
+            currency: z.enum(
+        Object.values(Currencies) as [Currencies, ...Currencies[]],
+            ),
         }),
     ),
     goals: z.array(
         z.object({
             id: z.string(),
             title: z.string(),
+            currency: z.enum(
+        Object.values(Currencies) as [Currencies, ...Currencies[]],
+            ),
         }),
     ),
     budgets: z.array(
         z.object({
             id: z.string(),
             title: z.string(),
+            currency: z.enum(
+        Object.values(Currencies) as [Currencies, ...Currencies[]],
+            ),
         }),
     ),
     goalNotification: z.boolean(),

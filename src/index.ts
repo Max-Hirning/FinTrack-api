@@ -13,12 +13,13 @@ import { configureRoutes } from "@/routes";
 import { IAccessToken } from "@/types/token";
 import { v2 as cloudinary } from "cloudinary";
 import { environmentVariables } from "@/config";
+import { subHours, subMinutes } from "date-fns";
 import { prisma } from "@/database/prisma/prisma";
-import { budgetServcice } from "./business/services";
 import { Periods, Roles, User } from "@prisma/client";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ForbiddenError } from "@/business/lib/errors";
 import { configureSwagger, fastify } from "@/bootstrap/swagger";
+import { budgetServcice, otpService, tokenService } from "./business/services";
 import { notificationService } from "./business/services/inform/notification.service";
 import {
     setupEmailConsumer,
@@ -135,6 +136,20 @@ async function main() {
         const address = await fastify.listen({
             port: environmentVariables.PORT,
             host: environmentVariables.HOST,
+        });
+
+        cron.schedule("* * * * *", async () => {
+            // Schedule a task to run every minute
+            tokenService.deleteTokens({
+                createdAt: {
+                    lt: subHours(new Date(), 1),
+                },
+            });
+            otpService.deleteOtps({
+                createdAt: {
+                    lt: subMinutes(new Date(), 5),
+                },
+            });
         });
 
         cron.schedule("0 0 * * *", async () => {
