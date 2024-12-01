@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { Currencies } from "@prisma/client";
 import { userResponseSchema } from "../account/user";
+import { Currencies, Statuses } from "@prisma/client";
 
 export const getLoansQueriesSchema = z
     .object({
@@ -61,12 +61,13 @@ type updateLoanBody = z.infer<typeof updateLoanBodySchema>;
 
 export const loanResponseSchema = z.object({
     id: z.string(),
-    date: z.string().datetime(),
     title: z.string(),
     amount: z.number(),
     balance: z.number(),
-    deadline: z.string().datetime(),
     description: z.string(),
+    date: z.string().datetime(),
+    deadline: z.string().datetime(),
+    status: z.enum(Object.values(Statuses) as [Statuses, ...Statuses[]]),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),
     user: userResponseSchema.pick({
         id: true,

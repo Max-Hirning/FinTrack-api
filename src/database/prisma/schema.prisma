@@ -20,10 +20,16 @@ enum Periods {
   week
 }
 
+enum Statuses {
+  open
+  closed
+}
+
 enum FileTypes {
   pdf
   png
 }
+
 
 enum Currencies {
   AUD
@@ -109,6 +115,7 @@ model Goal {
   balance       Float          @default(0)
   currency      Currencies
   deadline      DateTime
+  status        Statuses       @default(open)
   description   String
   userId        String
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -125,6 +132,7 @@ model Loan {
   balance       Float          @default(0)
   deadline      DateTime
   currency      Currencies
+  status        Statuses       @default(open)
   date          DateTime
   description   String
   userId        String

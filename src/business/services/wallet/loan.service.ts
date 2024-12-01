@@ -108,31 +108,32 @@ const getLoans = async (query: getLoansQueries) => {
 };
 const deleteLoan = async (loanId: string) => {
     let loan;
-    try {
-        loan = await prisma.loan.delete({
-            where: {
-                id: loanId,
-            },
-        });
-    } catch (error) {
-        throw new NotFoundError((error as Error).message);
-    }
+    console.log(loanId);
+    // try {
+    //     loan = await prisma.loan.delete({
+    //         where: {
+    //             id: loanId,
+    //         },
+    //     });
+    // } catch (error) {
+    //     throw new NotFoundError((error as Error).message);
+    // }
 
-    try {
-        await prisma.transaction.updateMany({
-            where: {
-                loanId: loan.id,
-            },
-            data: {
-                loanId: null,
-                loanAmount: null,
-            },
-        });
-    } catch (error) {
-        console.log(error);
-    }
+    // try {
+    //     await prisma.transaction.updateMany({
+    //         where: {
+    //             loanId: loan.id,
+    //         },
+    //         data: {
+    //             loanId: null,
+    //             loanAmount: null,
+    //         },
+    //     });
+    // } catch (error) {
+    //     console.log(error);
+    // }
 
-    await deleteCache(loan.userId);
+    // await deleteCache(loan.userId);
 
     return loan;
 };
