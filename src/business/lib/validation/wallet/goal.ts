@@ -60,10 +60,11 @@ type updateGoalBody = z.infer<typeof updateGoalBodySchema>;
 
 export const goalResponseSchema = z.object({
     id: z.string(),
+    date: z.date(),
     title: z.string(),
     amount: z.number(),
+    deadline: z.date(),
     balance: z.number(),
-    deadline: z.string().datetime(),
     description: z.string().optional(),
     status: z.enum(Object.values(Statuses) as [Statuses, ...Statuses[]]),
     currency: z.enum(Object.values(Currencies) as [Currencies, ...Currencies[]]),

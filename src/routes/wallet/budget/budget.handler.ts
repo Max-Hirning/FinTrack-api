@@ -20,8 +20,6 @@ const getBudget = async (request: FastifyRequest, reply: FastifyReply) => {
             code: 200,
             data: {
                 ...response,
-                startDate: response.startDate.toISOString(),
-                endDate: response.endDate.toISOString(),
                 cards: response.cards.map((el) => el.id),
                 categories: response.categories.map((el) => el.id),
             },
@@ -36,14 +34,7 @@ const getBudgets = async (request: FastifyRequest, reply: FastifyReply) => {
         const response = await budgetServcice.getBudgets(query);
         return {
             code: 200,
-            data: {
-                ...response,
-                data: response.data.map((el) => ({
-                    ...el,
-                    startDate: el.startDate.toISOString(),
-                    endDate: el.endDate.toISOString(),
-                })),
-            },
+            data: response,
         };
     });
 };

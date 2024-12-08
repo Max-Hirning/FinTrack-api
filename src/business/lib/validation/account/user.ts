@@ -48,7 +48,7 @@ export const userResponseSchema = z.object({
     email: z.string(),
     lastName: z.string(),
     firstName: z.string(),
-    dateOfBirth: z.string().datetime(),
+    dateOfBirth: z.date(),
     cards: z.array(
         z.object({
             id: z.string(),

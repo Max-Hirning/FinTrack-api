@@ -19,10 +19,7 @@ const getUser = async (request: FastifyRequest, reply: FastifyReply) => {
         const response = await userService.find({ id: userId });
         return {
             code: 200,
-            data: {
-                ...response,
-                dateOfBirth: response.dateOfBirth.toString(),
-            },
+            data: response,
         };
     });
 };

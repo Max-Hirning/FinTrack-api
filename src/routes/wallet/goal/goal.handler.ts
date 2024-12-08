@@ -18,7 +18,7 @@ const getGoal = async (request: FastifyRequest, reply: FastifyReply) => {
             code: 200,
             data: {
                 ...response,
-                deadline: response.deadline.toISOString(),
+                date: response.createdAt
             },
         };
     });
@@ -35,8 +35,8 @@ const getGoals = async (request: FastifyRequest, reply: FastifyReply) => {
                 ...response,
                 data: response.data.map((el) => ({
                     ...el,
-                    deadline: el.deadline.toISOString(),
-                })),
+                    date: el.createdAt,
+                }))
             },
         };
     });

@@ -23,7 +23,6 @@ const getTransaction = async (request: FastifyRequest, reply: FastifyReply) => {
             code: 200,
             data: {
                 ...response,
-                date: response.date.toISOString(),
                 category: {
                     ...response.category,
                     image: `${environmentVariables.API_URL}/assets/category/${response.category.image}.svg`,
@@ -47,7 +46,6 @@ const getTransactions = async (
                 ...response,
                 data: response.data.map((el) => ({
                     ...el,
-                    date: el.date.toISOString(),
                     category: {
                         ...el.category,
                         image: `${environmentVariables.API_URL}/assets/category/${el.category.image}.svg`,
