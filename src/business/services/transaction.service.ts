@@ -1,7 +1,9 @@
+import { Statuses } from "@prisma/client";
 import { deleteCache } from "../lib/redis";
 import { goalServcice } from "./wallet/goal.service";
 import { loanServcice } from "./wallet/loan.service";
 import { currencyService } from "./currency.service";
+import { cardServcice } from "./wallet/card.service";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import {
@@ -29,14 +31,14 @@ const deleteTransaction = async (transactionId: string) => {
     }
 
     try {
+        const card = await cardServcice.find({id: transaction.cardId});
+        const updatedCardBalance = +(card.balance + (-1 * transaction.amount)).toFixed(2);
         await prisma.card.update({
             where: {
                 id: transaction.cardId,
             },
             data: {
-                balance: {
-                    increment: -1 * transaction.amount,
-                },
+                balance: updatedCardBalance,
             },
         });
     } catch (error) {
@@ -77,15 +79,14 @@ const deleteTransaction = async (transactionId: string) => {
           transaction.amount *
           (currenciesRates[transaction.card.currency] || 1);
             }
+            const updatedBudgetBalance = +(budget.amount + (-1 * tarnsactionAmount)).toFixed(2);
             try {
                 await prisma.budget.update({
                     where: {
                         id: budget.id,
                     },
                     data: {
-                        amount: {
-                            increment: -1 * tarnsactionAmount,
-                        },
+                        amount: updatedBudgetBalance,
                     },
                 });
             } catch (error) {
@@ -108,14 +109,16 @@ const deleteTransaction = async (transactionId: string) => {
                 goalAmount =
           goalAmount * (currencyRate[transaction.card.currency] || 1);
             }
+            const updatedGoalBalance = +(goal.balance + (-1 * goalAmount)).toFixed(2);
             await prisma.goal.update({
                 where: {
                     id: transaction.goalId,
                 },
                 data: {
-                    balance: {
-                        increment: -1 * goalAmount,
-                    },
+                    ...(updatedGoalBalance >= goalAmount ? {
+                        status: Statuses.closed
+                    } : {}),
+                    balance: updatedGoalBalance,
                 },
             });
         } catch (error) {
@@ -135,14 +138,16 @@ const deleteTransaction = async (transactionId: string) => {
                 loanAmount =
           loanAmount * (currencyRate[transaction.card.currency] || 1);
             }
+            const updatedLoanBalance = +(loan.balance + (-1 * loanAmount)).toFixed(2);
             await prisma.loan.update({
                 where: {
                     id: transaction.loanId,
                 },
                 data: {
-                    balance: {
-                        increment: -1 * loanAmount,
-                    },
+                    ...(updatedLoanBalance >= loanAmount ? {
+                        status: Statuses.closed
+                    } : {}),
+                    balance: updatedLoanBalance,
                 },
             });
         } catch (error) {
@@ -278,14 +283,13 @@ const createTransaction = async (payload: createTransactionBody) => {
     }
 
     try {
+        const card = await cardServcice.find({ id: payload.cardId });
         await prisma.card.update({
             where: {
                 id: payload.cardId,
             },
             data: {
-                balance: {
-                    increment: payload.amount,
-                },
+                balance: +(card.balance + payload.amount).toFixed(2)
             },
         });
     } catch (error) {
@@ -332,9 +336,7 @@ const createTransaction = async (payload: createTransactionBody) => {
                         id: budget.id,
                     },
                     data: {
-                        amount: {
-                            increment: tarnsactionAmount,
-                        },
+                        amount: +(budget.amount + tarnsactionAmount).toFixed(2)
                     },
                 });
             } catch (error) {
@@ -357,6 +359,7 @@ const createTransaction = async (payload: createTransactionBody) => {
                 goalAmount =
           goalAmount * (currencyRate[transaction.card.currency] || 1);
             }
+            const updatedGoalBalance = +(goal.balance + goalAmount).toFixed(2);
             await prisma.transaction.update({
                 where: {
                     id: transaction.id,
@@ -370,9 +373,10 @@ const createTransaction = async (payload: createTransactionBody) => {
                     id: payload.goalId,
                 },
                 data: {
-                    balance: {
-                        increment: goalAmount,
-                    },
+                    ...(updatedGoalBalance >= goalAmount ? {
+                        status: Statuses.closed
+                    } : {}),
+                    balance: updatedGoalBalance,
                 },
             });
         } catch (error) {
@@ -392,6 +396,7 @@ const createTransaction = async (payload: createTransactionBody) => {
                 loanAmount =
           loanAmount * (currencyRate[transaction.card.currency] || 1);
             }
+            const updatedLoanBalance = +(loan.balance + loanAmount).toFixed(2);
             await prisma.transaction.update({
                 where: {
                     id: transaction.id,
@@ -405,9 +410,10 @@ const createTransaction = async (payload: createTransactionBody) => {
                     id: payload.loanId,
                 },
                 data: {
-                    balance: {
-                        increment: loanAmount,
-                    },
+                    ...(updatedLoanBalance >= loanAmount ? {
+                        status: Statuses.closed
+                    } : {}),
+                    balance: updatedLoanBalance,
                 },
             });
         } catch (error) {

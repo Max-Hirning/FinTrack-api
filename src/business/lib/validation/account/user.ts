@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { fileResponseSchema } from "../file";
-import { Currencies, Roles } from "@prisma/client";
+import { Currencies, Roles, Statuses } from "@prisma/client";
 
 export const getUserParamSchema = z.object({
     userId: z.string(),
@@ -48,7 +48,7 @@ export const userResponseSchema = z.object({
     email: z.string(),
     lastName: z.string(),
     firstName: z.string(),
-    dateOfBirth: z.string().datetime(),
+    dateOfBirth: z.date(),
     cards: z.array(
         z.object({
             id: z.string(),
@@ -71,6 +71,9 @@ export const userResponseSchema = z.object({
         z.object({
             id: z.string(),
             title: z.string(),
+            status: z.enum(
+                Object.values(Statuses) as [Statuses, ...Statuses[]],
+            ),
             currency: z.enum(
         Object.values(Currencies) as [Currencies, ...Currencies[]],
             ),
@@ -80,6 +83,9 @@ export const userResponseSchema = z.object({
         z.object({
             id: z.string(),
             title: z.string(),
+            status: z.enum(
+                Object.values(Statuses) as [Statuses, ...Statuses[]],
+            ),
             currency: z.enum(
         Object.values(Currencies) as [Currencies, ...Currencies[]],
             ),

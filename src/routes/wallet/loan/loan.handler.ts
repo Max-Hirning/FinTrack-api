@@ -18,11 +18,7 @@ const getLoan = async (request: FastifyRequest, reply: FastifyReply) => {
         const response = await loanServcice.find({ id: params.loanId });
         return {
             code: 200,
-            data: {
-                ...response,
-                date: response.date.toISOString(),
-                deadline: response.deadline.toISOString(),
-            },
+            data: response,
         };
     });
 };
@@ -34,14 +30,7 @@ const getLoans = async (request: FastifyRequest, reply: FastifyReply) => {
         const response = await loanServcice.getLoans(query);
         return {
             code: 200,
-            data: {
-                ...response,
-                data: response.data.map((el) => ({
-                    ...el,
-                    date: el.date.toISOString(),
-                    deadline: el.deadline.toISOString(),
-                })),
-            },
+            data: response,
         };
     });
 };

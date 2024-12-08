@@ -64,7 +64,7 @@ type updateTransactionBody = z.infer<typeof updateTransactionBodySchema>;
 
 export const transactionResponseSchema = z.object({
     id: z.string(),
-    date: z.string(),
+    date: z.date(),
     amount: z.number(),
     description: z.string(),
     goalAmount: z.number().nullable(),

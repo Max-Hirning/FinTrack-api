@@ -24,10 +24,7 @@ const find = async (query: Prisma.UserWhereUniqueInput) => {
                 goals: true,
             },
         });
-        return {
-            ...user,
-            dateOfBirth: user.dateOfBirth.toISOString(),
-        };
+        return user;
     } catch (error) {
         throw new NotFoundError((error as Error).message);
     }
