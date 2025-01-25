@@ -30,7 +30,7 @@ const deleteUser = async (
 ) => {
     return tryCatchApiMiddleware(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: deleteUserParam }>;
-        const user = await userService.deleteUser({ id: params.userId });
+        const user = await userService.deleteUser(params.userId);
 
         const msg = JSON.stringify({
             user: {

@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { fastify } from "@/bootstrap/swagger";
 import { environmentVariables } from "@/config";
 import { userService } from "@/business/services";
+import { refreshTokenRepository } from "@/database";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError } from "@/business/lib/errors";
 
@@ -21,7 +22,7 @@ const createTokens = async (userId: string) => {
     );
 
     try {
-        await prisma.refreshToken.create({
+        await refreshTokenRepository.create({
             data: {
                 uuid,
                 userId,

@@ -1,7 +1,7 @@
 import { fastify } from "@/bootstrap/swagger";
 import { IRefreshToken } from "@/types/token";
 import { hashing } from "@/business/lib/hashing";
-import { prisma } from "@/database/prisma/prisma";
+import { refreshTokenRepository, userRepository } from "@/database";
 import {
     otpService,
     tokenService,
@@ -43,7 +43,7 @@ const signIn = async (payload: SignInBody) => {
     };
 };
 const signUp = async (payload: SignUpBody) => {
-    const user = await prisma.user.findUnique({
+    const user = await userRepository.findUnique({
         where: {
             email: payload.email,
         },
@@ -54,7 +54,7 @@ const signUp = async (payload: SignUpBody) => {
     const cryptedPass = hashing.hashPassword(payload.password);
 
     try {
-        await prisma.user.create({
+        await userRepository.create({
             data: {
                 email: payload.email,
                 password: cryptedPass,
@@ -68,7 +68,7 @@ const signUp = async (payload: SignUpBody) => {
     }
 };
 const preSignUp = async (payload: SignUpBody) => {
-    const user = await prisma.user.findUnique({
+    const user = await userRepository.findUnique({
         where: {
             email: payload.email,
         },
@@ -99,16 +99,13 @@ const refreshTokens = async (payload: RefreshTokensBody) => {
 
     if (!refreshToken) throw new UnauthorizedError(true);
 
-    try {
-        await prisma.refreshToken.findFirstOrThrow({
-            where: {
-                uuid: refreshToken.uuid,
-                userId: refreshToken.userId,
-            },
-        });
-    } catch {
-        throw new UnauthorizedError(true);
-    }
+    const foundRefreshToken = await refreshTokenRepository.findFirst({
+        where: {
+            uuid: refreshToken.uuid,
+            userId: refreshToken.userId,
+        },
+    });
+    if (!foundRefreshToken) throw new UnauthorizedError(true);
 
     const user = await userService.find({
         id: refreshToken.userId,

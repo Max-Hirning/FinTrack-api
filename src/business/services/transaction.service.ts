@@ -1,11 +1,9 @@
 import { Statuses } from "@prisma/client";
 import { deleteCache } from "../lib/redis";
-import { goalServcice } from "./wallet/goal.service";
-import { loanServcice } from "./wallet/loan.service";
 import { currencyService } from "./currency.service";
-import { cardServcice } from "./wallet/card.service";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
+import { defaultTransactionSelect, transactionRepository } from "@/database";
 import {
     createTransactionBody,
     getTransactionsQueries,
@@ -13,57 +11,38 @@ import {
 } from "@/business/lib/validation";
 
 const deleteTransaction = async (transactionId: string) => {
-    let transaction;
-
-    try {
-        transaction = await prisma.transaction.delete({
+    return await prisma.$transaction(async (prisma) => {
+    // Step 1: Delete the Transaction
+        const transaction = await prisma.transaction.delete({
             where: {
                 id: transactionId,
             },
-            include: {
+            select: {
+                ...defaultTransactionSelect,
                 card: true,
                 loan: true,
                 goal: true,
             },
         });
-    } catch (error) {
-        throw new NotFoundError((error as Error).message);
-    }
 
-    try {
-        const card = await cardServcice.find({id: transaction.cardId});
-        const updatedCardBalance = +(card.balance + (-1 * transaction.amount)).toFixed(2);
         await prisma.card.update({
             where: {
                 id: transaction.cardId,
             },
             data: {
-                balance: updatedCardBalance,
+                balance: {
+                    increment: -1 * transaction.amount,
+                },
             },
         });
-    } catch (error) {
-        throw new NotFoundError((error as Error).message);
-    }
 
-    try {
+        // Step 3: Update Budgets
         const budgets = await prisma.budget.findMany({
             where: {
-                startDate: {
-                    lte: transaction.date,
-                },
-                endDate: {
-                    gt: transaction.date,
-                },
-                categories: {
-                    some: {
-                        id: transaction.categoryId,
-                    },
-                },
-                cards: {
-                    some: {
-                        id: transaction.cardId,
-                    },
-                },
+                startDate: { lte: transaction.date },
+                endDate: { gt: transaction.date },
+                categories: { some: { id: transaction.categoryId } },
+                cards: { some: { id: transaction.cardId } },
             },
         });
 
@@ -73,34 +52,30 @@ const deleteTransaction = async (transactionId: string) => {
         });
 
         for (const budget of budgets) {
-            let tarnsactionAmount = transaction.amount;
+            let transactionAmount = transaction.amount;
             if (budget.currency !== transaction.card.currency) {
-                tarnsactionAmount =
+                transactionAmount =
           transaction.amount *
           (currenciesRates[transaction.card.currency] || 1);
             }
-            const updatedBudgetBalance = +(budget.amount + (-1 * tarnsactionAmount)).toFixed(2);
-            try {
-                await prisma.budget.update({
-                    where: {
-                        id: budget.id,
-                    },
-                    data: {
-                        amount: updatedBudgetBalance,
-                    },
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        }
-    } catch (error) {
-        console.log(error);
-    }
 
-    if (transaction.goalId) {
-        try {
+            const updatedBudgetBalance = +(budget.amount - transactionAmount).toFixed(
+                2,
+            );
+
+            await prisma.budget.update({
+                where: { id: budget.id },
+                data: { amount: updatedBudgetBalance },
+            });
+        }
+
+        // Step 4: Update Goal (if applicable)
+        if (transaction.goalId) {
+            const goal = await prisma.goal.findUniqueOrThrow({
+                where: { id: transaction.goalId },
+            });
+
             let goalAmount = transaction.amount;
-            const goal = await goalServcice.find({ id: transaction.goalId });
             if (goal.currency !== transaction.card.currency) {
                 const currencyRate = await currencyService.getCurrentCurrenciesRates({
                     base: goal.currency,
@@ -109,27 +84,26 @@ const deleteTransaction = async (transactionId: string) => {
                 goalAmount =
           goalAmount * (currencyRate[transaction.card.currency] || 1);
             }
-            const updatedGoalBalance = +(goal.balance + (-1 * goalAmount)).toFixed(2);
+
+            const updatedGoalBalance = +(goal.balance - goalAmount).toFixed(2);
             await prisma.goal.update({
-                where: {
-                    id: transaction.goalId,
-                },
+                where: { id: transaction.goalId },
                 data: {
-                    ...(updatedGoalBalance >= goalAmount ? {
-                        status: Statuses.closed
-                    } : {}),
+                    ...(updatedGoalBalance >= goal.amount
+                        ? { status: Statuses.closed }
+                        : {}),
                     balance: updatedGoalBalance,
                 },
             });
-        } catch (error) {
-            console.log(error);
         }
-    }
 
-    if (transaction.loanId) {
-        try {
+        // Step 5: Update Loan (if applicable)
+        if (transaction.loanId) {
+            const loan = await prisma.loan.findUniqueOrThrow({
+                where: { id: transaction.loanId },
+            });
+
             let loanAmount = transaction.amount;
-            const loan = await loanServcice.find({ id: transaction.loanId });
             if (loan.currency !== transaction.card.currency) {
                 const currencyRate = await currencyService.getCurrentCurrenciesRates({
                     base: loan.currency,
@@ -138,42 +112,39 @@ const deleteTransaction = async (transactionId: string) => {
                 loanAmount =
           loanAmount * (currencyRate[transaction.card.currency] || 1);
             }
-            const updatedLoanBalance = +(loan.balance + (-1 * loanAmount)).toFixed(2);
+
+            const updatedLoanBalance = +(loan.balance - loanAmount).toFixed(2);
             await prisma.loan.update({
-                where: {
-                    id: transaction.loanId,
-                },
+                where: { id: transaction.loanId },
                 data: {
-                    ...(updatedLoanBalance >= loanAmount ? {
-                        status: Statuses.closed
-                    } : {}),
+                    ...(updatedLoanBalance >= loan.amount
+                        ? { status: Statuses.closed }
+                        : {}),
                     balance: updatedLoanBalance,
                 },
             });
-        } catch (error) {
-            console.log(error);
         }
-    }
 
-    await deleteCache(transaction.card.userId);
+        // Step 6: Delete Cache
+        await deleteCache(transaction.card.userId);
 
-    return transaction;
-};
-const find = async (query: Prisma.TransactionWhereInput) => {
-    try {
-        const transaction = await prisma.transaction.findFirstOrThrow({
-            where: query,
-            include: {
-                category: true,
-                card: true,
-                loan: true,
-                goal: true,
-            },
-        });
         return transaction;
-    } catch (error) {
-        throw new NotFoundError((error as Error).message);
-    }
+    });
+};
+
+const find = async (query: Prisma.TransactionWhereInput) => {
+    const transaction = await transactionRepository.findFirst({
+        where: query,
+        select: {
+            ...defaultTransactionSelect,
+            category: true,
+            card: true,
+            loan: true,
+            goal: true,
+        },
+    });
+    if (!transaction) throw new NotFoundError("No transaction found");
+    return transaction;
 };
 const getTransactions = async (query: getTransactionsQueries) => {
     const {
@@ -213,7 +184,8 @@ const getTransactions = async (query: getTransactionsQueries) => {
                 where: params,
                 take: perPage,
                 skip: (page - 1) * perPage,
-                include: {
+                select: {
+                    ...defaultTransactionSelect,
                     category: true,
                     card: true,
                     loan: true,
@@ -237,14 +209,15 @@ const getTransactions = async (query: getTransactionsQueries) => {
         };
     }
 
-    const transactions = await prisma.transaction.findMany({
+    const transactions = await transactionRepository.findMany({
         orderBy: [
             {
                 date: "desc",
             },
         ],
         where: params,
-        include: {
+        select: {
+            ...defaultTransactionSelect,
             category: true,
             card: true,
             loan: true,
@@ -260,9 +233,9 @@ const getTransactions = async (query: getTransactionsQueries) => {
     };
 };
 const createTransaction = async (payload: createTransactionBody) => {
-    let transaction;
-    try {
-        transaction = await prisma.transaction.create({
+    return await prisma.$transaction(async (prisma) => {
+    // Step 1: Create Transaction
+        const transaction = await prisma.transaction.create({
             data: {
                 date: payload.date,
                 amount: payload.amount,
@@ -272,49 +245,26 @@ const createTransaction = async (payload: createTransactionBody) => {
                 categoryId: payload.categoryId,
                 description: payload.description || "",
             },
-            include: {
+            select: {
+                ...defaultTransactionSelect,
                 card: true,
                 loan: true,
                 goal: true,
             },
         });
-    } catch (error) {
-        throw new InternalServerError((error as Error).message);
-    }
 
-    try {
-        const card = await cardServcice.find({ id: payload.cardId });
         await prisma.card.update({
-            where: {
-                id: payload.cardId,
-            },
-            data: {
-                balance: +(card.balance + payload.amount).toFixed(2)
-            },
+            where: { id: payload.cardId },
+            data: { balance: { increment: payload.amount } },
         });
-    } catch (error) {
-        console.log(error);
-    }
 
-    try {
+        // Step 3: Update Budgets
         const budgets = await prisma.budget.findMany({
             where: {
-                startDate: {
-                    lte: transaction.date,
-                },
-                endDate: {
-                    gt: transaction.date,
-                },
-                categories: {
-                    some: {
-                        id: transaction.categoryId,
-                    },
-                },
-                cards: {
-                    some: {
-                        id: transaction.cardId,
-                    },
-                },
+                startDate: { lte: transaction.date },
+                endDate: { gt: transaction.date },
+                categories: { some: { id: transaction.categoryId } },
+                cards: { some: { id: transaction.cardId } },
             },
         });
 
@@ -324,33 +274,26 @@ const createTransaction = async (payload: createTransactionBody) => {
         });
 
         for (const budget of budgets) {
-            let tarnsactionAmount = transaction.amount;
+            let transactionAmount = transaction.amount;
             if (budget.currency !== transaction.card.currency) {
-                tarnsactionAmount =
+                transactionAmount =
           transaction.amount *
           (currenciesRates[transaction.card.currency] || 1);
             }
-            try {
-                await prisma.budget.update({
-                    where: {
-                        id: budget.id,
-                    },
-                    data: {
-                        amount: +(budget.amount + tarnsactionAmount).toFixed(2)
-                    },
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        }
-    } catch (error) {
-        console.log(error);
-    }
 
-    if (payload.goalId) {
-        try {
+            await prisma.budget.update({
+                where: { id: budget.id },
+                data: { amount: { increment: transactionAmount } },
+            });
+        }
+
+        // Step 4: Update Goal (if applicable)
+        if (payload.goalId) {
+            const goal = await prisma.goal.findUniqueOrThrow({
+                where: { id: payload.goalId },
+            });
+
             let goalAmount = Math.abs(transaction.amount);
-            const goal = await goalServcice.find({ id: payload.goalId });
             if (goal.currency !== transaction.card.currency) {
                 const currencyRate = await currencyService.getCurrentCurrenciesRates({
                     base: goal.currency,
@@ -359,35 +302,31 @@ const createTransaction = async (payload: createTransactionBody) => {
                 goalAmount =
           goalAmount * (currencyRate[transaction.card.currency] || 1);
             }
+
             const updatedGoalBalance = +(goal.balance + goalAmount).toFixed(2);
             await prisma.transaction.update({
-                where: {
-                    id: transaction.id,
-                },
-                data: {
-                    goalAmount,
-                },
+                where: { id: transaction.id },
+                data: { goalAmount },
             });
+
             await prisma.goal.update({
-                where: {
-                    id: payload.goalId,
-                },
+                where: { id: payload.goalId },
                 data: {
-                    ...(updatedGoalBalance >= goalAmount ? {
-                        status: Statuses.closed
-                    } : {}),
+                    ...(updatedGoalBalance >= goal.amount
+                        ? { status: Statuses.closed }
+                        : {}),
                     balance: updatedGoalBalance,
                 },
             });
-        } catch (error) {
-            throw new InternalServerError((error as Error).message);
         }
-    }
 
-    if (payload.loanId) {
-        try {
+        // Step 5: Update Loan (if applicable)
+        if (payload.loanId) {
+            const loan = await prisma.loan.findUniqueOrThrow({
+                where: { id: payload.loanId },
+            });
+
             let loanAmount = Math.abs(transaction.amount);
-            const loan = await loanServcice.find({ id: payload.loanId });
             if (loan.currency !== transaction.card.currency) {
                 const currencyRate = await currencyService.getCurrentCurrenciesRates({
                     base: loan.currency,
@@ -396,34 +335,29 @@ const createTransaction = async (payload: createTransactionBody) => {
                 loanAmount =
           loanAmount * (currencyRate[transaction.card.currency] || 1);
             }
+
             const updatedLoanBalance = +(loan.balance + loanAmount).toFixed(2);
             await prisma.transaction.update({
-                where: {
-                    id: transaction.id,
-                },
-                data: {
-                    loanAmount,
-                },
+                where: { id: transaction.id },
+                data: { loanAmount },
             });
+
             await prisma.loan.update({
-                where: {
-                    id: payload.loanId,
-                },
+                where: { id: payload.loanId },
                 data: {
-                    ...(updatedLoanBalance >= loanAmount ? {
-                        status: Statuses.closed
-                    } : {}),
+                    ...(updatedLoanBalance >= loan.amount
+                        ? { status: Statuses.closed }
+                        : {}),
                     balance: updatedLoanBalance,
                 },
             });
-        } catch (error) {
-            throw new InternalServerError((error as Error).message);
         }
-    }
 
-    await deleteCache(transaction.card.userId);
+        // Step 6: Delete Cache
+        await deleteCache(transaction.card.userId);
 
-    return transaction;
+        return transaction;
+    });
 };
 const updateTransaction = async (
     transactionId: string,
@@ -432,7 +366,7 @@ const updateTransaction = async (
     let transaction;
 
     try {
-        transaction = await prisma.transaction.update({
+        transaction = await transactionRepository.update({
             where: {
                 id: transactionId,
             },
@@ -440,7 +374,8 @@ const updateTransaction = async (
                 categoryId: payload.categoryId,
                 description: payload.description || "",
             },
-            include: {
+            select: {
+                ...defaultTransactionSelect,
                 card: true,
                 loan: true,
                 goal: true,

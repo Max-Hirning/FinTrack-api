@@ -7,19 +7,23 @@ import {
     updateGoalBody,
     getGoalsQueries,
 } from "@/business/lib/validation";
+import {
+    defaultGoalSelect,
+    defaultUserSelect,
+    goalRepository,
+    transactionRepository,
+} from "@/database";
 
 const find = async (query: Prisma.GoalWhereInput) => {
-    try {
-        const user = await prisma.goal.findFirstOrThrow({
-            where: query,
-            include: {
-                user: true,
-            },
-        });
-        return user;
-    } catch (error) {
-        throw new NotFoundError((error as Error).message);
-    }
+    const goal = await goalRepository.findFirst({
+        where: query,
+        select: {
+            ...defaultGoalSelect,
+            user: true,
+        },
+    });
+    if (!goal) throw new NotFoundError("No goal found");
+    return goal;
 };
 const getGoals = async (query: getGoalsQueries) => {
     const { page, userIds, goalIds, currencies } = query;
@@ -58,9 +62,11 @@ const getGoals = async (query: getGoalsQueries) => {
                 where: params,
                 take: perPage,
                 skip: (page - 1) * perPage,
-                include: {
+                select: {
+                    ...defaultGoalSelect,
                     user: {
-                        include: {
+                        select: {
+                            ...defaultUserSelect,
                             images: true,
                         },
                     },
@@ -83,16 +89,18 @@ const getGoals = async (query: getGoalsQueries) => {
         };
     }
 
-    const goals = await prisma.goal.findMany({
+    const goals = await goalRepository.findMany({
         orderBy: [
             {
                 title: "desc",
             },
         ],
         where: params,
-        include: {
+        select: {
+            ...defaultGoalSelect,
             user: {
-                include: {
+                select: {
+                    ...defaultUserSelect,
                     images: true,
                 },
             },
@@ -108,7 +116,7 @@ const getGoals = async (query: getGoalsQueries) => {
 const deleteGoal = async (goalId: string) => {
     let goal;
     try {
-        goal = await prisma.goal.delete({
+        goal = await goalRepository.delete({
             where: {
                 id: goalId,
             },
@@ -118,7 +126,7 @@ const deleteGoal = async (goalId: string) => {
     }
 
     try {
-        await prisma.transaction.updateMany({
+        await transactionRepository.updateMany({
             where: {
                 goalId: goal.id,
             },
@@ -137,7 +145,7 @@ const deleteGoal = async (goalId: string) => {
 };
 const updateGoal = async (goalId: string, payload: updateGoalBody) => {
     try {
-        const goal = await prisma.goal.update({
+        const goal = await goalRepository.update({
             where: {
                 id: goalId,
             },
@@ -160,7 +168,7 @@ const createGoal = async (userId: string, payload: createGoalBody) => {
     currencyService.getCurrency(payload.currency);
 
     try {
-        const goal = await prisma.goal.create({
+        const goal = await goalRepository.create({
             data: {
                 userId,
                 title: payload.title,

@@ -1,3 +1,4 @@
+import { otpRepository } from "@/database";
 import { userService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
@@ -28,7 +29,7 @@ const generateOTP = (length: number = 6) => {
 const createOtp = async (userQuery: Prisma.UserWhereUniqueInput) => {
     const code = generateOTP();
 
-    const usedOtp = await prisma.otp.findFirst({
+    const usedOtp = await otpRepository.findFirst({
         where: {
             otp: code,
         },
@@ -39,7 +40,7 @@ const createOtp = async (userQuery: Prisma.UserWhereUniqueInput) => {
     const user = await userService.find(userQuery);
 
     try {
-        await prisma.otp.create({
+        await otpRepository.create({
             data: {
                 otp: code,
                 userId: user.id,
@@ -54,17 +55,13 @@ const checkOtp = async (
     userQuery: Prisma.UserWhereUniqueInput,
     code: string,
 ) => {
-    let otp;
-    try {
-        otp = await prisma.otp.findFirstOrThrow({
-            where: {
-                otp: code,
-                user: userQuery,
-            },
-        });
-    } catch {
-        throw new NotFoundError("Invalid otp");
-    }
+    const otp = await otpRepository.findFirst({
+        where: {
+            otp: code,
+            user: userQuery,
+        },
+    });
+    if (!otp) throw new NotFoundError("Invalid otp");
 
     await prisma.otp.deleteMany({
         where: {

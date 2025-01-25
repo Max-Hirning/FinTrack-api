@@ -30,7 +30,6 @@ enum FileTypes {
   png
 }
 
-
 enum Currencies {
   AUD
   CAD
