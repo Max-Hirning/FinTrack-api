@@ -1,6 +1,6 @@
 import { deleteCache } from "../lib/redis";
 import { environmentVariables } from "@/config";
-import { prisma } from "@/database/prisma/prisma";
+import { categoryRepository } from "@/database";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import {
     createCategoryBody,
@@ -10,7 +10,7 @@ import {
 
 const find = async (categoryId: string) => {
     try {
-        const category = await prisma.category.findUnique({
+        const category = await categoryRepository.findUnique({
             where: {
                 id: categoryId,
             },
@@ -22,7 +22,7 @@ const find = async (categoryId: string) => {
 };
 const getCategories = async (query: getCategoriesQueries) => {
     const { userIds, type } = query;
-    const categories = await prisma.category.findMany({
+    const categories = await categoryRepository.findMany({
         where: {
             OR: [
                 {
@@ -52,7 +52,7 @@ const getCategories = async (query: getCategoriesQueries) => {
 const createCategory = async (payload: createCategoryBody, userId?: string) => {
     let category;
     try {
-        category = await prisma.category.create({
+        category = await categoryRepository.create({
             data: {
                 userId,
                 type: payload.type,
@@ -73,7 +73,7 @@ const updateCategory = async (
 ) => {
     let category;
     try {
-        category = await prisma.category.update({
+        category = await categoryRepository.update({
             where: {
                 id: categoryId,
             },
@@ -93,7 +93,7 @@ const updateCategory = async (
 const deleteCategory = async (categoryId: string) => {
     let category;
     try {
-        category = await prisma.category.delete({
+        category = await categoryRepository.delete({
             where: {
                 id: categoryId,
             },

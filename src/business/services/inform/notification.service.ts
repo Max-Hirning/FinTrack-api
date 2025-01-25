@@ -1,11 +1,18 @@
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { addDays, format, isBefore, startOfDay, startOfToday } from "date-fns";
+import {
+    budgetRepository,
+    goalRepository,
+    loanRepository,
+    notificationRepository,
+    userRepository,
+} from "@/database";
 
 const goals = async () => {
     const currentDate = startOfDay(new Date());
 
     try {
-        const goals = await prisma.goal.findMany({
+        const goals = await goalRepository.findMany({
             where: {
                 deadline: {
                     lte: currentDate,
@@ -39,7 +46,7 @@ const goals = async () => {
                 message: `Just a reminder that your goal *${goal.title} is due tomorrow, ${format(goal.deadline, "yyyy-MM-dd")}.`,
             });
         }
-        await prisma.notification.createMany({
+        await notificationRepository.createMany({
             data: notifications,
         });
     } catch (error) {
@@ -50,7 +57,7 @@ const loans = async () => {
     const currentDate = startOfDay(new Date());
 
     try {
-        const loans = await prisma.loan.findMany({
+        const loans = await loanRepository.findMany({
             where: {
                 deadline: {
                     lte: currentDate,
@@ -84,7 +91,7 @@ const loans = async () => {
                 message: `Just a reminder that your loan ${loan.title} is due tomorrow, ${format(loan.deadline, "yyyy-MM-dd")}.`,
             });
         }
-        await prisma.notification.createMany({
+        await notificationRepository.createMany({
             data: notifications,
         });
     } catch (error) {
@@ -95,7 +102,7 @@ const budgets = async () => {
     const currentDate = startOfDay(new Date());
 
     try {
-        const budgets = await prisma.budget.findMany({
+        const budgets = await budgetRepository.findMany({
             where: {
                 startDate: {
                     lte: currentDate,
@@ -133,7 +140,7 @@ const budgets = async () => {
                 message: `You are 5% away from reaching your ${budget.title} budget limit.`,
             });
         }
-        await prisma.notification.createMany({
+        await notificationRepository.createMany({
             data: notifications,
         });
     } catch (error) {
@@ -142,7 +149,7 @@ const budgets = async () => {
 };
 const happyNewYear = async () => {
     try {
-        const users = await prisma.user.findMany();
+        const users = await userRepository.findMany();
         const notifications = [];
         for (const user of users) {
             notifications.push({
@@ -152,7 +159,7 @@ const happyNewYear = async () => {
           "Wishing you a year filled with joy, success, and new adventures. Cheers to fresh starts and wonderful memories ahead!",
             });
         }
-        await prisma.notification.createMany({
+        await notificationRepository.createMany({
             data: notifications,
         });
     } catch (error) {
@@ -161,7 +168,7 @@ const happyNewYear = async () => {
 };
 const happyBirthday = async () => {
     try {
-        const users = await prisma.user.findMany({
+        const users = await userRepository.findMany({
             where: {
                 dateOfBirth: format(startOfToday(), "yyyy-MM-dd"), // Prisma will match only the date part (ignoring the time)
             },
@@ -175,7 +182,7 @@ const happyBirthday = async () => {
           "Wishing you a day filled with joy and a year ahead filled with amazing adventures. Enjoy your special day!",
             });
         }
-        await prisma.notification.createMany({
+        await notificationRepository.createMany({
             data: notifications,
         });
     } catch (error) {
@@ -184,7 +191,7 @@ const happyBirthday = async () => {
 };
 const happyChristmas = async () => {
     try {
-        const users = await prisma.user.findMany();
+        const users = await userRepository.findMany();
         const notifications = [];
         for (const user of users) {
             notifications.push({
@@ -194,7 +201,7 @@ const happyChristmas = async () => {
           "Wishing you a joyful holiday season filled with love, laughter, and cherished moments. May your days be merry and bright!",
             });
         }
-        await prisma.notification.createMany({
+        await notificationRepository.createMany({
             data: notifications,
         });
     } catch (error) {
@@ -242,7 +249,7 @@ const getNotifications = async (userId: string, page?: number) => {
         };
     }
 
-    const notifications = await prisma.notification.findMany({
+    const notifications = await notificationRepository.findMany({
         orderBy: [
             {
                 createdAt: "desc",

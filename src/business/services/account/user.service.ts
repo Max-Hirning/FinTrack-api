@@ -1,7 +1,8 @@
 import { hashing } from "@/business/lib/hashing";
+import { Prisma } from "@/database/prisma/prisma";
 import { tokenService } from "@/business/services";
 import { deleteCache } from "@/business/lib/redis";
-import { Prisma, prisma } from "@/database/prisma/prisma";
+import { defaultUserSelect, userRepository } from "@/database";
 import {
     updateUserBody,
     updateUserPasswordBody,
@@ -13,27 +14,25 @@ import {
 } from "@/business/lib/errors";
 
 const find = async (query: Prisma.UserWhereUniqueInput) => {
-    try {
-        const user = await prisma.user.findUniqueOrThrow({
-            where: query,
-            include: {
-                images: true,
-                cards: true,
-                budgets: true,
-                loans: true,
-                goals: true,
-            },
-        });
-        return user;
-    } catch (error) {
-        throw new NotFoundError((error as Error).message);
-    }
+    const user = await userRepository.findFirst({
+        where: query,
+        select: {
+            ...defaultUserSelect,
+            images: true,
+            cards: true,
+            budgets: true,
+            loans: true,
+            goals: true,
+        },
+    });
+    if (!user) throw new NotFoundError("No user found");
+    return user;
 };
 const deleteUser = async (query: Prisma.UserWhereUniqueInput) => {
     let user;
 
     try {
-        user = await prisma.user.delete({
+        user = await userRepository.delete({
             where: query,
         });
     } catch (error) {
@@ -55,7 +54,7 @@ const deleteUser = async (query: Prisma.UserWhereUniqueInput) => {
 const updateUser = async (userId: string, payload: updateUserBody) => {
     let user;
     try {
-        user = await prisma.user.update({
+        user = await userRepository.update({
             where: {
                 id: userId,
             },
@@ -104,7 +103,7 @@ const updateUserPassword = async (
     const cryptedPass = hashing.hashPassword(payload.password);
 
     try {
-        user = await prisma.user.update({
+        user = await userRepository.update({
             where: {
                 id: userId,
             },

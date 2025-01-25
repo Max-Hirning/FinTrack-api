@@ -1,4 +1,5 @@
 import { Periods } from "@prisma/client";
+import { budgetRepository } from "@/database";
 import { RedisKey } from "@/business/constants";
 import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
@@ -17,19 +18,16 @@ import {
 } from "@/business/lib/errors";
 
 const find = async (query: Prisma.BudgetWhereInput) => {
-    try {
-        const budget = await prisma.budget.findFirstOrThrow({
-            where: query,
-            include: {
-                user: true,
-                cards: true,
-                categories: true,
-            },
-        });
-        return budget;
-    } catch (error) {
-        throw new NotFoundError((error as Error).message);
-    }
+    const budget = await budgetRepository.findFirst({
+        where: query,
+        include: {
+            user: true,
+            cards: true,
+            categories: true,
+        },
+    });
+    if (!budget) throw new NotFoundError("No budget found");
+    return budget;
 };
 const getBudgets = async (query: getBudgetsQueries) => {
     const { page, userIds, budgetIds, currencies } = query;
@@ -93,7 +91,7 @@ const getBudgets = async (query: getBudgetsQueries) => {
         };
     }
 
-    const budgets = await prisma.budget.findMany({
+    const budgets = await budgetRepository.findMany({
         orderBy: [
             {
                 title: "desc",
@@ -117,7 +115,7 @@ const getBudgets = async (query: getBudgetsQueries) => {
 };
 const deleteBudget = async (budgetId: string) => {
     try {
-        const budget = await prisma.budget.delete({
+        const budget = await budgetRepository.delete({
             where: {
                 id: budgetId,
             },
@@ -182,7 +180,7 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
         throw new BadRequestError("startDate can't be less or equal than endDate");
     if (payload.cardIds) {
         try {
-            await prisma.budget.update({
+            await budgetRepository.update({
                 where: {
                     id: budgetId,
                 },
@@ -198,7 +196,7 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
     }
     if (payload.categoryIds) {
         try {
-            await prisma.budget.update({
+            await budgetRepository.update({
                 where: {
                     id: budgetId,
                 },
@@ -214,7 +212,7 @@ const updateBudget = async (budgetId: string, payload: updateBudgetBody) => {
     }
 
     try {
-        const budget = await prisma.budget.update({
+        const budget = await budgetRepository.update({
             where: {
                 id: budgetId,
             },
@@ -278,7 +276,7 @@ const createBudget = async (userId: string, payload: createBudgetBody) => {
         throw new BadRequestError("startDate can't be less or equal than endDate");
 
     try {
-        const budget = await prisma.budget.create({
+        const budget = await budgetRepository.create({
             data: {
                 amount: 0,
                 title: payload.title,
@@ -339,7 +337,7 @@ const updateBudgetsDateRange = async (period: Periods) => {
         throw new BadRequestError("startDate can't be less or equal than endDate");
 
     try {
-        const budget = await prisma.budget.updateMany({
+        const budget = await budgetRepository.updateMany({
             where: {
                 period,
             },

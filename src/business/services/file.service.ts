@@ -1,6 +1,6 @@
 import { File } from "@prisma/client";
 import { FileTypes } from "@prisma/client";
-import { prisma } from "@/database/prisma/prisma";
+import { fileRepository } from "@/database";
 import { InternalServerError } from "@/business/lib/errors";
 import {
     v2 as cloudinary,
@@ -11,7 +11,7 @@ import {
 const deletFile = async (file: File) => {
     try {
         await cloudinary.uploader.destroy(file.fileId);
-        await prisma.file.delete({
+        await fileRepository.delete({
             where: {
                 id: file.id,
             },
@@ -49,7 +49,7 @@ const saveFile = async (options: UploadApiOptions, fileBuffer?: Buffer) => {
 };
 
 const deleteProfileAvatar = async (userId: string) => {
-    const files = await prisma.file.findMany({
+    const files = await fileRepository.findMany({
         where: {
             userId,
         },
@@ -72,7 +72,7 @@ const saveProfileAvatar = async (userId: string, fileBuffer?: Buffer) => {
 
     if (file) {
         try {
-            await prisma.file.create({
+            await fileRepository.create({
                 data: {
                     userId,
                     type: FileTypes.png,

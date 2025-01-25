@@ -1,6 +1,10 @@
-import { prisma } from "@/database/prisma/prisma";
 import { currencyService } from "./currency.service";
 import { userService } from "./account/user.service";
+import {
+    cardRepository,
+    loanRepository,
+    transactionRepository,
+} from "@/database";
 import {
     addDays,
     addMonths,
@@ -30,17 +34,17 @@ const getAccountStatistic = async (param: accountStatisticParam) => {
 
     const user = await userService.find({ id: param.userId });
 
-    const cards = await prisma.card.findMany({
+    const cards = await cardRepository.findMany({
         where: {
             userId: param.userId,
         },
     });
-    const loans = await prisma.loan.findMany({
+    const loans = await loanRepository.findMany({
         where: {
             userId: param.userId,
         },
     });
-    const transactions = await prisma.transaction.findMany({
+    const transactions = await transactionRepository.findMany({
         where: {
             date: {
                 lt: startOfNextMonth,
@@ -147,7 +151,7 @@ const getStatistic = async (query: getStatisticsQueries, userId: string) => {
     } = query;
 
     const user = await userService.find({ id: userId });
-    const cardCurrencies = await prisma.card
+    const cardCurrencies = await cardRepository
         .findMany({
             where: {
                 userId: userId,
@@ -158,7 +162,7 @@ const getStatistic = async (query: getStatisticsQueries, userId: string) => {
             },
         })
         .then((res) => res.map(({ currency }) => currency));
-    const transactions = await prisma.transaction.findMany({
+    const transactions = await transactionRepository.findMany({
         where: {
             date: {
                 lte: new Date(endDate),
@@ -282,7 +286,7 @@ const getCardsStatistic = async (
 ) => {
     const { cardIds, userId: categoryUserId, startDate, endDate } = query;
     const user = await userService.find({ id: userId });
-    const cardCurrencies = await prisma.card
+    const cardCurrencies = await cardRepository
         .findMany({
             where: {
                 userId: userId,
@@ -293,7 +297,7 @@ const getCardsStatistic = async (
             },
         })
         .then((res) => res.map(({ currency }) => currency));
-    const transactions = await prisma.transaction.findMany({
+    const transactions = await transactionRepository.findMany({
         where: {
             date: {
                 lte: new Date(endDate),
@@ -363,7 +367,7 @@ const getCategoriesStatistic = async (
 ) => {
     const { cardIds, userId: categoryUserId, startDate, endDate } = query;
     const user = await userService.find({ id: userId });
-    const cardCurrencies = await prisma.card
+    const cardCurrencies = await cardRepository
         .findMany({
             where: {
                 userId: userId,
@@ -374,7 +378,7 @@ const getCategoriesStatistic = async (
             },
         })
         .then((res) => res.map(({ currency }) => currency));
-    const transactions = await prisma.transaction.findMany({
+    const transactions = await transactionRepository.findMany({
         where: {
             date: {
                 lte: new Date(endDate),

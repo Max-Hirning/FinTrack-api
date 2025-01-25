@@ -1,3 +1,4 @@
+import { cardRepository } from "@/database";
 import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
@@ -9,17 +10,14 @@ import {
 } from "@/business/lib/validation";
 
 const find = async (query: Prisma.CardWhereInput) => {
-    try {
-        const user = await prisma.card.findFirstOrThrow({
-            where: query,
-            include: {
-                user: true,
-            },
-        });
-        return user;
-    } catch (error) {
-        throw new NotFoundError((error as Error).message);
-    }
+    const card = await cardRepository.findFirst({
+        where: query,
+        include: {
+            user: true,
+        },
+    });
+    if (!card) throw new NotFoundError("Card not found");
+    return card;
 };
 const getCards = async (query: getCardsQueries) => {
     const { page, userIds, cardIds, currencies } = query;
@@ -83,7 +81,7 @@ const getCards = async (query: getCardsQueries) => {
         };
     }
 
-    const cards = await prisma.card.findMany({
+    const cards = await cardRepository.findMany({
         orderBy: [
             {
                 title: "desc",
@@ -107,7 +105,7 @@ const getCards = async (query: getCardsQueries) => {
 };
 const deleteCard = async (cardId: string) => {
     try {
-        const card = await prisma.card.delete({
+        const card = await cardRepository.delete({
             where: {
                 id: cardId,
             },
@@ -122,7 +120,7 @@ const deleteCard = async (cardId: string) => {
 };
 const updateCard = async (cardId: string, payload: updateCardBody) => {
     try {
-        const card = await prisma.card.update({
+        const card = await cardRepository.update({
             where: {
                 id: cardId,
             },
@@ -143,7 +141,7 @@ const createCard = async (userId: string, payload: createCardBody) => {
     currencyService.getCurrency(payload.currency);
 
     try {
-        const card = await prisma.card.create({
+        const card = await cardRepository.create({
             data: {
                 userId,
                 color: payload.color,

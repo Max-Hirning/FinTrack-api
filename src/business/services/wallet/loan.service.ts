@@ -1,6 +1,7 @@
 import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
+import { loanRepository, transactionRepository } from "@/database";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import {
     createLoanBody,
@@ -9,18 +10,14 @@ import {
 } from "@/business/lib/validation";
 
 const find = async (query: Prisma.LoanWhereInput) => {
-    try {
-        const loan = await prisma.loan.findFirstOrThrow({
-            where: query,
-            include: {
-                user: true,
-            },
-        });
-
-        return loan;
-    } catch (error) {
-        throw new NotFoundError((error as Error).message);
-    }
+    const loan = await loanRepository.findFirst({
+        where: query,
+        include: {
+            user: true,
+        },
+    });
+    if (!loan) throw new NotFoundError("No loan found");
+    return loan;
 };
 const getLoans = async (query: getLoansQueries) => {
     const { page, userIds, loanIds, currencies } = query;
@@ -84,7 +81,7 @@ const getLoans = async (query: getLoansQueries) => {
         };
     }
 
-    const loans = await prisma.loan.findMany({
+    const loans = await loanRepository.findMany({
         orderBy: [
             {
                 title: "desc",
@@ -108,38 +105,38 @@ const getLoans = async (query: getLoansQueries) => {
 };
 const deleteLoan = async (loanId: string) => {
     let loan;
-    console.log(loanId);
-    // try {
-    //     loan = await prisma.loan.delete({
-    //         where: {
-    //             id: loanId,
-    //         },
-    //     });
-    // } catch (error) {
-    //     throw new NotFoundError((error as Error).message);
-    // }
 
-    // try {
-    //     await prisma.transaction.updateMany({
-    //         where: {
-    //             loanId: loan.id,
-    //         },
-    //         data: {
-    //             loanId: null,
-    //             loanAmount: null,
-    //         },
-    //     });
-    // } catch (error) {
-    //     console.log(error);
-    // }
+    try {
+        loan = await loanRepository.delete({
+            where: {
+                id: loanId,
+            },
+        });
+    } catch (error) {
+        throw new NotFoundError((error as Error).message);
+    }
 
-    // await deleteCache(loan.userId);
+    try {
+        await transactionRepository.updateMany({
+            where: {
+                loanId: loan.id,
+            },
+            data: {
+                loanId: null,
+                loanAmount: null,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+    }
+
+    await deleteCache(loan.userId);
 
     return loan;
 };
 const updateLoan = async (loanId: string, payload: updateLoanBody) => {
     try {
-        const loan = await prisma.loan.update({
+        const loan = await loanRepository.update({
             where: {
                 id: loanId,
             },
@@ -163,7 +160,7 @@ const createLoan = async (userId: string, payload: createLoanBody) => {
     currencyService.getCurrency(payload.currency);
 
     try {
-        const loan = await prisma.loan.create({
+        const loan = await loanRepository.create({
             data: {
                 userId,
                 title: payload.title,
