@@ -1,3 +1,4 @@
+import { fileService } from "../file.service";
 import { hashing } from "@/business/lib/hashing";
 import { Prisma } from "@/database/prisma/prisma";
 import { tokenService } from "@/business/services";
@@ -28,23 +29,19 @@ const find = async (query: Prisma.UserWhereUniqueInput) => {
     if (!user) throw new NotFoundError("No user found");
     return user;
 };
-const deleteUser = async (query: Prisma.UserWhereUniqueInput) => {
+const deleteUser = async (userId: string) => {
     let user;
+
+    await fileService.deleteProfileAvatar(userId);
 
     try {
         user = await userRepository.delete({
-            where: query,
+            where: {
+                id: userId,
+            },
         });
     } catch (error) {
         throw new NotFoundError((error as Error).message);
-    }
-
-    try {
-        await tokenService.deleteTokens({
-            userId: user.id,
-        });
-    } catch (error) {
-        console.log(error);
     }
 
     await deleteCache(user.id);
