@@ -2,6 +2,7 @@ import { Prisma, prisma } from "@/database/prisma/prisma";
 import { addDays, format, isBefore, startOfDay, startOfToday } from "date-fns";
 import {
     budgetRepository,
+    defaultNotificationSelect,
     goalRepository,
     loanRepository,
     notificationRepository,
@@ -228,7 +229,8 @@ const getNotifications = async (userId: string, page?: number) => {
                 where: params,
                 take: perPage,
                 skip: (page - 1) * perPage,
-                include: {
+                select: {
+                    ...defaultNotificationSelect,
                     user: true,
                 },
             }),
@@ -256,7 +258,8 @@ const getNotifications = async (userId: string, page?: number) => {
             },
         ],
         where: params,
-        include: {
+        select: {
+            ...defaultNotificationSelect,
             user: true,
         },
     });

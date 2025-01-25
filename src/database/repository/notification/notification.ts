@@ -9,6 +9,8 @@ export const defaultNotificationSelect = {
     budgetId: true,
     loanId: true,
     goalId: true,
+    createdAt: true,
+    updatedAt: true,
 };
 
 export const notificationRepository = generateRepository("Notification");

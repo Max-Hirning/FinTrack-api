@@ -10,6 +10,8 @@ export const defaultBudgetSelect = {
     startDate: true,
     endDate: true,
     userId: true,
+    createdAt: true,
+    updatedAt: true,
 };
 
 export const budgetRepository = generateRepository("Budget");

@@ -10,6 +10,8 @@ export const defaultGoalSelect = {
     status: true,
     description: true,
     userId: true,
+    createdAt: true,
+    updatedAt: true,
 };
 
 export const goalRepository = generateRepository("Goal");

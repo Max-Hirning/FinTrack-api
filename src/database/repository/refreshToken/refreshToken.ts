@@ -5,6 +5,8 @@ export const defaultRefreshTokenSelect = {
     token: true,
     uuid: true,
     userId: true,
+    createdAt: true,
+    updatedAt: true,
 };
 
 export const refreshTokenRepository = generateRepository("RefreshToken");

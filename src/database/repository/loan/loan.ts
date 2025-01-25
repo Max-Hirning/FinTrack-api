@@ -11,6 +11,8 @@ export const defaultLoanSelect = {
     date: true,
     description: true,
     userId: true,
+    createdAt: true,
+    updatedAt: true,
 };
 
 export const loanRepository = generateRepository("Loan");

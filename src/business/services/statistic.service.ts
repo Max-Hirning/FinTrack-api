@@ -1,11 +1,6 @@
 import { currencyService } from "./currency.service";
 import { userService } from "./account/user.service";
 import {
-    cardRepository,
-    loanRepository,
-    transactionRepository,
-} from "@/database";
-import {
     addDays,
     addMonths,
     addYears,
@@ -14,6 +9,12 @@ import {
     setMonth,
     startOfMonth,
 } from "date-fns";
+import {
+    cardRepository,
+    defaultTransactionSelect,
+    loanRepository,
+    transactionRepository,
+} from "@/database";
 import {
     accountStatisticParam,
     getStatisticsQueries,
@@ -54,7 +55,8 @@ const getAccountStatistic = async (param: accountStatisticParam) => {
                 userId: param.userId,
             },
         },
-        include: {
+        select: {
+            ...defaultTransactionSelect,
             card: true,
         },
     });
@@ -232,7 +234,8 @@ const getStatistic = async (query: getStatisticsQueries, userId: string) => {
                 }
                 : {}),
         },
-        include: {
+        select: {
+            ...defaultTransactionSelect,
             card: true,
         },
     });
@@ -325,7 +328,8 @@ const getCardsStatistic = async (
                 }
                 : {}),
         },
-        include: {
+        select: {
+            ...defaultTransactionSelect,
             card: true,
         },
     });
@@ -406,7 +410,8 @@ const getCategoriesStatistic = async (
                 }
                 : {}),
         },
-        include: {
+        select: {
+            ...defaultTransactionSelect,
             card: true,
             category: true,
         },

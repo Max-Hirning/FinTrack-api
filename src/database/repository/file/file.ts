@@ -6,6 +6,8 @@ export const defaultFileSelect = {
     type: true,
     fileId: true,
     userId: true,
+    createdAt: true,
+    updatedAt: true,
 };
 
 export const fileRepository = generateRepository("File");

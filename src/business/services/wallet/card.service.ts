@@ -1,8 +1,12 @@
-import { cardRepository } from "@/database";
 import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
+import {
+    cardRepository,
+    defaultCardSelect,
+    defaultUserSelect,
+} from "@/database";
 import {
     createCardBody,
     updateCardBody,
@@ -12,7 +16,8 @@ import {
 const find = async (query: Prisma.CardWhereInput) => {
     const card = await cardRepository.findFirst({
         where: query,
-        include: {
+        select: {
+            ...defaultCardSelect,
             user: true,
         },
     });
@@ -56,9 +61,11 @@ const getCards = async (query: getCardsQueries) => {
                 where: params,
                 take: perPage,
                 skip: (page - 1) * perPage,
-                include: {
+                select: {
+                    ...defaultCardSelect,
                     user: {
-                        include: {
+                        select: {
+                            ...defaultUserSelect,
                             images: true,
                         },
                     },
@@ -88,9 +95,11 @@ const getCards = async (query: getCardsQueries) => {
             },
         ],
         where: params,
-        include: {
+        select: {
+            ...defaultCardSelect,
             user: {
-                include: {
+                select: {
+                    ...defaultUserSelect,
                     images: true,
                 },
             },

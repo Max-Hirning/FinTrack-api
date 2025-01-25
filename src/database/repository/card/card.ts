@@ -8,6 +8,8 @@ export const defaultCardSelect = {
     startBalance: true,
     color: true,
     userId: true,
+    createdAt: true,
+    updatedAt: true,
 };
 
 export const cardRepository = generateRepository("Card");

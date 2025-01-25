@@ -11,6 +11,8 @@ export const defaultTransactionSelect = {
     cardId: true,
     goalId: true,
     loanId: true,
+    createdAt: true,
+    updatedAt: true,
 };
 
 export const transactionRepository = generateRepository("Transaction");

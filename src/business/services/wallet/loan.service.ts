@@ -1,18 +1,24 @@
 import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
-import { loanRepository, transactionRepository } from "@/database";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import {
     createLoanBody,
     getLoansQueries,
     updateLoanBody,
 } from "@/business/lib/validation";
+import {
+    defaultLoanSelect,
+    defaultUserSelect,
+    loanRepository,
+    transactionRepository,
+} from "@/database";
 
 const find = async (query: Prisma.LoanWhereInput) => {
     const loan = await loanRepository.findFirst({
         where: query,
-        include: {
+        select: {
+            ...defaultLoanSelect,
             user: true,
         },
     });
@@ -56,9 +62,11 @@ const getLoans = async (query: getLoansQueries) => {
                 where: params,
                 take: perPage,
                 skip: (page - 1) * perPage,
-                include: {
+                select: {
+                    ...defaultLoanSelect,
                     user: {
-                        include: {
+                        select: {
+                            ...defaultUserSelect,
                             images: true,
                         },
                     },
@@ -88,9 +96,11 @@ const getLoans = async (query: getLoansQueries) => {
             },
         ],
         where: params,
-        include: {
+        select: {
+            ...defaultLoanSelect,
             user: {
-                include: {
+                ...defaultUserSelect,
+                select: {
                     images: true,
                 },
             },

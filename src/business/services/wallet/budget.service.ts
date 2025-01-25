@@ -1,10 +1,14 @@
 import { Periods } from "@prisma/client";
-import { budgetRepository } from "@/database";
 import { RedisKey } from "@/business/constants";
 import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { getMonthRange, getWeekRange, getYearRange } from "@/business/lib/date";
+import {
+    budgetRepository,
+    defaultBudgetSelect,
+    defaultUserSelect,
+} from "@/database";
 import {
     createBudgetBody,
     updateBudgetBody,
@@ -20,7 +24,8 @@ import {
 const find = async (query: Prisma.BudgetWhereInput) => {
     const budget = await budgetRepository.findFirst({
         where: query,
-        include: {
+        select: {
+            ...defaultBudgetSelect,
             user: true,
             cards: true,
             categories: true,
@@ -66,9 +71,11 @@ const getBudgets = async (query: getBudgetsQueries) => {
                 where: params,
                 take: perPage,
                 skip: (page - 1) * perPage,
-                include: {
+                select: {
+                    ...defaultBudgetSelect,
                     user: {
-                        include: {
+                        select: {
+                            ...defaultUserSelect,
                             images: true,
                         },
                     },
@@ -98,9 +105,11 @@ const getBudgets = async (query: getBudgetsQueries) => {
             },
         ],
         where: params,
-        include: {
+        select: {
+            ...defaultBudgetSelect,
             user: {
-                include: {
+                select: {
+                    ...defaultUserSelect,
                     images: true,
                 },
             },

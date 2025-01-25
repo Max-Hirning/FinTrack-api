@@ -14,6 +14,7 @@ import {
 import {
     budgetRepository,
     cardRepository,
+    defaultTransactionSelect,
     goalRepository,
     loanRepository,
     transactionRepository,
@@ -27,7 +28,8 @@ const deleteTransaction = async (transactionId: string) => {
             where: {
                 id: transactionId,
             },
-            include: {
+            select: {
+                ...defaultTransactionSelect,
                 card: true,
                 loan: true,
                 goal: true,
@@ -179,7 +181,8 @@ const deleteTransaction = async (transactionId: string) => {
 const find = async (query: Prisma.TransactionWhereInput) => {
     const transaction = await transactionRepository.findFirst({
         where: query,
-        include: {
+        select: {
+            ...defaultTransactionSelect,
             category: true,
             card: true,
             loan: true,
@@ -227,7 +230,8 @@ const getTransactions = async (query: getTransactionsQueries) => {
                 where: params,
                 take: perPage,
                 skip: (page - 1) * perPage,
-                include: {
+                select: {
+                    ...defaultTransactionSelect,
                     category: true,
                     card: true,
                     loan: true,
@@ -258,7 +262,8 @@ const getTransactions = async (query: getTransactionsQueries) => {
             },
         ],
         where: params,
-        include: {
+        select: {
+            ...defaultTransactionSelect,
             category: true,
             card: true,
             loan: true,
@@ -286,7 +291,8 @@ const createTransaction = async (payload: createTransactionBody) => {
                 categoryId: payload.categoryId,
                 description: payload.description || "",
             },
-            include: {
+            select: {
+                ...defaultTransactionSelect,
                 card: true,
                 loan: true,
                 goal: true,
@@ -458,7 +464,8 @@ const updateTransaction = async (
                 categoryId: payload.categoryId,
                 description: payload.description || "",
             },
-            include: {
+            select: {
+                ...defaultTransactionSelect,
                 card: true,
                 loan: true,
                 goal: true,

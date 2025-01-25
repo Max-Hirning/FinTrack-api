@@ -1,18 +1,24 @@
 import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
-import { goalRepository, transactionRepository } from "@/database";
 import { InternalServerError, NotFoundError } from "@/business/lib/errors";
 import {
     createGoalBody,
     updateGoalBody,
     getGoalsQueries,
 } from "@/business/lib/validation";
+import {
+    defaultGoalSelect,
+    defaultUserSelect,
+    goalRepository,
+    transactionRepository,
+} from "@/database";
 
 const find = async (query: Prisma.GoalWhereInput) => {
     const goal = await goalRepository.findFirst({
         where: query,
-        include: {
+        select: {
+            ...defaultGoalSelect,
             user: true,
         },
     });
@@ -56,9 +62,11 @@ const getGoals = async (query: getGoalsQueries) => {
                 where: params,
                 take: perPage,
                 skip: (page - 1) * perPage,
-                include: {
+                select: {
+                    ...defaultGoalSelect,
                     user: {
-                        include: {
+                        select: {
+                            ...defaultUserSelect,
                             images: true,
                         },
                     },
@@ -88,9 +96,11 @@ const getGoals = async (query: getGoalsQueries) => {
             },
         ],
         where: params,
-        include: {
+        select: {
+            ...defaultGoalSelect,
             user: {
-                include: {
+                select: {
+                    ...defaultUserSelect,
                     images: true,
                 },
             },

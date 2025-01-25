@@ -12,6 +12,8 @@ export const defaultUserSelect = {
     dateOfBirth: true,
     role: true,
     currency: true,
+    createdAt: true,
+    updatedAt: true,
 };
 
 export const userRepository = generateRepository("User");
