@@ -99,8 +99,8 @@ const getLoans = async (query: getLoansQueries) => {
         select: {
             ...defaultLoanSelect,
             user: {
-                ...defaultUserSelect,
                 select: {
+                    ...defaultUserSelect,
                     images: true,
                 },
             },

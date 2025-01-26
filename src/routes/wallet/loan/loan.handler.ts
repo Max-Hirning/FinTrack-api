@@ -6,12 +6,14 @@ import {
     deleteLoanParam,
     getLoanParam,
     getLoansQueries,
+    loanResponse,
+    loansListResponse,
     updateLoanBody,
     updateLoanParam,
 } from "@/business/lib/validation";
 
 const getLoan = async (request: FastifyRequest, reply: FastifyReply) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<loanResponse>(reply, async () => {
         const { params } = request as FastifyRequest<{
       Params: getLoanParam;
     }>;
@@ -23,7 +25,7 @@ const getLoan = async (request: FastifyRequest, reply: FastifyReply) => {
     });
 };
 const getLoans = async (request: FastifyRequest, reply: FastifyReply) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<loansListResponse>(reply, async () => {
         const { query } = request as FastifyRequest<{
       Querystring: getLoansQueries;
     }>;

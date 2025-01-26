@@ -1,13 +1,16 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { notificationService } from "@/business/services";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
-import { getNotificationsQueires } from "@/business/lib/validation";
+import {
+    getNotificationsQueires,
+    notificationListResponse,
+} from "@/business/lib/validation";
 
 const getNotifications = async (
     request: FastifyRequest,
     reply: FastifyReply,
 ) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<notificationListResponse>(reply, async () => {
         const { query } = request as FastifyRequest<{
       Querystring: getNotificationsQueires;
     }>;

@@ -4,6 +4,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { ForbiddenError } from "@/business/lib/errors";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
+    categoriesResponse,
     createCategoryBody,
     deleteCategoryParam,
     getCategoriesQueries,
@@ -25,7 +26,7 @@ const createCategory = async (request: FastifyRequest, reply: FastifyReply) => {
     });
 };
 const getCategories = async (request: FastifyRequest, reply: FastifyReply) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<categoriesResponse>(reply, async () => {
         const { query } = request as FastifyRequest<{
       Querystring: getCategoriesQueries;
     }>;

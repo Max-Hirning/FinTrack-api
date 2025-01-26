@@ -2,6 +2,8 @@ import { budgetServcice } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { tryCatchApiMiddleware } from "@/business/lib/middleware";
 import {
+    budgetResponse,
+    budgetsListResponse,
     createBudgetBody,
     deleteBudgetParam,
     getBudgetParam,
@@ -11,7 +13,7 @@ import {
 } from "@/business/lib/validation";
 
 const getBudget = async (request: FastifyRequest, reply: FastifyReply) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<budgetResponse>(reply, async () => {
         const { params } = request as FastifyRequest<{
       Params: getBudgetParam;
     }>;
@@ -27,7 +29,7 @@ const getBudget = async (request: FastifyRequest, reply: FastifyReply) => {
     });
 };
 const getBudgets = async (request: FastifyRequest, reply: FastifyReply) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<budgetsListResponse>(reply, async () => {
         const { query } = request as FastifyRequest<{
       Querystring: getBudgetsQueries;
     }>;

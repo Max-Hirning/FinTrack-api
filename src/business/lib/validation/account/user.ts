@@ -62,6 +62,7 @@ export const userResponseSchema = z.object({
         z.object({
             id: z.string(),
             title: z.string(),
+            status: z.enum(Object.values(Statuses) as [Statuses, ...Statuses[]]),
             currency: z.enum(
         Object.values(Currencies) as [Currencies, ...Currencies[]],
             ),
@@ -71,9 +72,7 @@ export const userResponseSchema = z.object({
         z.object({
             id: z.string(),
             title: z.string(),
-            status: z.enum(
-                Object.values(Statuses) as [Statuses, ...Statuses[]],
-            ),
+            status: z.enum(Object.values(Statuses) as [Statuses, ...Statuses[]]),
             currency: z.enum(
         Object.values(Currencies) as [Currencies, ...Currencies[]],
             ),
@@ -83,9 +82,6 @@ export const userResponseSchema = z.object({
         z.object({
             id: z.string(),
             title: z.string(),
-            status: z.enum(
-                Object.values(Statuses) as [Statuses, ...Statuses[]],
-            ),
             currency: z.enum(
         Object.values(Currencies) as [Currencies, ...Currencies[]],
             ),

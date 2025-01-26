@@ -18,9 +18,9 @@ type getNotificationsQueires = z.infer<typeof getNotificationsQueiresSchema>;
 export const notificationResponseSchema = z.object({
     id: z.string(),
     title: z.string(),
-    isRead: z.string(),
     userId: z.string(),
     message: z.string(),
+    isRead: z.boolean(),
     loanId: z.string().nullable(),
     goalId: z.string().nullable(),
     budgetId: z.string().nullable(),

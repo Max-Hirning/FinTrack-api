@@ -9,6 +9,7 @@ import {
     RequestOtpBody,
     ResetPasswordBody,
     SignInBody,
+    signInResponse,
     SignUpBody,
 } from "@/business/lib/validation";
 
@@ -16,7 +17,7 @@ const signIn = async (
     request: FastifyRequest<{ Body: SignInBody }>,
     reply: FastifyReply,
 ) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<signInResponse>(reply, async () => {
         const { body } = request;
         return {
             code: 200,
@@ -76,7 +77,7 @@ const refreshTokens = async (
     request: FastifyRequest<{ Body: RefreshTokensBody }>,
     reply: FastifyReply,
 ) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<signInResponse>(reply, async () => {
         const { body } = request;
         return {
             code: 201,
