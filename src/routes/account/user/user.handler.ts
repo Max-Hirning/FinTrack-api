@@ -10,10 +10,11 @@ import {
     updateUserParam,
     updateUserPasswordBody,
     updateUserPasswordParam,
+    userResponse,
 } from "@/business/lib/validation";
 
 const getUser = async (request: FastifyRequest, reply: FastifyReply) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<userResponse>(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: getUserParam }>;
         const { userId } = params;
         const response = await userService.find({ id: userId });

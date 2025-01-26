@@ -1,6 +1,6 @@
-interface IResponse {
+interface IResponse<T> {
   code: number;
-  data: unknown;
+  data: T;
 }
 
 export type { IResponse };

@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { Currencies } from "@prisma/client";
 import { cardResponseSchema } from "./wallet/card";
-import { loanResponseSchema } from "./wallet/loan";
-import { goalResponseSchema } from "./wallet/goal";
 import { categoryResponseSchema } from "./category";
 
 export const getTransactionsQueriesSchema = z.object({
@@ -73,16 +71,6 @@ export const transactionResponseSchema = z.object({
     card: cardResponseSchema.omit({
         user: true,
     }),
-    loan: loanResponseSchema
-        .omit({
-            user: true,
-        })
-        .nullable(),
-    goal: goalResponseSchema
-        .omit({
-            user: true,
-        })
-        .nullable(),
 });
 export const transactionsListResponseSchema = z.object({
     totalPages: z.number().int(),

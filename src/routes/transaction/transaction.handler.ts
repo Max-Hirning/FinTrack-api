@@ -7,12 +7,14 @@ import {
     deleteTransactionParam,
     getTransactionParam,
     getTransactionsQueries,
+    transactionResponse,
+    transactionsListResponse,
     updateTransactionBody,
     updateTransactionParam,
 } from "@/business/lib/validation";
 
 const getTransaction = async (request: FastifyRequest, reply: FastifyReply) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<transactionResponse>(reply, async () => {
         const { params } = request as FastifyRequest<{
       Params: getTransactionParam;
     }>;
@@ -35,7 +37,7 @@ const getTransactions = async (
     request: FastifyRequest,
     reply: FastifyReply,
 ) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<transactionsListResponse>(reply, async () => {
         const { query } = request as FastifyRequest<{
       Querystring: getTransactionsQueries;
     }>;

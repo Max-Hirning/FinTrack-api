@@ -6,25 +6,27 @@ import {
     deleteGoalParam,
     getGoalParam,
     getGoalsQueries,
+    goalResponse,
+    goalsListResponse,
     updateGoalBody,
     updateGoalParam,
 } from "@/business/lib/validation";
 
 const getGoal = async (request: FastifyRequest, reply: FastifyReply) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<goalResponse>(reply, async () => {
         const { params } = request as FastifyRequest<{ Params: getGoalParam }>;
         const response = await goalServcice.find({ id: params.goalId });
         return {
             code: 200,
             data: {
                 ...response,
-                date: response.createdAt
+                date: response.createdAt,
             },
         };
     });
 };
 const getGoals = async (request: FastifyRequest, reply: FastifyReply) => {
-    return tryCatchApiMiddleware(reply, async () => {
+    return tryCatchApiMiddleware<goalsListResponse>(reply, async () => {
         const { query } = request as FastifyRequest<{
       Querystring: getGoalsQueries;
     }>;
@@ -36,7 +38,7 @@ const getGoals = async (request: FastifyRequest, reply: FastifyReply) => {
                 data: response.data.map((el) => ({
                     ...el,
                     date: el.createdAt,
-                }))
+                })),
             },
         };
     });

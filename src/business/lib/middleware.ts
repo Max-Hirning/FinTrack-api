@@ -2,10 +2,10 @@ import { IResponse } from "@/types/api";
 import { fastify } from "@/bootstrap/swagger";
 import { FastifyError, FastifyReply } from "fastify";
 
-const tryCatchApiMiddleware = async (
+const tryCatchApiMiddleware = async <T>(
     reply: FastifyReply,
-    callback: () => Promise<IResponse>,
-) => {
+    callback: () => Promise<IResponse<T>>,
+): Promise<IResponse<T>> => {
     try {
         const { data, code } = await callback();
         return reply.code(code).send(data);
@@ -17,11 +17,11 @@ const tryCatchApiMiddleware = async (
             .send(err.message || "Internal server error");
     }
 };
-const redisGetSetCacheMiddleware = async (
+const redisGetSetCacheMiddleware = async <T>(
     key: string,
-    callback: () => Promise<IResponse>,
+    callback: () => Promise<IResponse<T>>,
     ttl: number = 3600,
-): Promise<IResponse> => {
+): Promise<IResponse<T>> => {
     let cache;
 
     try {
