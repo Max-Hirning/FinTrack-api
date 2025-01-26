@@ -38,6 +38,9 @@ export const categoryResponseSchema = z.object({
     title: z.string(),
     color: z.string(),
     image: z.string().url(),
+    type: z.enum(
+    Object.values(CategoryType) as [CategoryType, ...CategoryType[]],
+    ),
 });
 export const categoriesResponseSchema = z.array(categoryResponseSchema);
 
