@@ -14,6 +14,7 @@ import { IAccessToken } from "@/types/token";
 import { v2 as cloudinary } from "cloudinary";
 import { environmentVariables } from "@/config";
 import { subHours, subMinutes } from "date-fns";
+import { cronTasks } from "./business/lib/cron";
 import { prisma } from "@/database/prisma/prisma";
 import { Periods, Roles, User } from "@prisma/client";
 import { FastifyReply, FastifyRequest } from "fastify";
@@ -95,8 +96,7 @@ async function main() {
                     role,
                     id: userId,
                 };
-            } catch (e) {
-                console.log(e);
+            } catch {
                 return reply.status(401).send("Unauthorized");
             }
         },
@@ -139,64 +139,80 @@ async function main() {
         });
 
         cron.schedule("* * * * *", async () => {
-            // Schedule a task to run every minute
-            tokenService.deleteTokens({
-                createdAt: {
-                    lt: subHours(new Date(), 1),
-                },
-            });
-            otpService.deleteOtps({
-                createdAt: {
-                    lt: subMinutes(new Date(), 5),
-                },
+            fastify.log.info("CRON Runs every 1 minute");
+            await cronTasks({
+                cleanupTasks: [
+                    async () =>
+                        otpService.deleteOtps({
+                            createdAt: {
+                                lt: subMinutes(new Date(), 5),
+                            },
+                        }),
+                    async () =>
+                        tokenService.deleteTokens({
+                            createdAt: {
+                                lt: subHours(new Date(), 1),
+                            },
+                        }),
+                ],
             });
         });
 
         cron.schedule("0 0 * * *", async () => {
-            // Schedule a task to run every day at 12:00 AM
-            notificationService.happyBirthday();
-            notificationService.budgets();
-            notificationService.loans();
-            notificationService.goals();
+            fastify.log.info("CRON Runs every 1 day");
+            await cronTasks({
+                notificationTasks: [
+                    async () => notificationService.happyBirthday(),
+                    async () => notificationService.budgets(),
+                    async () => notificationService.loans(),
+                    async () => notificationService.goals(),
+                ],
+            });
         });
         cron.schedule("0 0 * * 1", async () => {
-            // Schedule a task to run every Monday at 12:00 AM
-            try {
-                await budgetServcice.updateBudgetsDateRange(Periods.week);
-            } catch (error) {
-                console.log(error);
-            }
+            fastify.log.info("CRON Runs every monday");
+            await cronTasks({
+                criticalTasks: [
+                    async () => budgetServcice.updateBudgetsDateRange(Periods.week),
+                ],
+            });
         });
         cron.schedule("0 0 1 * *", async () => {
-            // Schedule a task to run on the 1st day of every month at 12:00 AM
-            try {
-                await budgetServcice.updateBudgetsDateRange(Periods.month);
-            } catch (error) {
-                console.log(error);
-            }
+            fastify.log.info("CRON Runs every 1st day of every month");
+            await cronTasks({
+                criticalTasks: [
+                    async () => budgetServcice.updateBudgetsDateRange(Periods.month),
+                ],
+            });
         });
         cron.schedule("0 0 1 1 *", async () => {
-            // Schedule a task to run on January 1st every year at 12:00 AM
-            try {
-                await budgetServcice.updateBudgetsDateRange(Periods.year);
-            } catch (error) {
-                console.log(error);
-            }
+            fastify.log.info("CRON Runs every January 1st");
+            await cronTasks({
+                criticalTasks: [
+                    async () => budgetServcice.updateBudgetsDateRange(Periods.year),
+                ],
+            });
         });
         cron.schedule("0 0 31 12 *", async () => {
-            // Schedule a task to run on December 31st at midnight (12:00 AM)
-            notificationService.happyNewYear();
+            fastify.log.info("CRON Runs every December 31st");
+            await cronTasks({
+                notificationTasks: [async () => notificationService.happyNewYear()],
+            });
         });
         cron.schedule("0 0 25 12 *", async () => {
-            // Schedule a task to run on December 25th at midnight (12:00 AM)
-            notificationService.happyChristmas();
+            fastify.log.info("CRON Runs every December 25th");
+            await cronTasks({
+                notificationTasks: [async () => notificationService.happyChristmas()],
+            });
         });
 
-        fastify.log.info(`Documentation available at ${address}/api/docs/`);
-        fastify.log.info(
-            `Docs login: ${credentials.username} | password: ${credentials.password}`,
-        );
-        fastify.log.info("Please update in production");
+        if (environmentVariables.NODE_ENV === "development") {
+            fastify.log.info(`Documentation available at ${address}/api/docs/`);
+            fastify.log.info(
+                `Docs login: ${credentials.username} | password: ${credentials.password}`,
+            );
+            fastify.log.info("Please update in production");
+        }
     } catch (err) {
         fastify.log.error("Failed to start server");
         fastify.log.error(err);
@@ -217,7 +233,7 @@ async function main() {
     });
 }
 
-main().catch((err) => {
-    console.error(err);
+main().catch((error) => {
+    fastify.log.error((error as Error).message);
     process.exit(1);
 });

@@ -1,3 +1,4 @@
+import { fastify } from "@/bootstrap";
 import { Prisma, prisma } from "@/database/prisma/prisma";
 import { addDays, format, isBefore, startOfDay, startOfToday } from "date-fns";
 import {
@@ -51,7 +52,7 @@ const goals = async () => {
             data: notifications,
         });
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
     }
 };
 const loans = async () => {
@@ -96,7 +97,7 @@ const loans = async () => {
             data: notifications,
         });
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
     }
 };
 const budgets = async () => {
@@ -145,7 +146,7 @@ const budgets = async () => {
             data: notifications,
         });
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
     }
 };
 const happyNewYear = async () => {
@@ -164,7 +165,7 @@ const happyNewYear = async () => {
             data: notifications,
         });
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
     }
 };
 const happyBirthday = async () => {
@@ -187,7 +188,7 @@ const happyBirthday = async () => {
             data: notifications,
         });
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
     }
 };
 const happyChristmas = async () => {
@@ -206,7 +207,7 @@ const happyChristmas = async () => {
             data: notifications,
         });
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
     }
 };
 const getNotifications = async (userId: string, page?: number) => {

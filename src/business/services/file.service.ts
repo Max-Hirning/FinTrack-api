@@ -1,4 +1,5 @@
 import { File } from "@prisma/client";
+import { fastify } from "@/bootstrap";
 import { FileTypes } from "@prisma/client";
 import { fileRepository } from "@/database";
 import { InternalServerError } from "@/business/lib/errors";
@@ -17,7 +18,7 @@ const deletFile = async (file: File) => {
             },
         });
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
     }
 
     return "File was deleted";

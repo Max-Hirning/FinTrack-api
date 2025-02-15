@@ -10,7 +10,7 @@ const tryCatchApiMiddleware = async <T>(
         const { data, code } = await callback();
         return reply.code(code).send(data);
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
         const err = error as FastifyError;
         return reply
             .code(+(err.code || "500") || 500)
@@ -27,7 +27,7 @@ const redisGetSetCacheMiddleware = async <T>(
     try {
         cache = await fastify.redis.get(key);
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
     }
 
     if (cache) {
@@ -41,7 +41,7 @@ const redisGetSetCacheMiddleware = async <T>(
         try {
             await fastify.redis.set(key, JSON.stringify(response.data), "EX", ttl);
         } catch (error) {
-            console.log(error);
+            fastify.log.error((error as Error).message);
         }
 
         return response;

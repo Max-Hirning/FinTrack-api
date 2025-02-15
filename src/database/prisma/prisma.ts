@@ -1,4 +1,5 @@
 import { Server } from "net";
+import { fastify } from "@/bootstrap";
 import { environmentVariables } from "@/config";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { buildProxyDatabaseConnection } from "./proxy";
@@ -11,7 +12,7 @@ let proxy: Server;
 
 const initializePrismaProxy = async () => {
     if (environmentVariables.NODE_ENV !== "production") {
-        console.log(
+        fastify.log.warn(
             "Skipping Prisma proxy initialization for none production env...",
         );
         return;

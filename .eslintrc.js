@@ -23,6 +23,7 @@ module.exports = {
     plugins: ["@typescript-eslint", "pretty-imports"],
     rules: {
         "pretty-imports/sorted": "warn",
+        "no-console": "error",
         "@typescript-eslint/no-unused-vars": "warn",
         indent: ["error", 4],
         "linebreak-style": ["error", "unix"],

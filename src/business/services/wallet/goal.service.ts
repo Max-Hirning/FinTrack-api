@@ -1,3 +1,4 @@
+import { fastify } from "@/bootstrap";
 import { deleteCache } from "@/business/lib/redis";
 import { currencyService } from "@/business/services";
 import { Prisma, prisma } from "@/database/prisma/prisma";
@@ -136,7 +137,7 @@ const deleteGoal = async (goalId: string) => {
             },
         });
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
     }
 
     await deleteCache(goal.userId);

@@ -5,7 +5,7 @@ const deleteCache = async (key: string | RedisKey) => {
     try {
         await fastify.redis.del(key);
     } catch (error) {
-        console.log(error);
+        fastify.log.error((error as Error).message);
     }
 
     let cursor = "0";
@@ -13,9 +13,8 @@ const deleteCache = async (key: string | RedisKey) => {
         let result;
         try {
             result = await fastify.redis.scan(cursor, "MATCH", `*${key}*`);
-            console.log(result);
         } catch (error) {
-            console.log(error);
+            fastify.log.error((error as Error).message);
         }
 
         cursor = result ? result[0] : "0";
@@ -25,7 +24,7 @@ const deleteCache = async (key: string | RedisKey) => {
             try {
                 await fastify.redis.del(keys);
             } catch (error) {
-                console.log(error);
+                fastify.log.error((error as Error).message);
             }
         }
     } while (cursor !== "0");

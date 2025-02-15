@@ -1,4 +1,5 @@
 import fastifyAmqp from "fastify-amqp";
+import { fastify } from "@/bootstrap";
 import { emailService } from "@/business/services";
 import {
     EmailType,
@@ -27,11 +28,11 @@ const setupEmailConsumer = (channel: fastifyAmqp.FastifyAmqpChannelObject) => {
                     await emailService.sendUpdateUserPasswordEmail(user);
                     break;
                 default:
-                    console.warn("Unknown email type:", emailType);
+                    fastify.log.error("Unknown email type:", emailType);
                     break;
                 }
             } catch (error) {
-                console.error("Error processing email message:", error);
+                fastify.log.error((error as Error).message);
                 // channel.nack(msg); // Optionally handle error by requeuing the message
             }
         }

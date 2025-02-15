@@ -1,4 +1,5 @@
 import fastifyAmqp from "fastify-amqp";
+import { fastify } from "@/bootstrap";
 import { userService } from "@/business/services";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { EmailType, RabbitMqQueues } from "@/types/rabbitmq";
@@ -104,9 +105,8 @@ const updateUserPassword = async (
             });
             channel.assertQueue(RabbitMqQueues.email, { durable: false });
             channel.sendToQueue(RabbitMqQueues.email, Buffer.from(msg));
-            console.log(user);
         } catch (error) {
-            console.log(error);
+            fastify.log.error((error as Error).message);
         }
 
         return {
