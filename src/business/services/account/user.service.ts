@@ -97,15 +97,13 @@ const updateUserPassword = async (
         if (!comparedPasses) throw new ForbiddenError("Invalid old password");
     }
 
-    const cryptedPass = hashing.hashPassword(payload.password);
-
     try {
         user = await userRepository.update({
             where: {
                 id: userId,
             },
             data: {
-                password: cryptedPass,
+                password: payload.password,
             },
         });
     } catch (error) {

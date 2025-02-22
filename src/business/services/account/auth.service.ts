@@ -51,13 +51,11 @@ const signUp = async (payload: SignUpBody) => {
 
     if (user) throw new ForbiddenError("User allready exists");
 
-    const cryptedPass = hashing.hashPassword(payload.password);
-
     try {
         await userRepository.create({
             data: {
                 email: payload.email,
-                password: cryptedPass,
+                password: payload.password,
                 lastName: payload.lastName,
                 firstName: payload.firstName,
             },
